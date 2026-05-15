@@ -1298,7 +1298,7 @@ function computeBubblePositions(items, links, W, H, bubbleR) {
         const dx = pos[b.name].x - pos[a.name].x;
         const dy = pos[b.name].y - pos[a.name].y;
         const dist = Math.sqrt(dx*dx+dy*dy) || 1;
-        const str = wt * 0.002 * alpha;
+        const str = wt * 0.001 * alpha;
         forces[a.name].x += dx/dist * str;
         forces[a.name].y += dy/dist * str;
         forces[b.name].x -= dx/dist * str;
@@ -1315,9 +1315,9 @@ function computeBubblePositions(items, links, W, H, bubbleR) {
         const dist = Math.sqrt(dx*dx+dy*dy) || 1;
         const ra = (bubbleR && bubbleR[a.name]) || maxBubR;
         const rb = (bubbleR && bubbleR[b.name]) || maxBubR;
-        const minDist = ra + rb + 50;
+        const minDist = ra + rb + 90;
         if(dist < minDist) {
-          const push = (minDist - dist) / minDist * 0.4 * alpha;
+          const push = (minDist - dist) / minDist * 0.7 * alpha;
           forces[a.name].x -= dx/dist * push;
           forces[a.name].y -= dy/dist * push;
           forces[b.name].x += dx/dist * push;
