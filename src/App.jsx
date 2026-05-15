@@ -1,4 +1,12 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, useSyncExternalStore } from "react";
+
+function useIsMobile() {
+  const subscribe = useCallback(cb => {
+    window.addEventListener("resize", cb);
+    return () => window.removeEventListener("resize", cb);
+  }, []);
+  return useSyncExternalStore(subscribe, () => window.innerWidth < 680, () => false);
+}
 import * as d3 from "d3";
 import { supabase } from "./supabase";
 
@@ -154,18 +162,33 @@ function Pill({ children, color, small }) {
   return <span style={{ fontSize: small?"8px":"9px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"2px 7px", borderRadius:"2px", background:color+"22", color, fontWeight:600, whiteSpace:"nowrap" }}>{children}</span>;
 }
 
+const TABS = [
+  { id:"dispatch", label:"Dispatch", icon:"📋" },
+  { id:"garden",   label:"Garden",   icon:"🌿" },
+  { id:"stats",    label:"Stats",    icon:"📊" },
+  { id:"add",      label:"Add",      icon:"＋" },
+];
+
 function TabBar({ active, onChange }) {
-  const tabs = [
-    { id:"dispatch", label:"Dispatch" },
-    { id:"garden",   label:"Garden" },
-    { id:"stats",    label:"Stats" },
-    { id:"add",      label:"+ Add Source" },
-  ];
   return (
     <div style={{ display:"flex", alignItems:"center", gap:0, height:"100%" }}>
-      {tabs.map(t => (
+      {TABS.map(t => (
         <button key={t.id} onClick={() => onChange(t.id)} style={{ ...F, height:"100%", padding:"0 20px", background:"transparent", border:"none", borderBottom: active===t.id ? "2px solid #9B6230":"2px solid transparent", color: active===t.id ? "#0F2420":"#426860", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", transition:"color 0.15s" }}>
           {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function BottomTabBar({ active, onChange }) {
+  return (
+    <div style={{ position:"fixed", bottom:0, left:0, right:0, height:"56px", background:"rgba(224,238,255,0.99)", borderTop:"1px solid rgba(0,100,200,0.14)", display:"flex", zIndex:200, backdropFilter:"blur(8px)" }}>
+      {TABS.map(t => (
+        <button key={t.id} onClick={() => onChange(t.id)}
+          style={{ flex:1, background:"transparent", border:"none", borderTop: active===t.id ? "2px solid #9B6230" : "2px solid transparent", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"2px", cursor:"pointer", color: active===t.id ? "#0D1F35" : "#5080A8", transition:"color 0.15s", padding:0 }}>
+          <span style={{ fontSize:"18px", lineHeight:1 }}>{t.icon}</span>
+          <span style={{ ...F, fontSize:"9px", letterSpacing:"0.08em", textTransform:"uppercase" }}>{t.label}</span>
         </button>
       ))}
     </div>
@@ -1511,6 +1534,7 @@ export default function App() {
 
   const totalNotes = Object.keys(notes).length;
   const totalRead  = readItems.size;
+  const isMobile   = useIsMobile();
 
   if (!authReady) return <div style={{ ...F, height:"100vh", background:"#F0F7FF", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#5080A8", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
   if (recovering)  return <SetPasswordScreen onDone={() => setRecovering(false)} />;
@@ -1525,24 +1549,29 @@ export default function App() {
           <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#D48010" }} />
           <span style={{ ...F, fontSize:"12px", color:"#0D1F35", letterSpacing:"0.12em", textTransform:"uppercase" }}>The Dispatch</span>
         </div>
-        <div style={{ height:"100%", borderLeft:"1px solid rgba(0,100,200,0.2)", marginLeft:"4px" }} />
-        <TabBar active={tab} onChange={setTab} />
+        {!isMobile && (
+          <>
+            <div style={{ height:"100%", borderLeft:"1px solid rgba(0,100,200,0.2)", marginLeft:"4px" }} />
+            <TabBar active={tab} onChange={setTab} />
+          </>
+        )}
         <div style={{ marginLeft:"auto", display:"flex", gap:"14px", alignItems:"center" }}>
-          {totalRead > 0  && <span style={{ fontSize:"10px", color:"#5080A8" }}>{totalRead} read</span>}
-          {totalNotes > 0 && <span style={{ fontSize:"10px", color:"#5080A8" }}>{totalNotes} notes</span>}
-          {customItems.length > 0 && <span style={{ fontSize:"10px", color:"#6340A888" }}>+{customItems.length} custom</span>}
+          {!isMobile && totalRead > 0  && <span style={{ fontSize:"10px", color:"#5080A8" }}>{totalRead} read</span>}
+          {!isMobile && totalNotes > 0 && <span style={{ fontSize:"10px", color:"#5080A8" }}>{totalNotes} notes</span>}
+          {!isMobile && customItems.length > 0 && <span style={{ fontSize:"10px", color:"#6340A888" }}>+{customItems.length} custom</span>}
           <button onClick={() => supabase.auth.signOut()} style={{ ...NAV, fontSize:"10px", width:"auto", padding:"0 8px", letterSpacing:"0.06em" }}>Sign out</button>
         </div>
       </div>
 
-
       {/* Main content */}
-      <div style={{ flex:1, overflowY: tab==="garden"?"hidden":"auto", overflowX:"hidden", position:"relative" }}>
+      <div style={{ flex:1, overflowY: tab==="garden"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
         {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} />}
         {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} />}
         {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} />}
         {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} />}
       </div>
+
+      {isMobile && <BottomTabBar active={tab} onChange={setTab} />}
     </div>
   );
 }
