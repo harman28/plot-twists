@@ -5,7 +5,7 @@ import { supabase } from "./supabase";
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const THEMES = [
-  { name: "AI Safety",          color: "#8B6508" },
+  { name: "AI Safety",          color: "#C47F0A" },
   { name: "AI Policy",          color: "#1A7A5E" },
   { name: "Digital Justice",    color: "#C04E00" },
   { name: "Governance",         color: "#1A5EA8" },
@@ -164,7 +164,7 @@ function TabBar({ active, onChange }) {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:0, height:"100%" }}>
       {tabs.map(t => (
-        <button key={t.id} onClick={() => onChange(t.id)} style={{ ...F, height:"100%", padding:"0 20px", background:"transparent", border:"none", borderBottom: active===t.id ? "2px solid #8B6508":"2px solid transparent", color: active===t.id ? "#2C2416":"#6B5035", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", transition:"color 0.15s" }}>
+        <button key={t.id} onClick={() => onChange(t.id)} style={{ ...F, height:"100%", padding:"0 20px", background:"transparent", border:"none", borderBottom: active===t.id ? "2px solid #C47F0A":"2px solid transparent", color: active===t.id ? "#1A2E28":"#5A7870", fontSize:"12px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", transition:"color 0.15s" }}>
           {t.label}
         </button>
       ))}
@@ -178,36 +178,36 @@ function NotesModal({ item, notes, onSave, onClose }) {
   const existing = notes[item.url] || { argument:"", thoughts:"" };
   const [arg, setArg]     = useState(existing.argument);
   const [tho, setTho]     = useState(existing.thoughts);
-  const c = COLOR[item.theme] || "#6B5035";
+  const c = COLOR[item.theme] || "#5A7870";
   const hasContent = arg.trim() || tho.trim();
 
   return (
-    <div style={{ position:"fixed", inset:0, background:"rgba(40,25,10,0.6)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ ...F, background:"#F5F0E8", border:"1px solid rgba(60,40,20,0.24)", borderRadius:"6px", width:"100%", maxWidth:"540px", maxHeight:"90vh", display:"flex", flexDirection:"column", overflow:"hidden" }}>
-        <div style={{ padding:"16px 18px 12px", borderBottom:"1px solid rgba(60,40,20,0.32)", display:"flex", alignItems:"flex-start", gap:"10px" }}>
+    <div style={{ position:"fixed", inset:0, background:"rgba(10,30,20,0.65)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ ...F, background:"#F0F8F4", border:"1px solid rgba(26,70,52,0.17)", borderRadius:"6px", width:"100%", maxWidth:"540px", maxHeight:"90vh", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        <div style={{ padding:"16px 18px 12px", borderBottom:"1px solid rgba(26,70,52,0.22)", display:"flex", alignItems:"flex-start", gap:"10px" }}>
           <div style={{ flex:1 }}>
             <Pill color={c}>{item.theme}</Pill>
-            <div style={{ fontSize:"14px", color:"#2C2416", marginTop:"7px", lineHeight:1.4, fontWeight:500 }}>{item.title}</div>
-            <div style={{ fontSize:"11px", color:"#3D2B1A", fontStyle:"italic", marginTop:"3px" }}>{item.source} · {item.published}</div>
+            <div style={{ fontSize:"14px", color:"#1A2E28", marginTop:"7px", lineHeight:1.4, fontWeight:500 }}>{item.title}</div>
+            <div style={{ fontSize:"11px", color:"#2A3C34", fontStyle:"italic", marginTop:"3px" }}>{item.source} · {item.published}</div>
           </div>
-          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#2C2416", cursor:"pointer", fontSize:"20px", flexShrink:0 }}>×</button>
+          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1A2E28", cursor:"pointer", fontSize:"20px", flexShrink:0 }}>×</button>
         </div>
         <div style={{ flex:1, overflowY:"auto", padding:"16px 18px", display:"flex", flexDirection:"column", gap:"14px" }}>
           <div>
-            <label style={{ fontSize:"10px", color:"#6B5035", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>What is being argued?</label>
+            <label style={{ fontSize:"10px", color:"#5A7870", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>What is being argued?</label>
             <textarea value={arg} onChange={e => setArg(e.target.value)} placeholder="Summarise the core argument…" rows={4}
-              style={{ ...F, width:"100%", background:"rgba(60,40,20,0.07)", border:"1px solid rgba(60,40,20,0.25)", borderRadius:"3px", color:"#2C2416", fontSize:"13px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6 }} />
+              style={{ ...F, width:"100%", background:"rgba(26,70,52,0.06)", border:"1px solid rgba(26,70,52,0.18)", borderRadius:"3px", color:"#1A2E28", fontSize:"13px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6 }} />
           </div>
           <div>
-            <label style={{ fontSize:"10px", color:"#3D2B1A", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>My thoughts / response</label>
+            <label style={{ fontSize:"10px", color:"#2A3C34", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>My thoughts / response</label>
             <textarea value={tho} onChange={e => setTho(e.target.value)} placeholder="Your reaction, critique, connections to other ideas…" rows={5}
-              style={{ ...F, width:"100%", background:"rgba(60,40,20,0.07)", border:"1px solid rgba(60,40,20,0.25)", borderRadius:"3px", color:"#2C2416", fontSize:"13px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6 }} />
+              style={{ ...F, width:"100%", background:"rgba(26,70,52,0.06)", border:"1px solid rgba(26,70,52,0.18)", borderRadius:"3px", color:"#1A2E28", fontSize:"13px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6 }} />
           </div>
         </div>
-        <div style={{ padding:"12px 18px", borderTop:"1px solid rgba(60,40,20,0.18)", display:"flex", gap:"8px", justifyContent:"flex-end" }}>
+        <div style={{ padding:"12px 18px", borderTop:"1px solid rgba(26,70,52,0.14)", display:"flex", gap:"8px", justifyContent:"flex-end" }}>
           {hasContent && <button onClick={() => { onSave(item.url, null); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid rgba(180,60,0,0.3)", color:"#C04E00", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Delete note</button>}
-          <button onClick={onClose} style={{ ...F, background:"transparent", border:"1px solid rgba(60,40,20,0.32)", color:"#6B5035", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
-          <button onClick={() => { onSave(item.url, { argument:arg, thoughts:tho }); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid #8B6508", color:"#8B6508", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Save note</button>
+          <button onClick={onClose} style={{ ...F, background:"transparent", border:"1px solid rgba(26,70,52,0.22)", color:"#5A7870", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
+          <button onClick={() => { onSave(item.url, { argument:arg, thoughts:tho }); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid #C47F0A", color:"#C47F0A", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Save note</button>
         </div>
       </div>
     </div>
@@ -217,35 +217,35 @@ function NotesModal({ item, notes, onSave, onClose }) {
 // ─── Dispatch item row ────────────────────────────────────────────────────────
 
 function DispatchItem({ item, show, idx, readItems, onToggleRead, notes, onOpenNote }) {
-  const c = COLOR[item.theme] || "#6B5035";
+  const c = COLOR[item.theme] || "#5A7870";
   const isRead = readItems.has(item.url);
   const hasNote = !!(notes[item.url]?.argument || notes[item.url]?.thoughts);
   return (
-    <div style={{ opacity:show?(isRead?0.42:1):0, transform:show?"none":"translateY(8px)", transition:`opacity 0.35s ease ${idx*0.06}s, transform 0.35s ease ${idx*0.06}s`, borderBottom:"1px solid rgba(60,40,20,0.28)", paddingBottom:"18px", marginBottom:"18px" }}>
+    <div style={{ opacity:show?(isRead?0.42:1):0, transform:show?"none":"translateY(8px)", transition:`opacity 0.35s ease ${idx*0.06}s, transform 0.35s ease ${idx*0.06}s`, borderBottom:"1px solid rgba(26,70,52,0.2)", paddingBottom:"18px", marginBottom:"18px" }}>
       <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center", marginBottom:"7px" }}>
         <Pill color={c}>{item.theme}</Pill>
         {item.year && <Pill color={item.type==="foundational"?"#F97316":"#60A5FA"}>{item.type==="foundational"?"Foundational":item.year}</Pill>}
         {item.custom && <Pill color="#A78BFA">Custom</Pill>}
-        <span style={{ fontSize:"10px", color:"#2C2416" }}>{item.published}</span>
-        <span style={{ fontSize:"10px", color:"#2C2416", marginLeft:"auto" }}>{item.readingMinutes} min</span>
+        <span style={{ fontSize:"10px", color:"#1A2E28" }}>{item.published}</span>
+        <span style={{ fontSize:"10px", color:"#1A2E28", marginLeft:"auto" }}>{item.readingMinutes} min</span>
       </div>
       <a href={item.url} target="_blank" rel="noopener noreferrer"
-        style={{ fontSize:"15px", color:isRead?"#3A2518":"#2C2416", textDecoration:isRead?"line-through":"none", textDecorationColor:"#444", display:"block", lineHeight:"1.4", marginBottom:"8px", fontWeight:500, transition:"color 0.15s", ...F }}
+        style={{ fontSize:"15px", color:isRead?"#243C30":"#1A2E28", textDecoration:isRead?"line-through":"none", textDecorationColor:"#444", display:"block", lineHeight:"1.4", marginBottom:"8px", fontWeight:500, transition:"color 0.15s", ...F }}
         onMouseEnter={e => { if(!isRead) e.currentTarget.style.color=c; }}
-        onMouseLeave={e => { if(!isRead) e.currentTarget.style.color="#2C2416"; }}>
+        onMouseLeave={e => { if(!isRead) e.currentTarget.style.color="#1A2E28"; }}>
         {item.title} <span style={{ opacity:0.3, fontSize:"11px" }}>↗</span>
       </a>
       <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center" }}>
-        <span style={{ fontSize:"11px", color:"#3D2B1A", fontStyle:"italic" }}>{item.source}</span>
-        <span style={{ color:"#3A2518" }}>·</span>
-        {item.keywords.map((kw,j) => <span key={j} style={{ fontSize:"10px", color:"#3D2B1A", background:"rgba(60,40,20,0.32)", border:"1px solid rgba(60,40,20,0.25)", padding:"1px 6px", borderRadius:"2px" }}>#{kw}</span>)}
+        <span style={{ fontSize:"11px", color:"#2A3C34", fontStyle:"italic" }}>{item.source}</span>
+        <span style={{ color:"#243C30" }}>·</span>
+        {item.keywords.map((kw,j) => <span key={j} style={{ fontSize:"10px", color:"#2A3C34", background:"rgba(26,70,52,0.22)", border:"1px solid rgba(26,70,52,0.18)", padding:"1px 6px", borderRadius:"2px" }}>#{kw}</span>)}
         <div style={{ marginLeft:"auto", display:"flex", gap:"5px" }}>
           <button onClick={() => onOpenNote(item)}
-            style={{ ...F, background: hasNote?"rgba(184,134,11,0.08)":"rgba(60,40,20,0.07)", border: hasNote?"1px solid rgba(184,134,11,0.35)":"1px solid rgba(60,40,20,0.28)", borderRadius:"3px", padding:"2px 8px", cursor:"pointer", fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase", color: hasNote?"#8B6508":"#6B5035" }}>
+            style={{ ...F, background: hasNote?"rgba(196,127,10,0.08)":"rgba(26,70,52,0.06)", border: hasNote?"1px solid rgba(196,127,10,0.35)":"1px solid rgba(26,70,52,0.2)", borderRadius:"3px", padding:"2px 8px", cursor:"pointer", fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase", color: hasNote?"#C47F0A":"#5A7870" }}>
             {hasNote ? "✎ Note" : "Note"}
           </button>
           <button onClick={() => onToggleRead(item.url)}
-            style={{ ...F, background: isRead?"rgba(26,122,94,0.08)":"rgba(60,40,20,0.07)", border: isRead?"1px solid rgba(26,122,94,0.4)":"1px solid rgba(60,40,20,0.28)", borderRadius:"3px", padding:"2px 8px", cursor:"pointer", fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase", color: isRead?"#1A7A5E":"#6B5035" }}>
+            style={{ ...F, background: isRead?"rgba(26,122,94,0.08)":"rgba(26,70,52,0.06)", border: isRead?"1px solid rgba(26,122,94,0.4)":"1px solid rgba(26,70,52,0.2)", borderRadius:"3px", padding:"2px 8px", cursor:"pointer", fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase", color: isRead?"#1A7A5E":"#5A7870" }}>
             {isRead ? "✓ Read" : "To Read"}
           </button>
         </div>
@@ -282,21 +282,21 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"20px", flexWrap:"wrap" }}>
           <button onClick={() => load(prevDay(date))} style={NAV}>←</button>
           <button onClick={() => { setPickerVal(date); setShowPicker(v=>!v); }} style={{ ...F, background:"transparent", border:"none", cursor:"pointer", padding:"0 2px" }}>
-            <span style={{ fontSize:"14px", color: isToday?"#8B6508":"#3D2B1A", fontStyle:"italic", borderBottom:"1px dashed currentColor", opacity:0.85 }}>{fmtDate(date)}</span>
+            <span style={{ fontSize:"14px", color: isToday?"#C47F0A":"#2A3C34", fontStyle:"italic", borderBottom:"1px dashed currentColor", opacity:0.85 }}>{fmtDate(date)}</span>
           </button>
           <button onClick={() => { if(!isToday) load(nextDay(date)); }} style={{ ...NAV, opacity:isToday?0.2:1, cursor:isToday?"default":"pointer" }}>→</button>
-          {!isToday && <button onClick={() => load(todayStr())} style={{ ...F, fontSize:"9px", letterSpacing:"0.12em", textTransform:"uppercase", background:"transparent", border:"1px solid rgba(184,134,11,0.35)", color:"#8B6508", padding:"3px 9px", borderRadius:"2px", cursor:"pointer" }}>Today</button>}
+          {!isToday && <button onClick={() => load(todayStr())} style={{ ...F, fontSize:"9px", letterSpacing:"0.12em", textTransform:"uppercase", background:"transparent", border:"1px solid rgba(196,127,10,0.35)", color:"#C47F0A", padding:"3px 9px", borderRadius:"2px", cursor:"pointer" }}>Today</button>}
           {issue && <span style={{ fontSize:"11px", color:"#1A120A", marginLeft:"auto", fontStyle:"italic" }}>{readCount}/{allItems.length} read</span>}
         </div>
 
         {showPicker && (
-          <div style={{ marginBottom:"16px", background:"rgba(60,40,20,0.07)", border:"1px solid rgba(60,40,20,0.25)", borderRadius:"4px", padding:"11px 14px", display:"flex", alignItems:"center", gap:"10px", flexWrap:"wrap" }}>
-            <span style={{ fontSize:"10px", color:"#3D2B1A", textTransform:"uppercase", letterSpacing:"0.1em" }}>Jump to</span>
+          <div style={{ marginBottom:"16px", background:"rgba(26,70,52,0.06)", border:"1px solid rgba(26,70,52,0.18)", borderRadius:"4px", padding:"11px 14px", display:"flex", alignItems:"center", gap:"10px", flexWrap:"wrap" }}>
+            <span style={{ fontSize:"10px", color:"#2A3C34", textTransform:"uppercase", letterSpacing:"0.1em" }}>Jump to</span>
             <input type="date" value={pickerVal} max={todayStr()} onChange={e=>setPickerVal(e.target.value)}
-              style={{ background:"transparent", border:"1px solid rgba(60,40,20,0.32)", borderRadius:"3px", color:"#2C2416", padding:"4px 8px", fontSize:"13px", ...F }} />
+              style={{ background:"transparent", border:"1px solid rgba(26,70,52,0.22)", borderRadius:"3px", color:"#1A2E28", padding:"4px 8px", fontSize:"13px", ...F }} />
             <button onClick={() => { if(pickerVal){load(pickerVal);setShowPicker(false);} }}
-              style={{ ...F, background:"transparent", border:"1px solid #8B6508", color:"#8B6508", padding:"4px 12px", borderRadius:"3px", cursor:"pointer", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase" }}>Go</button>
-            <button onClick={() => setShowPicker(false)} style={{ background:"transparent", border:"none", color:"#2C2416", cursor:"pointer", fontSize:"18px", marginLeft:"auto" }}>×</button>
+              style={{ ...F, background:"transparent", border:"1px solid #C47F0A", color:"#C47F0A", padding:"4px 12px", borderRadius:"3px", cursor:"pointer", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase" }}>Go</button>
+            <button onClick={() => setShowPicker(false)} style={{ background:"transparent", border:"none", color:"#1A2E28", cursor:"pointer", fontSize:"18px", marginLeft:"auto" }}>×</button>
           </div>
         )}
 
@@ -306,7 +306,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
         </div>
 
         {!issue && (
-          <button onClick={() => load(date)} style={{ ...F, padding:"11px 26px", background:"transparent", border:"1px solid #8B6508", color:"#8B6508", fontSize:"11px", letterSpacing:"0.15em", textTransform:"uppercase", cursor:"pointer", borderRadius:"3px" }}>
+          <button onClick={() => load(date)} style={{ ...F, padding:"11px 26px", background:"transparent", border:"1px solid #C47F0A", color:"#C47F0A", fontSize:"11px", letterSpacing:"0.15em", textTransform:"uppercase", cursor:"pointer", borderRadius:"3px" }}>
             Generate Today's Dispatch
           </button>
         )}
@@ -315,15 +315,15 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
       {issue && (
         <>
           {/* Progress bar */}
-          <div style={{ height:"2px", background:"rgba(60,40,20,0.32)", borderRadius:"1px", marginBottom:"26px", overflow:"hidden", opacity:show?1:0, transition:"opacity 0.4s ease 0.2s" }}>
+          <div style={{ height:"2px", background:"rgba(26,70,52,0.22)", borderRadius:"1px", marginBottom:"26px", overflow:"hidden", opacity:show?1:0, transition:"opacity 0.4s ease 0.2s" }}>
             <div style={{ height:"100%", width:`${allItems.length?(readCount/allItems.length)*100:0}%`, background:"linear-gradient(90deg,#1A7A5E,#1A5EA8)", transition:"width 0.5s", borderRadius:"1px" }} />
           </div>
 
           {/* Section I */}
           <div style={{ marginBottom:"40px" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:"12px", marginBottom:"20px", paddingBottom:"10px", borderBottom:"1px solid rgba(184,134,11,0.2)" }}>
-              <span style={{ fontSize:"10px", color:"#8B6508", letterSpacing:"0.18em", textTransform:"uppercase" }}>I — In the Field</span>
-              <span style={{ fontSize:"11px", color:"#6B5035", fontStyle:"italic" }}>Essays · Reports · Journalism</span>
+            <div style={{ display:"flex", alignItems:"center", gap:"12px", marginBottom:"20px", paddingBottom:"10px", borderBottom:"1px solid rgba(196,127,10,0.2)" }}>
+              <span style={{ fontSize:"10px", color:"#C47F0A", letterSpacing:"0.18em", textTransform:"uppercase" }}>I — In the Field</span>
+              <span style={{ fontSize:"11px", color:"#5A7870", fontStyle:"italic" }}>Essays · Reports · Journalism</span>
             </div>
             {issue.nonAcademic.map((item,i) => <DispatchItem key={item.url} item={item} show={show} idx={i} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />)}
           </div>
@@ -332,14 +332,14 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
           <div>
             <div style={{ display:"flex", alignItems:"center", gap:"12px", marginBottom:"20px", paddingBottom:"10px", borderBottom:"1px solid rgba(26,94,168,0.18)" }}>
               <span style={{ fontSize:"10px", color:"#1A5EA8", letterSpacing:"0.18em", textTransform:"uppercase" }}>II — The Literature</span>
-              <span style={{ fontSize:"11px", color:"#2C2416", fontStyle:"italic" }}>Papers · Foundational works</span>
+              <span style={{ fontSize:"11px", color:"#1A2E28", fontStyle:"italic" }}>Papers · Foundational works</span>
             </div>
             {issue.academic.map((item,i) => <DispatchItem key={item.url} item={item} show={show} idx={i} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />)}
           </div>
 
-          <div style={{ marginTop:"40px", paddingTop:"14px", borderTop:"1px solid rgba(60,40,20,0.14)", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"8px", opacity:show?1:0, transition:"opacity 0.4s ease 0.6s" }}>
-            <span style={{ fontSize:"10px", color:"#3A2518", fontStyle:"italic" }}>{pool.length} items in pool · rotates daily</span>
-            <button onClick={() => load(date)} style={{ ...F, background:"transparent", border:"1px solid rgba(60,40,20,0.28)", color:"#6B5035", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"4px 11px", cursor:"pointer", borderRadius:"2px" }}>Reshuffle</button>
+          <div style={{ marginTop:"40px", paddingTop:"14px", borderTop:"1px solid rgba(26,70,52,0.12)", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"8px", opacity:show?1:0, transition:"opacity 0.4s ease 0.6s" }}>
+            <span style={{ fontSize:"10px", color:"#243C30", fontStyle:"italic" }}>{pool.length} items in pool · rotates daily</span>
+            <button onClick={() => load(date)} style={{ ...F, background:"transparent", border:"1px solid rgba(26,70,52,0.2)", color:"#5A7870", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"4px 11px", cursor:"pointer", borderRadius:"2px" }}>Reshuffle</button>
           </div>
         </>
       )}
@@ -406,15 +406,15 @@ function AddSourceView({ pool, onAdd, onDelete }) {
   }
 
   const customItems = pool.filter(p => p.custom);
-  const inputStyle = { ...F, width:"100%", background:"rgba(60,40,20,0.07)", border:"1px solid rgba(60,40,20,0.28)", borderRadius:"3px", color:"#2C2416", fontSize:"13px", padding:"8px 10px", outline:"none", boxSizing:"border-box" };
-  const labelStyle = { fontSize:"10px", color:"#6B5035", letterSpacing:"0.1em", textTransform:"uppercase", display:"block", marginBottom:"5px" };
+  const inputStyle = { ...F, width:"100%", background:"rgba(26,70,52,0.06)", border:"1px solid rgba(26,70,52,0.2)", borderRadius:"3px", color:"#1A2E28", fontSize:"13px", padding:"8px 10px", outline:"none", boxSizing:"border-box" };
+  const labelStyle = { fontSize:"10px", color:"#5A7870", letterSpacing:"0.1em", textTransform:"uppercase", display:"block", marginBottom:"5px" };
   const errStyle   = { fontSize:"10px", color:"#F97316", marginTop:"3px" };
 
   return (
     <div style={{ ...F, maxWidth:"680px", margin:"0 auto", padding:"24px 24px 80px" }}>
       <div style={{ marginBottom:"28px" }}>
-        <h2 style={{ fontSize:"20px", color:"#2C2416", fontWeight:400, margin:"0 0 6px", letterSpacing:"-0.01em" }}>Add a Source</h2>
-        <p style={{ fontSize:"13px", color:"#6B5035", fontStyle:"italic", margin:0 }}>New sources enter the pool immediately and will appear in future dispatches and the garden.</p>
+        <h2 style={{ fontSize:"20px", color:"#1A2E28", fontWeight:400, margin:"0 0 6px", letterSpacing:"-0.01em" }}>Add a Source</h2>
+        <p style={{ fontSize:"13px", color:"#5A7870", fontStyle:"italic", margin:0 }}>New sources enter the pool immediately and will appear in future dispatches and the garden.</p>
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"14px", marginBottom:"14px" }}>
@@ -470,9 +470,9 @@ function AddSourceView({ pool, onAdd, onDelete }) {
         <label style={labelStyle}>Keywords * (3 recommended)</label>
         <div style={{ display:"flex", gap:"6px", flexWrap:"wrap", marginBottom:"8px" }}>
           {form.keywords.map((kw,i) => (
-            <span key={i} style={{ fontSize:"11px", color:"#8B6508", background:"rgba(184,134,11,0.08)", border:"1px solid rgba(184,134,11,0.3)", padding:"2px 8px", borderRadius:"2px", display:"flex", alignItems:"center", gap:"5px" }}>
+            <span key={i} style={{ fontSize:"11px", color:"#C47F0A", background:"rgba(196,127,10,0.08)", border:"1px solid rgba(196,127,10,0.3)", padding:"2px 8px", borderRadius:"2px", display:"flex", alignItems:"center", gap:"5px" }}>
               #{kw}
-              <button onClick={() => set("keywords",form.keywords.filter((_,j)=>j!==i))} style={{ background:"none", border:"none", color:"#8B6508", cursor:"pointer", fontSize:"12px", padding:0, lineHeight:1 }}>×</button>
+              <button onClick={() => set("keywords",form.keywords.filter((_,j)=>j!==i))} style={{ background:"none", border:"none", color:"#C47F0A", cursor:"pointer", fontSize:"12px", padding:0, lineHeight:1 }}>×</button>
             </span>
           ))}
         </div>
@@ -480,13 +480,13 @@ function AddSourceView({ pool, onAdd, onDelete }) {
           <input value={kwInput} onChange={e=>setKwInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"||e.key===","){ e.preventDefault(); addKw(kwInput); }}}
             placeholder="Type a keyword and press Enter" style={{ ...inputStyle, flex:1 }} list="kw-suggestions" />
           <datalist id="kw-suggestions">{allKeywords.map(k=><option key={k} value={k}/>)}</datalist>
-          <button onClick={() => addKw(kwInput)} style={{ ...F, background:"transparent", border:"1px solid rgba(60,40,20,0.32)", color:"#6B5035", padding:"0 14px", borderRadius:"3px", cursor:"pointer", fontSize:"11px", whiteSpace:"nowrap" }}>Add</button>
+          <button onClick={() => addKw(kwInput)} style={{ ...F, background:"transparent", border:"1px solid rgba(26,70,52,0.22)", color:"#5A7870", padding:"0 14px", borderRadius:"3px", cursor:"pointer", fontSize:"11px", whiteSpace:"nowrap" }}>Add</button>
         </div>
-        <div style={{ fontSize:"10px", color:"#6B5035", marginTop:"5px" }}>Pick from existing or type new ones. Shared keywords create edges in the Garden.</div>
+        <div style={{ fontSize:"10px", color:"#5A7870", marginTop:"5px" }}>Pick from existing or type new ones. Shared keywords create edges in the Garden.</div>
         {errors.keywords && <div style={errStyle}>{errors.keywords}</div>}
       </div>
 
-      <button onClick={submit} style={{ ...F, padding:"10px 28px", background:"transparent", border:"1px solid #8B6508", color:"#8B6508", fontSize:"11px", letterSpacing:"0.15em", textTransform:"uppercase", cursor:"pointer", borderRadius:"3px", marginBottom:"8px" }}>
+      <button onClick={submit} style={{ ...F, padding:"10px 28px", background:"transparent", border:"1px solid #C47F0A", color:"#C47F0A", fontSize:"11px", letterSpacing:"0.15em", textTransform:"uppercase", cursor:"pointer", borderRadius:"3px", marginBottom:"8px" }}>
         Add to Pool
       </button>
       {saved && <span style={{ fontSize:"12px", color:"#1A7A5E", marginLeft:"12px" }}>✓ Added successfully</span>}
@@ -494,15 +494,15 @@ function AddSourceView({ pool, onAdd, onDelete }) {
       {/* Custom items list */}
       {customItems.length > 0 && (
         <div style={{ marginTop:"36px" }}>
-          <div style={{ fontSize:"10px", color:"#6B5035", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"14px" }}>Your custom sources ({customItems.length})</div>
+          <div style={{ fontSize:"10px", color:"#5A7870", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"14px" }}>Your custom sources ({customItems.length})</div>
           {customItems.map(item => (
-            <div key={item.id} style={{ display:"flex", alignItems:"flex-start", gap:"12px", borderBottom:"1px solid rgba(60,40,20,0.28)", paddingBottom:"12px", marginBottom:"12px" }}>
+            <div key={item.id} style={{ display:"flex", alignItems:"flex-start", gap:"12px", borderBottom:"1px solid rgba(26,70,52,0.2)", paddingBottom:"12px", marginBottom:"12px" }}>
               <div style={{ flex:1 }}>
                 <div style={{ display:"flex", gap:"5px", marginBottom:"4px" }}>
-                  <Pill color={COLOR[item.theme]||"#6B5035"}>{item.theme}</Pill>
+                  <Pill color={COLOR[item.theme]||"#5A7870"}>{item.theme}</Pill>
                 </div>
-                <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:"13px", color:"#2C2416", textDecoration:"none", display:"block", marginBottom:"3px" }}>{item.title} ↗</a>
-                <div style={{ fontSize:"11px", color:"#3D2B1A", fontStyle:"italic" }}>{item.source} · {item.published} · {item.readingMinutes} min</div>
+                <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:"13px", color:"#1A2E28", textDecoration:"none", display:"block", marginBottom:"3px" }}>{item.title} ↗</a>
+                <div style={{ fontSize:"11px", color:"#2A3C34", fontStyle:"italic" }}>{item.source} · {item.published} · {item.readingMinutes} min</div>
               </div>
               <button onClick={() => onDelete(item.id)} style={{ ...F, background:"transparent", border:"1px solid rgba(180,60,0,0.25)", color:"#C04E00", padding:"3px 9px", borderRadius:"3px", cursor:"pointer", fontSize:"9px", letterSpacing:"0.1em", textTransform:"uppercase", flexShrink:0 }}>Remove</button>
             </div>
@@ -532,43 +532,43 @@ function buildLinks(items) {
 
 function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNote, connectedTitles, onNavigate, publicMode }) {
   if(!node) return null;
-  const c = COLOR[node.theme]||"#6B5035";
+  const c = COLOR[node.theme]||"#5A7870";
   const isRead = readItems.has(node.url);
   const hasNote = !!(notes[node.url]?.argument||notes[node.url]?.thoughts);
   const noteData = notes[node.url];
   return (
-    <div style={{ ...F, position:"absolute", top:0, right:0, bottom:0, width:"290px", background:"rgba(235,228,215,1.0)", borderLeft:"1px solid rgba(60,40,20,0.24)", zIndex:30, display:"flex", flexDirection:"column" }}>
-      <div style={{ padding:"14px 16px 12px", borderBottom:"1px solid rgba(60,40,20,0.32)", display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:"8px" }}>
+    <div style={{ ...F, position:"absolute", top:0, right:0, bottom:0, width:"290px", background:"rgba(230,244,240,1.0)", borderLeft:"1px solid rgba(26,70,52,0.17)", zIndex:30, display:"flex", flexDirection:"column" }}>
+      <div style={{ padding:"14px 16px 12px", borderBottom:"1px solid rgba(26,70,52,0.22)", display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:"8px" }}>
         <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
           <Pill color={c}>{node.theme}</Pill>
           {node.year && <Pill color={node.type==="foundational"?"#F97316":"#60A5FA"}>{node.type==="foundational"?"Foundational":node.year}</Pill>}
           {node.custom && <Pill color="#A78BFA">Custom</Pill>}
         </div>
-        <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#2C2416", cursor:"pointer", fontSize:"20px", lineHeight:1, flexShrink:0 }}>×</button>
+        <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1A2E28", cursor:"pointer", fontSize:"20px", lineHeight:1, flexShrink:0 }}>×</button>
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"14px 16px" }}>
-        <div style={{ fontSize:"15px", color:"#2C2416", lineHeight:"1.4", marginBottom:"8px", fontWeight:500 }}>{node.title}</div>
-        <div style={{ fontSize:"11px", color:"#3D2B1A", fontStyle:"italic", marginBottom:"3px" }}>{node.source}</div>
-        <div style={{ fontSize:"10px", color:"#2C2416", marginBottom:"12px" }}>{node.published} · {node.readingMinutes} min</div>
+        <div style={{ fontSize:"15px", color:"#1A2E28", lineHeight:"1.4", marginBottom:"8px", fontWeight:500 }}>{node.title}</div>
+        <div style={{ fontSize:"11px", color:"#2A3C34", fontStyle:"italic", marginBottom:"3px" }}>{node.source}</div>
+        <div style={{ fontSize:"10px", color:"#1A2E28", marginBottom:"12px" }}>{node.published} · {node.readingMinutes} min</div>
         <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginBottom:"14px" }}>
           {node.keywords.map((kw,i) => <span key={i} style={{ fontSize:"10px", color:c, background:c+"14", border:"1px solid "+c+"30", padding:"2px 7px", borderRadius:"2px" }}>#{kw}</span>)}
         </div>
 
         {/* Notes preview */}
         {hasNote && (
-          <div style={{ background:"rgba(184,134,11,0.06)", border:"1px solid rgba(184,134,11,0.18)", borderRadius:"3px", padding:"10px 12px", marginBottom:"12px" }}>
-            {noteData.argument && <div style={{ fontSize:"11px", color:"#2C2416", lineHeight:1.5, marginBottom: noteData.thoughts?"8px":0 }}><span style={{ fontSize:"9px", color:"#8B6508", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>Argument</span>{publicMode ? noteData.argument : (noteData.argument.slice(0,120)+(noteData.argument.length>120?"…":""))}</div>}
-            {noteData.thoughts && <div style={{ fontSize:"11px", color:"#2C2416", lineHeight:1.5 }}><span style={{ fontSize:"9px", color:"#8B6508", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>My thoughts</span>{publicMode ? noteData.thoughts : (noteData.thoughts.slice(0,120)+(noteData.thoughts.length>120?"…":""))}</div>}
+          <div style={{ background:"rgba(196,127,10,0.06)", border:"1px solid rgba(196,127,10,0.18)", borderRadius:"3px", padding:"10px 12px", marginBottom:"12px" }}>
+            {noteData.argument && <div style={{ fontSize:"11px", color:"#1A2E28", lineHeight:1.5, marginBottom: noteData.thoughts?"8px":0 }}><span style={{ fontSize:"9px", color:"#C47F0A", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>Argument</span>{publicMode ? noteData.argument : (noteData.argument.slice(0,120)+(noteData.argument.length>120?"…":""))}</div>}
+            {noteData.thoughts && <div style={{ fontSize:"11px", color:"#1A2E28", lineHeight:1.5 }}><span style={{ fontSize:"9px", color:"#C47F0A", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>My thoughts</span>{publicMode ? noteData.thoughts : (noteData.thoughts.slice(0,120)+(noteData.thoughts.length>120?"…":""))}</div>}
           </div>
         )}
 
         {connectedTitles.length > 0 && (
           <div>
-            <div style={{ fontSize:"9px", color:"#6B5035", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>
+            <div style={{ fontSize:"9px", color:"#5A7870", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>
               Connected via shared keywords — <span style={{ fontStyle:"italic" }}>click to navigate</span>
             </div>
             {connectedTitles.slice(0,8).map((ct,i) => {
-              const cc = COLOR[ct.theme] || "#6B5035";
+              const cc = COLOR[ct.theme] || "#5A7870";
               return (
                 <button key={i} onClick={() => onNavigate && onNavigate(ct.id)}
                   style={{ display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderLeft:"2px solid "+cc+"55", padding:"5px 0 5px 9px", marginBottom:"4px", cursor:"pointer", borderRadius:"0 3px 3px 0", transition:"background 0.15s" }}
@@ -578,29 +578,29 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
                   <div style={{ fontSize:"9px", color:cc, marginBottom:"2px", letterSpacing:"0.04em" }}>
                     #{ct.keywords.join(" · #")}
                   </div>
-                  <div style={{ fontSize:"11px", color:"#2C2416", lineHeight:1.4, ...F }}>
+                  <div style={{ fontSize:"11px", color:"#1A2E28", lineHeight:1.4, ...F }}>
                     {ct.title.length>52 ? ct.title.slice(0,52)+"…" : ct.title}
                   </div>
-                  <div style={{ fontSize:"10px", color:"#6B5035", fontStyle:"italic", marginTop:"1px" }}>
+                  <div style={{ fontSize:"10px", color:"#5A7870", fontStyle:"italic", marginTop:"1px" }}>
                     {ct.source}
                   </div>
                 </button>
               );
             })}
             {connectedTitles.length>8 && (
-              <div style={{ fontSize:"10px", color:"#6B5035", paddingLeft:"9px", marginTop:"4px", fontStyle:"italic" }}>
+              <div style={{ fontSize:"10px", color:"#5A7870", paddingLeft:"9px", marginTop:"4px", fontStyle:"italic" }}>
                 +{connectedTitles.length-8} more connections
               </div>
             )}
           </div>
         )}
       </div>
-      <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(60,40,20,0.32)", display:"flex", gap:"5px", flexWrap:"wrap" }}>
+      <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(26,70,52,0.22)", display:"flex", gap:"5px", flexWrap:"wrap" }}>
         <a href={node.url} target="_blank" rel="noopener noreferrer" style={{ flex:1, textAlign:"center", padding:"7px 4px", background:"transparent", border:"1px solid "+c, color:c, borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", textDecoration:"none", ...F }}>Read ↗</a>
-        {!publicMode && <button onClick={() => onOpenNote(node)} style={{ flex:1, padding:"7px 4px", background:hasNote?"rgba(232,197,71,0.1)":"transparent", border:hasNote?"1px solid rgba(232,197,71,0.35)":"1px solid rgba(60,40,20,0.22)", color:hasNote?"#8B6508":"#3D2B1A", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
+        {!publicMode && <button onClick={() => onOpenNote(node)} style={{ flex:1, padding:"7px 4px", background:hasNote?"rgba(196,127,10,0.1)":"transparent", border:hasNote?"1px solid rgba(196,127,10,0.3)":"1px solid rgba(26,70,52,0.16)", color:hasNote?"#C47F0A":"#2A3C34", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
           {hasNote?"✎ Note":"Note"}
         </button>}
-        {!publicMode && <button onClick={() => onToggleRead(node.url)} style={{ flex:1, padding:"7px 4px", background:isRead?"rgba(52,211,153,0.1)":"transparent", border:isRead?"1px solid rgba(52,211,153,0.35)":"1px solid rgba(60,40,20,0.22)", color:isRead?"#34D399":"#3D2B1A", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
+        {!publicMode && <button onClick={() => onToggleRead(node.url)} style={{ flex:1, padding:"7px 4px", background:isRead?"rgba(52,211,153,0.1)":"transparent", border:isRead?"1px solid rgba(52,211,153,0.35)":"1px solid rgba(26,70,52,0.16)", color:isRead?"#34D399":"#2A3C34", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
           {isRead?"✓ Read":"To Read"}
         </button>}
       </div>
@@ -834,7 +834,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     const linkSel = g.append("g")
       .selectAll("line").data(crossLinks).enter().append("line")
-      .attr("stroke","rgba(60,40,20,0.1)").attr("stroke-width",0.8)
+      .attr("stroke","rgba(26,70,52,0.08)").attr("stroke-width",0.8)
       .style("pointer-events","none");
     linkSelRef.current = linkSel;
 
@@ -877,7 +877,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         );
         nodeSel.attr("fill-opacity", n => n.id===d.id ? 1 : connIds.has(n.id) ? 0.9 : 0.08);
         linkSel
-          .attr("stroke", l => (l.source?.id===d.id||l.target?.id===d.id) ? COLOR[d.theme]+"dd" : "rgba(60,40,20,0.02)")
+          .attr("stroke", l => (l.source?.id===d.id||l.target?.id===d.id) ? COLOR[d.theme]+"dd" : "rgba(26,70,52,0.02)")
           .attr("stroke-width", l => (l.source?.id===d.id||l.target?.id===d.id) ? 2 : 0.3);
       })
       .on("mousemove", function(e) {
@@ -900,7 +900,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       .text(d => d.title.split(":")[0].split("—")[0].trim().slice(0, 26))
       .attr("font-size","7px")
       .attr("font-family","'Palatino Linotype',Palatino,serif")
-      .attr("fill","#3A2518")
+      .attr("fill","#243C30")
       .attr("text-anchor","middle")
       .attr("dy", d => rScale(d.degree) + 9)
       .attr("opacity", 0)
@@ -911,7 +911,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     function resetOp() {
       nodeSel.attr("fill-opacity", d => readRef.current.has(d.url) ? 0.2 : 0.82);
-      linkSel.attr("stroke","rgba(60,40,20,0.1)").attr("stroke-width",0.8);
+      linkSel.attr("stroke","rgba(26,70,52,0.08)").attr("stroke-width",0.8);
     }
 
     // Simulation
@@ -972,7 +972,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         });
     } else {
       nodeSelRef.current.attr("fill-opacity", d => readItems.has(d.url) ? 0.2 : 0.82);
-      linkSelRef.current.attr("stroke","rgba(60,40,20,0.1)").attr("stroke-width",0.8);
+      linkSelRef.current.attr("stroke","rgba(26,70,52,0.08)").attr("stroke-width",0.8);
     }
   }, [dimTheme, readItems]);
 
@@ -983,27 +983,27 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       <div style={{ position:"absolute", top:"10px", left:"10px", zIndex:10, display:"flex", flexDirection:"column", gap:"3px" }}>
         {THEMES.map(t => (
           <button key={t.name} onClick={() => setDimTheme(d => d===t.name ? null : t.name)}
-            style={{ ...F, display:"flex", alignItems:"center", gap:"6px", background:dimTheme===t.name?t.color+"22":"rgba(228,220,205,0.97)", border:"1px solid "+(dimTheme===t.name?t.color:"rgba(60,40,20,0.28)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
+            style={{ ...F, display:"flex", alignItems:"center", gap:"6px", background:dimTheme===t.name?t.color+"22":"rgba(226,239,234,0.97)", border:"1px solid "+(dimTheme===t.name?t.color:"rgba(26,70,52,0.2)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
             <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:t.color, flexShrink:0 }} />
-            <span style={{ fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase", color:dimTheme===t.name?t.color:"#3D2B1A", whiteSpace:"nowrap" }}>{t.name}</span>
+            <span style={{ fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase", color:dimTheme===t.name?t.color:"#2A3C34", whiteSpace:"nowrap" }}>{t.name}</span>
           </button>
         ))}
         {dimTheme && (
-          <button onClick={() => setDimTheme(null)} style={{ ...F, background:"rgba(228,220,205,0.97)", border:"1px solid rgba(60,40,20,0.28)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", color:"#6B5035", fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase" }}>Clear</button>
+          <button onClick={() => setDimTheme(null)} style={{ ...F, background:"rgba(226,239,234,0.97)", border:"1px solid rgba(26,70,52,0.2)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", color:"#5A7870", fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase" }}>Clear</button>
         )}
       </div>
 
       <svg ref={svgRef} style={{ position:"absolute", inset:0, width:sideOpen?"calc(100% - 290px)":"100%", height:"100%", background:"transparent" }} />
 
       {tooltip && (
-        <div style={{ position:"absolute", left:tooltip.x, top:tooltip.y, transform:"translate(-50%,-100%)", background:"rgba(235,228,215,0.99)", border:"1px solid rgba(60,40,20,0.25)", borderRadius:"3px", padding:"5px 10px", fontSize:"11px", color:"#2C2416", pointerEvents:"none", zIndex:50, maxWidth:"260px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", ...F }}>
+        <div style={{ position:"absolute", left:tooltip.x, top:tooltip.y, transform:"translate(-50%,-100%)", background:"rgba(230,244,240,0.99)", border:"1px solid rgba(26,70,52,0.18)", borderRadius:"3px", padding:"5px 10px", fontSize:"11px", color:"#1A2E28", pointerEvents:"none", zIndex:50, maxWidth:"260px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", ...F }}>
           {tooltip.text}
         </div>
       )}
 
       {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} />}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
-      {!ready    && <div style={{ position:"absolute",inset:0,background:"#F5F0E8",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"11px",color:"#6B5035",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
+      {!ready    && <div style={{ position:"absolute",inset:0,background:"#F0F8F4",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"11px",color:"#5A7870",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
     </div>
   );
 }
@@ -1015,10 +1015,10 @@ function StatBar({ value, max, color }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
     <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-      <div style={{ flex:1, height:"4px", background:"rgba(60,40,20,0.32)", borderRadius:"2px", overflow:"hidden" }}>
+      <div style={{ flex:1, height:"4px", background:"rgba(26,70,52,0.22)", borderRadius:"2px", overflow:"hidden" }}>
         <div style={{ height:"100%", width: pct+"%", background: color, borderRadius:"2px", transition:"width 0.6s ease" }} />
       </div>
-      <span style={{ fontSize:"10px", color:"#2C2416", width:"36px", textAlign:"right" }}>{value}/{max}</span>
+      <span style={{ fontSize:"10px", color:"#1A2E28", width:"36px", textAlign:"right" }}>{value}/{max}</span>
     </div>
   );
 }
@@ -1062,22 +1062,22 @@ function StatsView({ pool, readItems, notes }) {
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(130px, 1fr))", gap:"10px", marginBottom:"36px" }}>
         {[
           { label:"Total read",    value: totalRead,  sub: `of ${pool.length}`,   color:"#34D399" },
-          { label:"Essays read",   value: readEssays.length, sub:`of ${essays.length}`, color:"#8B6508" },
+          { label:"Essays read",   value: readEssays.length, sub:`of ${essays.length}`, color:"#C47F0A" },
           { label:"Papers read",   value: readPapers.length, sub:`of ${papers.length}`, color:"#60A5FA" },
           { label:"Time invested", value: timeStr,    sub:"reading time",          color:"#A78BFA" },
           { label:"Notes written", value: totalNotes, sub:`across ${pool.length} items`, color:"#F97316" },
         ].map(s => (
-          <div key={s.label} style={{ background:"rgba(60,40,20,0.07)", border:"1px solid rgba(60,40,20,0.32)", borderTop:"2px solid "+s.color, borderRadius:"3px", padding:"14px 14px 12px" }}>
+          <div key={s.label} style={{ background:"rgba(26,70,52,0.06)", border:"1px solid rgba(26,70,52,0.22)", borderTop:"2px solid "+s.color, borderRadius:"3px", padding:"14px 14px 12px" }}>
             <div style={{ fontSize:"22px", color: s.color, fontWeight:400, lineHeight:1, marginBottom:"5px" }}>{s.value}</div>
-            <div style={{ fontSize:"10px", color:"#3D2B1A", letterSpacing:"0.05em" }}>{s.label}</div>
-            <div style={{ fontSize:"10px", color:"#2C2416", marginTop:"2px" }}>{s.sub}</div>
+            <div style={{ fontSize:"10px", color:"#2A3C34", letterSpacing:"0.05em" }}>{s.label}</div>
+            <div style={{ fontSize:"10px", color:"#1A2E28", marginTop:"2px" }}>{s.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Academic breakdown */}
       <div style={{ marginBottom:"36px" }}>
-        <div style={{ fontSize:"10px", color:"#6B5035", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>Academic breakdown</div>
+        <div style={{ fontSize:"10px", color:"#5A7870", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>Academic breakdown</div>
         <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
           {[
             { label:"Foundational papers", read: readFound.length, total: foundational.length, color:"#F97316" },
@@ -1085,8 +1085,8 @@ function StatsView({ pool, readItems, notes }) {
           ].map(row => (
             <div key={row.label}>
               <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"5px" }}>
-                <span style={{ fontSize:"12px", color:"#2C2416" }}>{row.label}</span>
-                <span style={{ fontSize:"11px", color: row.read===row.total && row.total>0 ? "#34D399":"#3D2B1A" }}>
+                <span style={{ fontSize:"12px", color:"#1A2E28" }}>{row.label}</span>
+                <span style={{ fontSize:"11px", color: row.read===row.total && row.total>0 ? "#34D399":"#2A3C34" }}>
                   {row.read===row.total && row.total>0 ? "✓ Complete" : `${Math.round(row.read/row.total*100)||0}%`}
                 </span>
               </div>
@@ -1098,17 +1098,17 @@ function StatsView({ pool, readItems, notes }) {
 
       {/* Per-theme breakdown */}
       <div style={{ marginBottom:"36px" }}>
-        <div style={{ fontSize:"10px", color:"#3D2B1A", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>Progress by theme</div>
+        <div style={{ fontSize:"10px", color:"#2A3C34", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>Progress by theme</div>
         <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
           {themeStats.map(t => (
             <div key={t.name}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:"5px" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:"7px" }}>
                   <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:t.color }} />
-                  <span style={{ fontSize:"12px", color:"#2C2416" }}>{t.name}</span>
-                  {t.noted > 0 && <span style={{ fontSize:"9px", color:"#8B6508", background:"rgba(184,134,11,0.08)", border:"1px solid rgba(184,134,11,0.2)", borderRadius:"2px", padding:"1px 5px" }}>✎ {t.noted} note{t.noted>1?"s":""}</span>}
+                  <span style={{ fontSize:"12px", color:"#1A2E28" }}>{t.name}</span>
+                  {t.noted > 0 && <span style={{ fontSize:"9px", color:"#C47F0A", background:"rgba(196,127,10,0.08)", border:"1px solid rgba(196,127,10,0.2)", borderRadius:"2px", padding:"1px 5px" }}>✎ {t.noted} note{t.noted>1?"s":""}</span>}
                 </div>
-                <span style={{ fontSize:"10px", color: t.read===t.total ? "#1A7A5E":"#6B5035" }}>
+                <span style={{ fontSize:"10px", color: t.read===t.total ? "#1A7A5E":"#5A7870" }}>
                   {t.read}/{t.total}
                 </span>
               </div>
@@ -1121,30 +1121,30 @@ function StatsView({ pool, readItems, notes }) {
       {/* Notes list */}
       {notedItems.length > 0 && (
         <div>
-          <div style={{ fontSize:"10px", color:"#3D2B1A", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>
+          <div style={{ fontSize:"10px", color:"#2A3C34", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>
             Your notes ({totalNotes})
           </div>
           <div style={{ display:"flex", flexDirection:"column", gap:"2px" }}>
             {notedItems.map(item => {
               const n = notes[item.url];
-              const c = COLOR[item.theme] || "#6B5035";
+              const c = COLOR[item.theme] || "#5A7870";
               return (
-                <div key={item.url} style={{ background:"rgba(60,40,20,0.07)", border:"1px solid rgba(60,40,20,0.24)", borderLeft:"3px solid "+c, borderRadius:"3px", padding:"12px 14px" }}>
+                <div key={item.url} style={{ background:"rgba(26,70,52,0.06)", border:"1px solid rgba(26,70,52,0.17)", borderLeft:"3px solid "+c, borderRadius:"3px", padding:"12px 14px" }}>
                   <div style={{ display:"flex", gap:"6px", alignItems:"center", marginBottom:"6px", flexWrap:"wrap" }}>
                     <span style={{ fontSize:"9px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"1px 6px", borderRadius:"2px", background:c+"22", color:c, fontWeight:600 }}>{item.theme}</span>
-                    <span style={{ fontSize:"10px", color:"#2C2416", fontStyle:"italic" }}>{item.source} · {item.published}</span>
+                    <span style={{ fontSize:"10px", color:"#1A2E28", fontStyle:"italic" }}>{item.source} · {item.published}</span>
                   </div>
-                  <div style={{ fontSize:"13px", color:"#2C2416", marginBottom:"10px", lineHeight:1.4, fontWeight:500 }}>{item.title}</div>
+                  <div style={{ fontSize:"13px", color:"#1A2E28", marginBottom:"10px", lineHeight:1.4, fontWeight:500 }}>{item.title}</div>
                   {n.argument && (
                     <div style={{ marginBottom: n.thoughts ? "8px" : 0 }}>
-                      <div style={{ fontSize:"9px", color:"#8B6508", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Argument</div>
-                      <div style={{ fontSize:"12px", color:"#3D2B1A", lineHeight:1.6 }}>{n.argument}</div>
+                      <div style={{ fontSize:"9px", color:"#C47F0A", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Argument</div>
+                      <div style={{ fontSize:"12px", color:"#2A3C34", lineHeight:1.6 }}>{n.argument}</div>
                     </div>
                   )}
                   {n.thoughts && (
                     <div>
                       <div style={{ fontSize:"9px", color:"#60A5FA", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>My thoughts</div>
-                      <div style={{ fontSize:"12px", color:"#6B5035", lineHeight:1.6 }}>{n.thoughts}</div>
+                      <div style={{ fontSize:"12px", color:"#5A7870", lineHeight:1.6 }}>{n.thoughts}</div>
                     </div>
                   )}
                 </div>
@@ -1156,8 +1156,8 @@ function StatsView({ pool, readItems, notes }) {
 
       {totalRead === 0 && (
         <div style={{ marginTop:"60px", textAlign:"center" }}>
-          <div style={{ fontSize:"13px", color:"#2C2416", fontStyle:"italic" }}>No items marked as read yet.</div>
-          <div style={{ fontSize:"11px", color:"#3A2518", marginTop:"6px" }}>Head to the Dispatch tab and start reading.</div>
+          <div style={{ fontSize:"13px", color:"#1A2E28", fontStyle:"italic" }}>No items marked as read yet.</div>
+          <div style={{ fontSize:"11px", color:"#243C30", marginTop:"6px" }}>Head to the Dispatch tab and start reading.</div>
         </div>
       )}
     </div>
@@ -1166,7 +1166,7 @@ function StatsView({ pool, readItems, notes }) {
 
 // ─── Root app ─────────────────────────────────────────────────────────────────
 
-const NAV = { ...F, background:"transparent", border:"1px solid rgba(60,40,20,0.32)", color:"#6B5035", width:"28px", height:"28px", borderRadius:"3px", cursor:"pointer", fontSize:"14px", display:"inline-flex", alignItems:"center", justifyContent:"center" };
+const NAV = { ...F, background:"transparent", border:"1px solid rgba(26,70,52,0.22)", color:"#5A7870", width:"28px", height:"28px", borderRadius:"3px", cursor:"pointer", fontSize:"14px", display:"inline-flex", alignItems:"center", justifyContent:"center" };
 
 export function PublicGardenPage() {
   const [pool,    setPool]    = useState(BUILTIN);
@@ -1188,23 +1188,23 @@ export function PublicGardenPage() {
     });
   }, []);
 
-  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#6B5035", letterSpacing:"0.15em", textTransform:"uppercase" }}>Growing the garden…</span></div>;
+  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F0F8F4", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#5A7870", letterSpacing:"0.15em", textTransform:"uppercase" }}>Growing the garden…</span></div>;
 
   return (
-    <div style={{ height:"100vh", background:"#F5F0E8", color:"#2C2416", display:"flex", flexDirection:"column", overflow:"hidden" }}>
-      <div style={{ height:"44px", background:"rgba(228,220,205,0.99)", borderBottom:"1px solid rgba(60,40,20,0.25)", display:"flex", alignItems:"center", paddingLeft:"18px", paddingRight:"18px", flexShrink:0, gap:"12px", backdropFilter:"blur(4px)", zIndex:100 }}>
+    <div style={{ height:"100vh", background:"#F0F8F4", color:"#1A2E28", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+      <div style={{ height:"44px", background:"rgba(226,239,234,0.99)", borderBottom:"1px solid rgba(26,70,52,0.18)", display:"flex", alignItems:"center", paddingLeft:"18px", paddingRight:"18px", flexShrink:0, gap:"12px", backdropFilter:"blur(4px)", zIndex:100 }}>
         <div style={{ display:"flex", alignItems:"center", gap:"8px", flexShrink:0 }}>
-          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#8B6508" }} />
-          <span style={{ ...F, fontSize:"12px", color:"#2C2416", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
+          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#C47F0A" }} />
+          <span style={{ ...F, fontSize:"12px", color:"#1A2E28", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
         </div>
-        <div style={{ height:"100%", borderLeft:"1px solid rgba(60,40,20,0.32)" }} />
-        <span style={{ ...F, fontSize:"11px", color:"#3D2B1A", lineHeight:1.4 }}>
+        <div style={{ height:"100%", borderLeft:"1px solid rgba(26,70,52,0.22)" }} />
+        <span style={{ ...F, fontSize:"11px", color:"#2A3C34", lineHeight:1.4 }}>
           Hi, I'm Prabhnoor, a researcher in critical AI studies. This is my digital garden, exploring AI safety, policy, bias, decolonisation, and more.{" "}
-          <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#8B6508", textDecoration:"underline" }}>More about me & my work ↗</a>
+          <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#C47F0A", textDecoration:"underline" }}>More about me & my work ↗</a>
         </span>
       </div>
-      <div style={{ height:"44px", background:"rgba(228,220,205,0.97)", borderBottom:"1px solid rgba(60,40,20,0.28)", display:"flex", alignItems:"center", padding:"0 18px", flexShrink:0 }}>
-        <span style={{ ...F, fontSize:"10px", color:"#6B5035", fontStyle:"italic" }}>{pool.length} items · bubbles positioned by keyword density · zoom in for labels · scroll to zoom · drag to pan</span>
+      <div style={{ height:"44px", background:"rgba(226,239,234,0.97)", borderBottom:"1px solid rgba(26,70,52,0.2)", display:"flex", alignItems:"center", padding:"0 18px", flexShrink:0 }}>
+        <span style={{ ...F, fontSize:"10px", color:"#5A7870", fontStyle:"italic" }}>{pool.length} items · bubbles positioned by keyword density · zoom in for labels · scroll to zoom · drag to pan</span>
       </div>
       <div style={{ flex:1, overflow:"hidden", position:"relative" }}>
         <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} />
@@ -1233,22 +1233,22 @@ function SetPasswordScreen({ onDone }) {
   }
 
   return (
-    <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
+    <div style={{ ...F, height:"100vh", background:"#F0F8F4", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontSize:"13px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#2C2416" }}>Plot Twists</div>
-        <div style={{ fontSize:"11px", color:"#6B5035", fontStyle:"italic", marginTop:"6px" }}>Set your password</div>
+        <div style={{ fontSize:"13px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#1A2E28" }}>Plot Twists</div>
+        <div style={{ fontSize:"11px", color:"#5A7870", fontStyle:"italic", marginTop:"6px" }}>Set your password</div>
       </div>
       {done ? (
-        <div style={{ fontSize:"12px", color:"#2C2416" }}>Password set. Entering…</div>
+        <div style={{ fontSize:"12px", color:"#1A2E28" }}>Password set. Entering…</div>
       ) : (
         <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"12px", width:"260px" }}>
           <input type="password" required placeholder="New password" value={password} onChange={e => setPassword(e.target.value)}
-            style={{ ...F, background:"rgba(228,220,205,0.8)", border:"1px solid rgba(60,40,20,0.3)", color:"#2C2416", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
+            style={{ ...F, background:"rgba(226,239,234,0.8)", border:"1px solid rgba(26,70,52,0.2)", color:"#1A2E28", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
           <input type="password" required placeholder="Confirm password" value={confirm} onChange={e => setConfirm(e.target.value)}
-            style={{ ...F, background:"rgba(228,220,205,0.8)", border:"1px solid rgba(60,40,20,0.3)", color:"#2C2416", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
+            style={{ ...F, background:"rgba(226,239,234,0.8)", border:"1px solid rgba(26,70,52,0.2)", color:"#1A2E28", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
           {error && <div style={{ fontSize:"11px", color:"#A04040" }}>{error}</div>}
           <button type="submit" disabled={loading}
-            style={{ ...F, background:"#2C2416", color:"#F5F0E8", border:"none", padding:"10px", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}>
+            style={{ ...F, background:"#1A2E28", color:"#F0F8F4", border:"none", padding:"10px", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}>
             {loading ? "Saving…" : "Set password"}
           </button>
         </form>
@@ -1275,10 +1275,10 @@ function LoginScreen() {
   }
 
   return (
-    <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
+    <div style={{ ...F, height:"100vh", background:"#F0F8F4", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontSize:"13px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#2C2416" }}>Plot Twists</div>
-        <div style={{ fontSize:"11px", color:"#6B5035", fontStyle:"italic", marginTop:"6px" }}>Prabhnoor's Digital Garden</div>
+        <div style={{ fontSize:"13px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#1A2E28" }}>Plot Twists</div>
+        <div style={{ fontSize:"11px", color:"#5A7870", fontStyle:"italic", marginTop:"6px" }}>Prabhnoor's Digital Garden</div>
       </div>
       <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"12px", width:"260px" }}>
         <input
@@ -1287,13 +1287,13 @@ function LoginScreen() {
           placeholder="Password"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          style={{ ...F, background:"rgba(228,220,205,0.8)", border:"1px solid rgba(60,40,20,0.3)", color:"#2C2416", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }}
+          style={{ ...F, background:"rgba(226,239,234,0.8)", border:"1px solid rgba(26,70,52,0.2)", color:"#1A2E28", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }}
         />
         {error && <div style={{ fontSize:"11px", color:"#A04040" }}>{error}</div>}
         <button
           type="submit"
           disabled={loading}
-          style={{ ...F, background:"#2C2416", color:"#F5F0E8", border:"none", padding:"10px", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}
+          style={{ ...F, background:"#1A2E28", color:"#F0F8F4", border:"none", padding:"10px", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}
         >
           {loading ? "Entering…" : "Enter"}
         </button>
@@ -1381,24 +1381,24 @@ export default function App() {
   const totalNotes = Object.keys(notes).length;
   const totalRead  = readItems.size;
 
-  if (!authReady) return <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#6B5035", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
+  if (!authReady) return <div style={{ ...F, height:"100vh", background:"#F0F8F4", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#5A7870", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
   if (recovering)  return <SetPasswordScreen onDone={() => setRecovering(false)} />;
   if (!user) return <LoginScreen />;
-  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#6B5035", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
+  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F0F8F4", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#5A7870", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
 
   return (
-    <div style={{ height:"100vh", background:"#F5F0E8", color:"#2C2416", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+    <div style={{ height:"100vh", background:"#F0F8F4", color:"#1A2E28", display:"flex", flexDirection:"column", overflow:"hidden" }}>
       {/* Top bar */}
-      <div style={{ height:"44px", background:"rgba(228,220,205,0.99)", borderBottom:"1px solid rgba(60,40,20,0.25)", display:"flex", alignItems:"center", paddingLeft:"18px", paddingRight:"18px", flexShrink:0, gap:"16px", backdropFilter:"blur(4px)", zIndex:100 }}>
+      <div style={{ height:"44px", background:"rgba(226,239,234,0.99)", borderBottom:"1px solid rgba(26,70,52,0.18)", display:"flex", alignItems:"center", paddingLeft:"18px", paddingRight:"18px", flexShrink:0, gap:"16px", backdropFilter:"blur(4px)", zIndex:100 }}>
         <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
-          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#8B6508" }} />
-          <span style={{ ...F, fontSize:"12px", color:"#2C2416", letterSpacing:"0.12em", textTransform:"uppercase" }}>The Dispatch</span>
+          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#C47F0A" }} />
+          <span style={{ ...F, fontSize:"12px", color:"#1A2E28", letterSpacing:"0.12em", textTransform:"uppercase" }}>The Dispatch</span>
         </div>
-        <div style={{ height:"100%", borderLeft:"1px solid rgba(60,40,20,0.32)", marginLeft:"4px" }} />
+        <div style={{ height:"100%", borderLeft:"1px solid rgba(26,70,52,0.22)", marginLeft:"4px" }} />
         <TabBar active={tab} onChange={setTab} />
         <div style={{ marginLeft:"auto", display:"flex", gap:"14px", alignItems:"center" }}>
-          {totalRead > 0  && <span style={{ fontSize:"10px", color:"#6B5035" }}>{totalRead} read</span>}
-          {totalNotes > 0 && <span style={{ fontSize:"10px", color:"#6B5035" }}>{totalNotes} notes</span>}
+          {totalRead > 0  && <span style={{ fontSize:"10px", color:"#5A7870" }}>{totalRead} read</span>}
+          {totalNotes > 0 && <span style={{ fontSize:"10px", color:"#5A7870" }}>{totalNotes} notes</span>}
           {customItems.length > 0 && <span style={{ fontSize:"10px", color:"#6340A888" }}>+{customItems.length} custom</span>}
           <button onClick={() => supabase.auth.signOut()} style={{ ...NAV, fontSize:"10px", width:"auto", padding:"0 8px", letterSpacing:"0.06em" }}>Sign out</button>
         </div>
@@ -1406,8 +1406,8 @@ export default function App() {
 
       {/* Subheader for garden */}
       {tab === "garden" && (
-        <div style={{ height:"44px", background:"rgba(228,220,205,0.97)", borderBottom:"1px solid rgba(60,40,20,0.28)", display:"flex", alignItems:"center", padding:"0 18px", flexShrink:0 }}>
-          <span style={{ ...F, fontSize:"10px", color:"#6B5035", fontStyle:"italic" }}>{pool.length} items · bubbles positioned by keyword density · zoom in for labels · scroll to zoom · drag to pan</span>
+        <div style={{ height:"44px", background:"rgba(226,239,234,0.97)", borderBottom:"1px solid rgba(26,70,52,0.2)", display:"flex", alignItems:"center", padding:"0 18px", flexShrink:0 }}>
+          <span style={{ ...F, fontSize:"10px", color:"#5A7870", fontStyle:"italic" }}>{pool.length} items · bubbles positioned by keyword density · zoom in for labels · scroll to zoom · drag to pan</span>
         </div>
       )}
 
