@@ -25,6 +25,15 @@ const THEMES = [
 const COLOR = Object.fromEntries(THEMES.map(t => [t.name, t.color]));
 const PATH_COLORS = ["#D48010","#0A9C60","#1068D4","#CC1E78","#8020D8","#E84E00"];
 
+const ORG_STANCES = ["Industry","Policy / Think Tank","Journalism","Academic","Civil Society / Advocacy"];
+const STANCE_COLORS = {
+  "Industry":                  "#1068D4",
+  "Policy / Think Tank":       "#009B72",
+  "Journalism":                "#D48010",
+  "Academic":                  "#8020D8",
+  "Civil Society / Advocacy":  "#E84E00",
+};
+
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 function fmtDate(d) { return new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" }); }
 function prevDay(d) { const dt = new Date(d+"T12:00:00"); dt.setDate(dt.getDate()-1); return dt.toISOString().slice(0,10); }
@@ -147,6 +156,8 @@ function Pill({ children, color, small }) {
 const TABS = [
   { id:"dispatch", label:"Dispatch", icon:"📋" },
   { id:"garden",   label:"Garden",   icon:"🌿" },
+  { id:"paths",    label:"Paths",    icon:"🗺️" },
+  { id:"field",    label:"Field",    icon:"🏛️" },
   { id:"stats",    label:"Stats",    icon:"📊" },
   { id:"add",      label:"Add",      icon:"＋" },
 ];
@@ -577,7 +588,7 @@ function buildLinks(items) {
   return links;
 }
 
-function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNote, connectedTitles, onNavigate, publicMode, onRemove, paths, onSavePath }) {
+function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNote, connectedTitles, onNavigate, publicMode, onRemove, paths, onSavePath, orgs, orgLinks, onSaveOrgLink, onDeleteOrgLink }) {
   if(!node) return null;
   const c = COLOR[node.theme]||"#426860";
   const isRead = readItems.has(node.url);
@@ -657,6 +668,25 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
               </div>
             ))}
             <PathSelector node={node} paths={paths} onSavePath={onSavePath} />
+          </div>
+        )}
+
+        {/* Organisations */}
+        {!publicMode && orgs && orgs.length > 0 && (
+          <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:"1px solid rgba(0,100,200,0.1)" }}>
+            <div style={{ fontSize:"9px", color:"#5080A8", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>Organisations</div>
+            {orgs.filter(org => orgLinks.some(l => l.org_id === org.id && l.item_id === node.id)).map(org => {
+              const color = STANCE_COLORS[org.stance] || "#5080A8";
+              return (
+                <div key={org.id} style={{ display:"flex", alignItems:"center", gap:"5px", marginBottom:"4px", background:color+"10", border:"1px solid "+color+"25", borderRadius:"3px", padding:"4px 7px" }}>
+                  <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:color, flexShrink:0 }} />
+                  <span style={{ ...F, fontSize:"10px", color:"#0D1F35", flex:1 }}>{org.name}</span>
+                  <span style={{ fontSize:"9px", color }}>{org.stance.split(" / ")[0]}</span>
+                  <button onClick={() => onDeleteOrgLink(org.id, node.id)} style={{ background:"none", border:"none", cursor:"pointer", color, fontSize:"13px", padding:0, lineHeight:1, opacity:0.7 }}>×</button>
+                </div>
+              );
+            })}
+            <OrgLinker node={node} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={onSaveOrgLink} onDeleteOrgLink={onDeleteOrgLink} />
           </div>
         )}
       </div>
@@ -853,6 +883,341 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
   );
 }
 
+// ─── Paths view ───────────────────────────────────────────────────────────────
+
+function PathsView({ paths, pool, notes }) {
+  const [selectedId, setSelectedId] = useState(null);
+  const itemMap = Object.fromEntries(pool.map(n => [n.id, n]));
+  const selected = paths.find(p => p.id === selectedId) || paths[0] || null;
+
+  if (paths.length === 0) return (
+    <div style={{ ...F, maxWidth:"680px", margin:"0 auto", padding:"80px 24px", textAlign:"center" }}>
+      <div style={{ fontSize:"14px", color:"#0D1F35", fontStyle:"italic" }}>No reading paths yet.</div>
+      <div style={{ fontSize:"12px", color:"#5080A8", marginTop:"8px" }}>Open the Garden, click any source, and add it to a new path from the sidebar.</div>
+    </div>
+  );
+
+  return (
+    <div style={{ display:"flex", height:"calc(100vh - 44px)", overflow:"hidden" }}>
+      {/* Left: path list */}
+      <div style={{ width:"210px", flexShrink:0, borderRight:"1px solid rgba(0,100,200,0.14)", overflowY:"auto", padding:"14px 0" }}>
+        {paths.map(p => (
+          <button key={p.id} onClick={() => setSelectedId(p.id)}
+            style={{ ...F, display:"block", width:"100%", textAlign:"left", background: selected?.id===p.id ? "rgba(0,100,200,0.07)" : "transparent", border:"none", borderLeft:"3px solid "+(selected?.id===p.id ? p.color : "transparent"), padding:"10px 14px", cursor:"pointer", transition:"all 0.15s" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"7px", marginBottom:"3px" }}>
+              <div style={{ width:"7px", height:"7px", borderRadius:"50%", background:p.color, flexShrink:0 }} />
+              <span style={{ fontSize:"12px", color:"#0D1F35", fontWeight: selected?.id===p.id ? 600 : 400 }}>{p.name}</span>
+            </div>
+            {p.description && <div style={{ fontSize:"10px", color:"#5080A8", paddingLeft:"14px", lineHeight:1.4, marginBottom:"2px", fontStyle:"italic" }}>{p.description.length>40 ? p.description.slice(0,40)+"…" : p.description}</div>}
+            <div style={{ fontSize:"10px", color:"#5080A8", paddingLeft:"14px" }}>{(p.item_ids||[]).length} sources</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Right: curriculum detail */}
+      {selected && (
+        <div style={{ flex:1, overflowY:"auto", padding:"28px 36px 80px" }}>
+          <div style={{ marginBottom:"28px", paddingBottom:"18px", borderBottom:"2px solid "+selected.color+"33" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px" }}>
+              <div style={{ width:"10px", height:"10px", borderRadius:"50%", background:selected.color }} />
+              <h1 style={{ ...F, fontSize:"22px", color:"#0D1F35", fontWeight:400, margin:0, letterSpacing:"-0.01em" }}>{selected.name}</h1>
+            </div>
+            {selected.description && (
+              <p style={{ ...F, fontSize:"13px", color:"#5080A8", fontStyle:"italic", margin:"0 0 0 20px", lineHeight:1.6 }}>{selected.description}</p>
+            )}
+          </div>
+
+          {(selected.item_ids||[]).length === 0 && (
+            <div style={{ fontSize:"12px", color:"#5080A8", fontStyle:"italic" }}>No sources in this path yet.</div>
+          )}
+
+          {(selected.item_ids||[]).map((id, idx) => {
+            const item = itemMap[id];
+            if (!item) return null;
+            const c = COLOR[item.theme] || "#426860";
+            const note = notes[item.url];
+            return (
+              <div key={id} style={{ display:"flex", gap:"16px", marginBottom:"30px" }}>
+                <div style={{ flexShrink:0, width:"26px", height:"26px", borderRadius:"50%", background:selected.color, display:"flex", alignItems:"center", justifyContent:"center", marginTop:"2px" }}>
+                  <span style={{ fontSize:"10px", color:"white", fontWeight:"bold" }}>{idx+1}</span>
+                </div>
+                <div style={{ flex:1, borderLeft:"1px solid rgba(0,100,200,0.12)", paddingLeft:"16px" }}>
+                  <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", alignItems:"center", marginBottom:"7px" }}>
+                    <Pill color={c}>{item.theme}</Pill>
+                    {item.type==="foundational" && <Pill color="#F97316">Foundational</Pill>}
+                    <span style={{ fontSize:"10px", color:"#5080A8" }}>{item.source} · {item.published}</span>
+                    <span style={{ fontSize:"10px", color:"#5080A8", marginLeft:"auto" }}>{item.readingMinutes} min</span>
+                  </div>
+                  <a href={item.url} target="_blank" rel="noopener noreferrer"
+                    style={{ ...F, fontSize:"15px", color:"#0F2420", textDecoration:"none", display:"block", lineHeight:"1.4", marginBottom:"12px", fontWeight:500 }}
+                    onMouseEnter={e => e.currentTarget.style.color=c}
+                    onMouseLeave={e => e.currentTarget.style.color="#0F2420"}>
+                    {item.title} <span style={{ opacity:0.3, fontSize:"11px" }}>↗</span>
+                  </a>
+                  {note && (note.quote || note.argument || note.thoughts) && (
+                    <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
+                      {note.quote && (
+                        <div style={{ borderLeft:"2px solid "+selected.color+"55", paddingLeft:"10px" }}>
+                          <div style={{ fontSize:"9px", color:selected.color, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Quote</div>
+                          <div style={{ ...F, fontSize:"12px", color:"#1A3C5E", fontStyle:"italic", lineHeight:1.7 }}>{note.quote}</div>
+                        </div>
+                      )}
+                      {note.argument && (
+                        <div>
+                          <div style={{ fontSize:"9px", color:"#D48010", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Argument</div>
+                          <div style={{ ...F, fontSize:"12px", color:"#0D1F35", lineHeight:1.6 }}>{note.argument}</div>
+                        </div>
+                      )}
+                      {note.thoughts && (
+                        <div>
+                          <div style={{ fontSize:"9px", color:"#60A5FA", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>My thoughts</div>
+                          <div style={{ ...F, fontSize:"12px", color:"#5080A8", lineHeight:1.6 }}>{note.thoughts}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Org linker (sidebar) ─────────────────────────────────────────────────────
+
+function OrgLinker({ node, orgs, orgLinks, onSaveOrgLink, onDeleteOrgLink }) {
+  const [open, setOpen]     = useState(false);
+  const [searchQ, setSearchQ] = useState("");
+  const linkedOrgIds = new Set(orgLinks.filter(l => l.item_id === node.id).map(l => l.org_id));
+  const available = orgs.filter(o => !linkedOrgIds.has(o.id) && (searchQ ? o.name.toLowerCase().includes(searchQ.toLowerCase()) : true));
+
+  return (
+    <div style={{ position:"relative" }}>
+      <button onClick={() => setOpen(v => !v)}
+        style={{ ...F, width:"100%", background:"transparent", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"3px", padding:"5px 8px", fontSize:"9px", letterSpacing:"0.1em", textTransform:"uppercase", color:"#5080A8", cursor:"pointer", textAlign:"left" }}>
+        + Link to organisation {open ? "▲" : "▼"}
+      </button>
+      {open && (
+        <div style={{ position:"absolute", bottom:"calc(100% + 4px)", left:0, right:0, background:"rgba(224,238,255,0.99)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"3px", boxShadow:"0 -4px 12px rgba(13,31,53,0.1)", overflow:"hidden", zIndex:50 }}>
+          <div style={{ padding:"5px 8px", borderBottom:"1px solid rgba(0,100,200,0.07)" }}>
+            <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Search organisations…" autoFocus
+              style={{ ...F, width:"100%", background:"transparent", border:"none", outline:"none", fontSize:"10px", color:"#0D1F35", boxSizing:"border-box" }} />
+          </div>
+          {available.length === 0 && <div style={{ padding:"7px 10px", fontSize:"10px", color:"#5080A8", fontStyle:"italic" }}>No organisations to link.</div>}
+          {available.slice(0,6).map(org => {
+            const color = STANCE_COLORS[org.stance] || "#5080A8";
+            return (
+              <button key={org.id} onClick={() => { onSaveOrgLink(org.id, node.id); setOpen(false); setSearchQ(""); }}
+                style={{ ...F, display:"flex", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(0,100,200,0.07)", padding:"6px 10px", cursor:"pointer", alignItems:"center", gap:"6px" }}
+                onMouseEnter={e => e.currentTarget.style.background="rgba(0,100,200,0.05)"}
+                onMouseLeave={e => e.currentTarget.style.background="transparent"}>
+                <div style={{ width:"7px", height:"7px", borderRadius:"50%", background:color, flexShrink:0 }} />
+                <span style={{ fontSize:"10px", color:"#0D1F35", flex:1 }}>{org.name}</span>
+                <span style={{ fontSize:"9px", color:"#5080A8" }}>{org.stance.split(" / ")[0]}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Add / edit org modal ─────────────────────────────────────────────────────
+
+function AddOrgModal({ org, onSave, onClose }) {
+  const iStyle = { ...F, width:"100%", background:"rgba(0,100,200,0.05)", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"3px", color:"#0D1F35", fontSize:"13px", padding:"8px 10px", outline:"none", boxSizing:"border-box" };
+  const lStyle = { fontSize:"10px", color:"#5080A8", letterSpacing:"0.1em", textTransform:"uppercase", display:"block", marginBottom:"5px" };
+  const [form, setForm] = useState({
+    id: org?.id || crypto.randomUUID(),
+    name: org?.name || "",
+    stance: org?.stance || ORG_STANCES[0],
+    description: org?.description || "",
+    website: org?.website || "",
+  });
+  const set = (k,v) => setForm(f => ({...f,[k]:v}));
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(10,30,20,0.65)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ ...F, background:"#F0F7FF", border:"1px solid rgba(26,70,52,0.2)", borderRadius:"6px", width:"100%", maxWidth:"460px", overflow:"hidden" }}>
+        <div style={{ padding:"16px 18px 12px", borderBottom:"1px solid rgba(0,100,200,0.2)", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+          <span style={{ fontSize:"13px", color:"#0D1F35", fontWeight:500 }}>{org ? "Edit Organisation" : "Add Organisation"}</span>
+          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#0D1F35", cursor:"pointer", fontSize:"20px" }}>×</button>
+        </div>
+        <div style={{ padding:"16px 18px", display:"flex", flexDirection:"column", gap:"12px" }}>
+          <div>
+            <label style={lStyle}>Name *</label>
+            <input value={form.name} onChange={e => set("name",e.target.value)} placeholder="Organisation name" style={iStyle} autoFocus />
+          </div>
+          <div>
+            <label style={lStyle}>Stance *</label>
+            <select value={form.stance} onChange={e => set("stance",e.target.value)} style={iStyle}>
+              {ORG_STANCES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={lStyle}>Description</label>
+            <textarea value={form.description} onChange={e => set("description",e.target.value)} placeholder="What is this organisation's role or stance?" rows={3}
+              style={{ ...iStyle, resize:"vertical", lineHeight:1.5 }} />
+          </div>
+          <div>
+            <label style={lStyle}>Website</label>
+            <input value={form.website} onChange={e => set("website",e.target.value)} placeholder="https://…" style={iStyle} />
+          </div>
+        </div>
+        <div style={{ padding:"12px 18px", borderTop:"1px solid rgba(0,100,200,0.12)", display:"flex", gap:"8px", justifyContent:"flex-end" }}>
+          <button onClick={onClose} style={{ ...F, background:"transparent", border:"1px solid rgba(0,100,200,0.2)", color:"#5080A8", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
+          <button onClick={() => { if(form.name.trim()) onSave(form); }}
+            style={{ ...F, background:"transparent", border:"1px solid #9B6230", color:"#D48010", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>
+            {org ? "Save" : "Add"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Org card ─────────────────────────────────────────────────────────────────
+
+function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onSaveOrgLink, onDeleteOrgLink }) {
+  const [searchQ, setSearchQ]     = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const color = STANCE_COLORS[org.stance] || "#5080A8";
+  const itemMap = Object.fromEntries(pool.map(n => [n.id, n]));
+  const linkedItems = links.map(l => itemMap[l.item_id]).filter(Boolean);
+
+  const searchResults = useMemo(() => {
+    const q = searchQ.trim().toLowerCase();
+    if (!q) return [];
+    const linkedIds = new Set(links.map(l => l.item_id));
+    return pool.filter(i => !linkedIds.has(i.id) && (i.title.toLowerCase().includes(q) || i.source.toLowerCase().includes(q))).slice(0,6);
+  }, [searchQ, pool, links]);
+
+  return (
+    <div style={{ background:"rgba(0,100,200,0.04)", border:"1px solid rgba(0,100,200,0.11)", borderLeft:"3px solid "+color, borderRadius:"3px", padding:"10px 14px" }}>
+      <div style={{ display:"flex", alignItems:"flex-start", gap:"8px" }}>
+        <div style={{ flex:1 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"3px" }}>
+            <span style={{ ...F, fontSize:"13px", color:"#0D1F35", fontWeight:500 }}>{org.name}</span>
+            {org.website && <a href={org.website} target="_blank" rel="noopener noreferrer" style={{ fontSize:"10px", color, textDecoration:"none" }}>↗</a>}
+          </div>
+          {org.description && <div style={{ ...F, fontSize:"11px", color:"#5080A8", fontStyle:"italic", lineHeight:1.4 }}>{org.description}</div>}
+        </div>
+        <div style={{ display:"flex", gap:"4px", alignItems:"center", flexShrink:0 }}>
+          <button onClick={onToggle}
+            style={{ ...F, background:"transparent", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", fontSize:"9px", color:"#5080A8", letterSpacing:"0.07em", whiteSpace:"nowrap" }}>
+            {links.length} {links.length===1?"article":"articles"} {isExpanded?"▲":"▼"}
+          </button>
+          <button onClick={onEdit} style={{ background:"none", border:"none", cursor:"pointer", color:"#5080A8", fontSize:"12px", padding:"0 2px" }}>✎</button>
+          <button onClick={onDelete} style={{ background:"none", border:"none", cursor:"pointer", color:"#E84E00", fontSize:"13px", padding:0, opacity:0.6 }}>×</button>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div style={{ marginTop:"10px", paddingTop:"10px", borderTop:"1px solid rgba(0,100,200,0.1)" }}>
+          {linkedItems.map(item => (
+            <div key={item.id} style={{ display:"flex", alignItems:"center", gap:"7px", marginBottom:"5px" }}>
+              <Pill color={COLOR[item.theme]||"#426860"} small>{item.theme}</Pill>
+              <span style={{ ...F, fontSize:"11px", color:"#0D1F35", flex:1, lineHeight:1.3 }}>{item.title.length>52 ? item.title.slice(0,52)+"…" : item.title}</span>
+              <button onClick={() => onDeleteOrgLink(org.id, item.id)} style={{ background:"none", border:"none", cursor:"pointer", color:"#E84E00", fontSize:"11px", padding:0, opacity:0.6, flexShrink:0 }}>×</button>
+            </div>
+          ))}
+          {linkedItems.length === 0 && <div style={{ fontSize:"10px", color:"#5080A8", fontStyle:"italic", marginBottom:"8px" }}>No articles linked yet.</div>}
+
+          <div style={{ marginTop:"8px", position:"relative" }}>
+            <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Search articles to link…"
+              onFocus={() => setShowSearch(true)}
+              onBlur={() => setTimeout(() => setShowSearch(false), 150)}
+              style={{ ...F, width:"100%", background:"rgba(0,100,200,0.05)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"3px", color:"#0D1F35", fontSize:"11px", padding:"5px 8px", outline:"none", boxSizing:"border-box" }} />
+            {showSearch && searchResults.length > 0 && (
+              <div style={{ position:"absolute", top:"calc(100% + 2px)", left:0, right:0, background:"rgba(224,238,255,0.99)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"3px", zIndex:50, overflow:"hidden", boxShadow:"0 4px 12px rgba(13,31,53,0.1)" }}>
+                {searchResults.map(item => (
+                  <button key={item.id} onMouseDown={() => { onSaveOrgLink(org.id, item.id); setSearchQ(""); }}
+                    style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(0,100,200,0.07)", padding:"6px 10px", cursor:"pointer" }}
+                    onMouseEnter={e => e.currentTarget.style.background="rgba(0,100,200,0.05)"}
+                    onMouseLeave={e => e.currentTarget.style.background="transparent"}>
+                    <div style={{ fontSize:"10px", color:"#0D1F35" }}>{item.title.length>54 ? item.title.slice(0,54)+"…" : item.title}</div>
+                    <div style={{ fontSize:"9px", color:"#5080A8" }}>{item.source}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Field view ───────────────────────────────────────────────────────────────
+
+function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink, onDeleteOrgLink }) {
+  const [showAdd,   setShowAdd]   = useState(false);
+  const [editOrg,   setEditOrg]   = useState(null);
+  const [expanded,  setExpanded]  = useState(null);
+
+  const grouped = Object.fromEntries(ORG_STANCES.map(s => [s, []]));
+  orgs.forEach(org => { (grouped[org.stance] || grouped["Industry"]).push(org); });
+
+  return (
+    <div style={{ ...F, maxWidth:"800px", margin:"0 auto", padding:"28px 24px 80px" }}>
+      <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:"28px", gap:"12px", flexWrap:"wrap" }}>
+        <div>
+          <h2 style={{ fontSize:"20px", color:"#0D1F35", fontWeight:400, margin:"0 0 5px" }}>The Field</h2>
+          <p style={{ ...F, fontSize:"12px", color:"#5080A8", fontStyle:"italic", margin:0 }}>Organisations, labs, journals, and actors shaping the discourse.</p>
+        </div>
+        <button onClick={() => { setEditOrg(null); setShowAdd(true); }}
+          style={{ ...F, background:"transparent", border:"1px solid #9B6230", color:"#D48010", padding:"7px 16px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", flexShrink:0 }}>
+          + Add Organisation
+        </button>
+      </div>
+
+      {orgs.length === 0 && (
+        <div style={{ textAlign:"center", padding:"60px 0", color:"#5080A8", fontStyle:"italic", fontSize:"13px" }}>
+          No organisations yet. Add the first one to start mapping the field.
+        </div>
+      )}
+
+      {ORG_STANCES.map(stance => {
+        const group = grouped[stance] || [];
+        if (group.length === 0) return null;
+        const color = STANCE_COLORS[stance];
+        return (
+          <div key={stance} style={{ marginBottom:"32px" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"12px", paddingBottom:"8px", borderBottom:"1px solid "+color+"35" }}>
+              <div style={{ width:"8px", height:"8px", borderRadius:"50%", background:color }} />
+              <span style={{ fontSize:"10px", color, letterSpacing:"0.12em", textTransform:"uppercase", fontWeight:600 }}>{stance}</span>
+              <span style={{ fontSize:"10px", color:"#5080A8" }}>{group.length}</span>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+              {group.map(org => (
+                <OrgCard key={org.id} org={org}
+                  links={orgLinks.filter(l => l.org_id === org.id)}
+                  pool={pool}
+                  isExpanded={expanded === org.id}
+                  onToggle={() => setExpanded(v => v===org.id ? null : org.id)}
+                  onEdit={() => { setEditOrg(org); setShowAdd(true); }}
+                  onDelete={() => onDeleteOrg(org.id)}
+                  onSaveOrgLink={onSaveOrgLink}
+                  onDeleteOrgLink={onDeleteOrgLink} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      {showAdd && (
+        <AddOrgModal org={editOrg}
+          onSave={org => { onSaveOrg(org); setShowAdd(false); setEditOrg(null); }}
+          onClose={() => { setShowAdd(false); setEditOrg(null); }} />
+      )}
+    </div>
+  );
+}
+
 // Compute inter-theme connection counts — used to position bubbles smartly
 function interThemeWeights(items, links) {
   const itemTheme = Object.fromEntries(items.map(n => [n.id, n.theme]));
@@ -942,7 +1307,7 @@ function computeBubblePositions(items, links, W, H) {
 }
 
 
-function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode, onRemove, paths = [], onSavePath, onDeletePath }) {
+function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode, onRemove, paths = [], onSavePath, onDeletePath, orgs = [], orgLinks = [], onSaveOrgLink, onDeleteOrgLink }) {
   const svgRef        = useRef(null);
   const simRef        = useRef(null);
   const linksRef      = useRef([]);
@@ -952,7 +1317,11 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   const zoomRef       = useRef(null);
   const nodesRef      = useRef([]);
   const pathGroupRef  = useRef(null);
+  const orgGroupRef   = useRef(null);
   const pathsRef      = useRef(paths);
+  const orgsRef       = useRef(orgs);
+  const orgLinksRef   = useRef(orgLinks);
+  const showOrgsRef   = useRef(false);
 
   const [selected,       setSelected]       = useState(null);
   const [dimTheme,       setDimTheme]       = useState(null);
@@ -960,6 +1329,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   const [tooltip,        setTooltip]        = useState(null);
   const [noteItem,       setNoteItem]       = useState(null);
   const [pathsPanelOpen, setPathsPanelOpen] = useState(false);
+  const [showOrgs,       setShowOrgs]       = useState(false);
 
   // Pan + zoom to a node by id, then open its sidebar
   const navigateToNode = useCallback((nodeId) => {
@@ -979,6 +1349,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   // Keep readRef and pathsRef in sync without triggering sim rebuild
   useEffect(() => { readRef.current = readItems; }, [readItems]);
   useEffect(() => { pathsRef.current = paths; }, [paths]);
+  useEffect(() => { orgsRef.current = orgs; orgLinksRef.current = orgLinks; }, [orgs, orgLinks]);
+  useEffect(() => { showOrgsRef.current = showOrgs; }, [showOrgs]);
 
   // Draw path overlay lines + step badges from settled node positions
   const drawPathOverlay = useCallback(() => {
@@ -1134,6 +1506,10 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const pathGroup = g.append("g");
     pathGroupRef.current = pathGroup;
 
+    // Org overlay — sits above path overlay, below nodes
+    const orgGroup = g.append("g");
+    orgGroupRef.current = orgGroup;
+
     const NR = 5;
 
     // Compute degree for node sizing
@@ -1159,7 +1535,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       .call(d3.drag()
         .on("start", (e,d) => { if(!e.active && simRef.current) simRef.current.alphaTarget(0.2).restart(); d.fx=d.x; d.fy=d.y; })
         .on("drag",  (e,d) => { d.fx=e.x; d.fy=e.y; })
-        .on("end",   (e,d) => { if(!e.active && simRef.current) simRef.current.alphaTarget(0); d.fx=null; d.fy=null; drawPathOverlay(); })
+        .on("end",   (e,d) => { if(!e.active && simRef.current) simRef.current.alphaTarget(0); d.fx=null; d.fy=null; drawPathOverlay(); drawOrgOverlay(); })
       )
       .on("mouseenter", function(e, d) {
         const rect = svgRef.current.getBoundingClientRect();
@@ -1242,8 +1618,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     linksRef.current = links;
     nodesRef.current = nodes;
 
-    sim.on("end", drawPathOverlay);
-    const pathTimer = setTimeout(drawPathOverlay, 2500);
+    sim.on("end", () => { drawPathOverlay(); drawOrgOverlay(); });
+    const pathTimer = setTimeout(() => { drawPathOverlay(); drawOrgOverlay(); }, 2500);
 
     return () => { sim.stop(); clearTimeout(pathTimer); };
   }, [ready, pool]); // ← readItems, paths, drawPathOverlay intentionally NOT here
@@ -1258,6 +1634,64 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   useEffect(() => {
     drawPathOverlay();
   }, [paths, drawPathOverlay]);
+
+  // ── Draw/clear org overlay when showOrgs, orgs, or orgLinks change ──
+  const drawOrgOverlay = useCallback(() => {
+    if (!orgGroupRef.current) return;
+    const og = orgGroupRef.current;
+    og.selectAll("*").remove();
+    if (!showOrgsRef.current) return;
+    const currentOrgs = orgsRef.current || [];
+    const currentLinks = orgLinksRef.current || [];
+    if (currentOrgs.length === 0 || !nodesRef.current.length) return;
+    const W = svgRef.current?.clientWidth || window.innerWidth;
+    const H = svgRef.current?.clientHeight || (window.innerHeight - 88);
+    const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
+    const outerR = Math.min(W, H) * 0.50;
+    const orgPos = {};
+    currentOrgs.forEach((org, i) => {
+      const angle = (i / currentOrgs.length) * 2 * Math.PI - Math.PI / 2;
+      orgPos[org.id] = { x: W/2 + outerR * Math.cos(angle), y: H/2 + outerR * Math.sin(angle) };
+    });
+    // Lines first (below circles)
+    currentLinks.forEach(link => {
+      const op = orgPos[link.org_id], ap = nodePos[link.item_id];
+      if (!op || !ap) return;
+      const color = STANCE_COLORS[currentOrgs.find(o => o.id === link.org_id)?.stance] || "#5080A8";
+      og.append("line")
+        .attr("x1", op.x).attr("y1", op.y).attr("x2", ap.x).attr("y2", ap.y)
+        .attr("stroke", color).attr("stroke-width", 1)
+        .attr("stroke-opacity", 0.22).attr("stroke-dasharray", "4 4")
+        .attr("pointer-events", "none");
+    });
+    // Org circles + labels
+    currentOrgs.forEach(org => {
+      const pos = orgPos[org.id];
+      const color = STANCE_COLORS[org.stance] || "#5080A8";
+      const r = Math.max(12, Math.min(22, 10 + currentLinks.filter(l => l.org_id === org.id).length * 2));
+      og.append("circle")
+        .attr("cx", pos.x).attr("cy", pos.y).attr("r", r)
+        .attr("fill", color).attr("fill-opacity", 0.13)
+        .attr("stroke", color).attr("stroke-opacity", 0.65).attr("stroke-width", 1.5)
+        .style("cursor", "pointer")
+        .on("mouseenter", e => {
+          const rect = svgRef.current.getBoundingClientRect();
+          setTooltip({ x: e.clientX-rect.left, y: e.clientY-rect.top-14, text: org.name + (org.stance ? ` · ${org.stance}` : "") });
+        })
+        .on("mouseleave", () => setTooltip(null));
+      og.append("text")
+        .attr("x", pos.x).attr("y", pos.y + r + 12)
+        .attr("text-anchor", "middle").attr("font-size", "9px")
+        .attr("font-family", "'Palatino Linotype',Palatino,serif")
+        .attr("fill", color).attr("fill-opacity", 0.85)
+        .attr("letter-spacing", "0.04em").attr("pointer-events", "none")
+        .text(org.name.length > 20 ? org.name.slice(0,20)+"…" : org.name);
+    });
+  }, []);
+
+  useEffect(() => {
+    drawOrgOverlay();
+  }, [showOrgs, orgs, orgLinks, drawOrgOverlay]);
 
   // ── Theme filter ──
   useEffect(() => {
@@ -1328,6 +1762,12 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
             </span>
           </button>
         )}
+        <button onClick={() => setShowOrgs(v => !v)}
+          style={{ ...F, marginTop:"3px", background: showOrgs?"rgba(16,104,212,0.13)":"rgba(224,238,255,0.97)", border:"1px solid "+(showOrgs?"rgba(16,104,212,0.5)":"rgba(0,100,200,0.17)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
+          <span style={{ fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase", color: showOrgs?"#1068D4":"#1A3C5E", whiteSpace:"nowrap" }}>
+            Orgs{orgs.length > 0 ? ` (${orgs.length})` : ""}
+          </span>
+        </button>
       </div>
 
       {pathsPanelOpen && !publicMode && (
@@ -1392,7 +1832,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         )}
       </div>
 
-      {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} paths={paths} onSavePath={onSavePath} />}
+      {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} paths={paths} onSavePath={onSavePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={onSaveOrgLink} onDeleteOrgLink={onDeleteOrgLink} />}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
       {!ready    && <div style={{ position:"absolute",inset:0,background:"#F0F7FF",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"11px",color:"#5080A8",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
     </div>
@@ -1569,6 +2009,8 @@ export function PublicGardenPage() {
   const [pool,        setPool]        = useState(BUILTIN);
   const [notes,       setNotes]       = useState({});
   const [paths,       setPaths]       = useState([]);
+  const [orgs,        setOrgs]        = useState([]);
+  const [orgLinks,    setOrgLinks]    = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [loaded,      setLoaded]      = useState(false);
 
@@ -1579,13 +2021,17 @@ export function PublicGardenPage() {
       supabase.from("hidden_items").select("item_id"),
       supabase.from("garden_meta").select("last_updated").limit(1).single(),
       supabase.from("paths").select("*"),
-    ]).then(([{ data: cd }, { data: nd }, { data: hd }, { data: gm }, { data: pd }]) => {
+      supabase.from("organisations").select("*"),
+      supabase.from("org_article_links").select("*"),
+    ]).then(([{ data: cd }, { data: nd }, { data: hd }, { data: gm }, { data: pd }, { data: od }, { data: ld }]) => {
       const hiddenSet = new Set((hd || []).map(h => h.item_id));
       const customMapped = (cd || []).map(c => ({ id: c.item_id, title: c.title, url: c.url, source: c.source, published: c.published, keywords: c.keywords || [], readingMinutes: c.reading_minutes, theme: c.theme, type: c.type }));
       setPool([...BUILTIN.filter(i => !hiddenSet.has(i.id)), ...customMapped.filter(i => !hiddenSet.has(i.id))]);
       if (nd?.length) setNotes(Object.fromEntries(nd.map(n => [n.url, { argument: n.argument, thoughts: n.thoughts, quote: n.quote || "" }])));
       if (gm?.last_updated) setLastUpdated(new Date(gm.last_updated).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" }));
       if (pd?.length) setPaths(pd.map(p => ({ id: p.id, name: p.name, description: p.description || "", color: p.color, item_ids: p.item_ids || [] })));
+      if (od?.length) setOrgs(od.map(o => ({ id: o.id, name: o.name, stance: o.stance, description: o.description || "", website: o.website || "" })));
+      if (ld?.length) setOrgLinks(ld.map(l => ({ id: l.id, org_id: l.org_id, item_id: l.item_id })));
       setLoaded(true);
     });
   }, []);
@@ -1607,7 +2053,7 @@ export function PublicGardenPage() {
         {lastUpdated && <span style={{ ...F, fontSize:"10px", color:"#5080A8", fontStyle:"italic", marginLeft:"auto", flexShrink:0 }}>Updated {lastUpdated}</span>}
       </div>
       <div style={{ flex:1, overflow:"hidden", position:"relative" }}>
-        <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} paths={paths} />
+        <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} paths={paths} orgs={orgs} orgLinks={orgLinks} />
       </div>
     </div>
   );
@@ -1709,6 +2155,8 @@ export default function App() {
   const [notes, setNotes]         = useState({});
   const [hiddenIds, setHiddenIds] = useState(new Set());
   const [paths, setPaths]         = useState([]);
+  const [orgs, setOrgs]           = useState([]);
+  const [orgLinks, setOrgLinks]   = useState([]);
   const [loaded, setLoaded]       = useState(false);
   const [user,        setUser]        = useState(null);
   const [authReady,   setAuthReady]   = useState(false);
@@ -1734,12 +2182,16 @@ export default function App() {
       supabase.from("custom_items").select("*").eq("user_id", user.id),
       supabase.from("hidden_items").select("item_id").eq("user_id", user.id),
       supabase.from("paths").select("*").eq("user_id", user.id),
-    ]).then(([{ data: rd }, { data: nd }, { data: cd }, { data: hd }, { data: pd }]) => {
+      supabase.from("organisations").select("*").eq("user_id", user.id),
+      supabase.from("org_article_links").select("*").eq("user_id", user.id),
+    ]).then(([{ data: rd }, { data: nd }, { data: cd }, { data: hd }, { data: pd }, { data: od }, { data: ld }]) => {
       setReadItems(new Set((rd || []).map(r => r.url)));
       setNotes(Object.fromEntries((nd || []).map(n => [n.url, { argument: n.argument, thoughts: n.thoughts, quote: n.quote || "" }])));
       setCustomItems((cd || []).map(c => ({ id: c.item_id, title: c.title, url: c.url, source: c.source, published: c.published, keywords: c.keywords || [], readingMinutes: c.reading_minutes, theme: c.theme, type: c.type })));
       setHiddenIds(new Set((hd || []).map(h => h.item_id)));
       setPaths((pd || []).map(p => ({ id: p.id, name: p.name, description: p.description || "", color: p.color, item_ids: p.item_ids || [] })));
+      setOrgs((od || []).map(o => ({ id: o.id, name: o.name, stance: o.stance, description: o.description || "", website: o.website || "" })));
+      setOrgLinks((ld || []).map(l => ({ id: l.id, org_id: l.org_id, item_id: l.item_id })));
       setLoaded(true);
     });
   }, [user]);
@@ -1820,6 +2272,40 @@ export default function App() {
       .then(({ error }) => { if (error) console.error("paths delete:", error); });
   }, [user]);
 
+  const saveOrg = useCallback((org) => {
+    setOrgs(prev => {
+      const isNew = !prev.some(o => o.id === org.id);
+      if (isNew) {
+        supabase.from("organisations").insert({ id: org.id, user_id: user.id, name: org.name, stance: org.stance, description: org.description || "", website: org.website || "" })
+          .then(({ error }) => { if (error) console.error("orgs insert:", error); });
+        return [...prev, org];
+      }
+      supabase.from("organisations").update({ name: org.name, stance: org.stance, description: org.description || "", website: org.website || "", updated_at: new Date().toISOString() }).eq("user_id", user.id).eq("id", org.id)
+        .then(({ error }) => { if (error) console.error("orgs update:", error); });
+      return prev.map(o => o.id === org.id ? org : o);
+    });
+  }, [user]);
+
+  const deleteOrg = useCallback((id) => {
+    setOrgs(prev => prev.filter(o => o.id !== id));
+    setOrgLinks(prev => prev.filter(l => l.org_id !== id));
+    supabase.from("organisations").delete().eq("user_id", user.id).eq("id", id)
+      .then(({ error }) => { if (error) console.error("orgs delete:", error); });
+  }, [user]);
+
+  const saveOrgLink = useCallback((orgId, itemId) => {
+    const id = crypto.randomUUID();
+    setOrgLinks(prev => [...prev, { id, org_id: orgId, item_id: itemId }]);
+    supabase.from("org_article_links").insert({ id, user_id: user.id, org_id: orgId, item_id: itemId })
+      .then(({ error }) => { if (error) console.error("org_link insert:", error); });
+  }, [user]);
+
+  const deleteOrgLink = useCallback((orgId, itemId) => {
+    setOrgLinks(prev => prev.filter(l => !(l.org_id === orgId && l.item_id === itemId)));
+    supabase.from("org_article_links").delete().eq("user_id", user.id).eq("org_id", orgId).eq("item_id", itemId)
+      .then(({ error }) => { if (error) console.error("org_link delete:", error); });
+  }, [user]);
+
   const removeFromPool = useCallback(item => {
     const isCustom = customItems.some(c => c.id === item.id);
     if (isCustom) deleteItem(item.id);
@@ -1860,7 +2346,9 @@ export default function App() {
       {/* Main content */}
       <div style={{ flex:1, overflowY: tab==="garden"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
         {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} />}
-        {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} />}
+        {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
+        {tab === "paths"    && <PathsView    paths={paths} pool={pool} notes={notes} />}
+        {tab === "field"    && <FieldView    orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={saveOrg} onDeleteOrg={deleteOrg} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
         {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} />}
         {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} />}
       </div>
