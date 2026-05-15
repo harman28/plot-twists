@@ -25,14 +25,22 @@ const THEMES = [
 const COLOR = Object.fromEntries(THEMES.map(t => [t.name, t.color]));
 const PATH_COLORS = ["#D48010","#0A9C60","#1068D4","#CC1E78","#8020D8","#E84E00"];
 
-const ORG_STANCES = ["Industry","Policy / Think Tank","Journalism","Academic","Civil Society / Advocacy"];
+const ORG_STANCES = ["Industry","Policy / Think Tank","Journalism","Academic","Civil Society / Advocacy","Other"];
 const STANCE_COLORS = {
   "Industry":                  "#1068D4",
   "Policy / Think Tank":       "#009B72",
   "Journalism":                "#D48010",
   "Academic":                  "#8020D8",
   "Civil Society / Advocacy":  "#E84E00",
+  "Other":                     "#607890",
 };
+
+// Stable per-org hash for deterministic scatter within the donut band
+function orgHash(id) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (Math.imul(31, h) + id.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 function fmtDate(d) { return new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" }); }
@@ -1793,12 +1801,12 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         .attr("letter-spacing", "0.1em").attr("pointer-events", "none")
         .text(shortName);
 
-      // ── Position orgs within their band arc ──
-      stanceOrgs.forEach((org, oi) => {
-        const angle = stanceOrgs.length === 1
-          ? midAngle
-          : arcStart + (oi / (stanceOrgs.length - 1)) * (arcEnd - arcStart);
-        orgPos[org.id] = { x: W/2 + outerR * Math.cos(angle), y: H/2 + outerR * Math.sin(angle) };
+      // ── Scatter orgs randomly within the donut band (stable via hash) ──
+      stanceOrgs.forEach((org) => {
+        const h = orgHash(org.id);
+        const angle = arcStart + ((h % 10000) / 10000) * (arcEnd - arcStart);
+        const r     = (outerR - bandHalf + 4) + (((h >> 13) % 10000) / 10000) * (bandHalf * 2 - 8);
+        orgPos[org.id] = { x: W/2 + r * Math.cos(angle), y: H/2 + r * Math.sin(angle) };
       });
     });
 
