@@ -1176,6 +1176,10 @@ function LoginScreen() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (email.toLowerCase() !== "prabhnoorkohliwork@gmail.com") {
+      setError("This email is not authorised to access Plot Twists.");
+      return;
+    }
     setLoading(true);
     setError(null);
     const { error: err } = await supabase.auth.signInWithOtp({
