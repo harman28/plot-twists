@@ -748,10 +748,11 @@ function PathSelector({ node, paths, onSavePath }) {
 // ─── Paths management panel ───────────────────────────────────────────────────
 
 function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
-  const [editingId, setEditingId] = useState(null);
-  const [editName,  setEditName]  = useState("");
-  const [editDesc,  setEditDesc]  = useState("");
-  const [expanded,  setExpanded]  = useState(null);
+  const [editingId,  setEditingId]  = useState(null);
+  const [editName,   setEditName]   = useState("");
+  const [editDesc,   setEditDesc]   = useState("");
+  const [editFocus,  setEditFocus]  = useState("name");
+  const [expanded,   setExpanded]   = useState(null);
   const itemMap = Object.fromEntries(pool.map(n => [n.id, n]));
 
   function moveItem(p, fromIdx, toIdx) {
@@ -792,10 +793,10 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
               {isEditing ? (
                 <input value={editName} onChange={e => setEditName(e.target.value)}
                   onKeyDown={e => { if(e.key==="Enter") commitEdit(p); if(e.key==="Escape") setEditingId(null); }}
-                  onBlur={() => commitEdit(p)} autoFocus
+                  onBlur={() => commitEdit(p)} autoFocus={editFocus === "name"}
                   style={{ ...F, flex:1, background:"transparent", border:"none", borderBottom:"1px solid rgba(0,100,200,0.3)", outline:"none", fontSize:"12px", color:"#0D1F35", padding:"1px 0", fontWeight:500 }} />
               ) : (
-                <span onClick={() => { setEditingId(p.id); setEditName(p.name); setEditDesc(p.description||""); }}
+                <span onClick={() => { setEditingId(p.id); setEditName(p.name); setEditDesc(p.description||""); setEditFocus("name"); }}
                   style={{ flex:1, fontSize:"12px", color:"#0D1F35", cursor:"text", fontWeight:500, lineHeight:1.3 }} title="Click to rename">{p.name}</span>
               )}
               <button onClick={() => setExpanded(v => v===p.id ? null : p.id)}
@@ -809,9 +810,10 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
             {/* Description */}
             {isEditing ? (
               <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Describe this path…" rows={2}
+                autoFocus={editFocus === "desc"}
                 style={{ ...F, width:"100%", marginTop:"6px", background:"rgba(0,100,200,0.04)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"2px", color:"#1A3C5E", fontSize:"10px", padding:"4px 6px", resize:"none", outline:"none", boxSizing:"border-box", lineHeight:1.5, fontStyle:"italic" }} />
             ) : (
-              <div onClick={() => { setEditingId(p.id); setEditName(p.name); setEditDesc(p.description||""); }}
+              <div onClick={() => { setEditingId(p.id); setEditName(p.name); setEditDesc(p.description||""); setEditFocus("desc"); }}
                 style={{ fontSize:"10px", color: p.description ? "#5080A8" : "rgba(80,128,168,0.45)", fontStyle:"italic", marginTop:"4px", lineHeight:1.4, cursor:"text" }}>
                 {p.description ? (p.description.length>80 ? p.description.slice(0,80)+"…" : p.description) : "Add a description…"}
               </div>
