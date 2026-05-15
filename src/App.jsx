@@ -1322,6 +1322,63 @@ function computeBubblePositions(items, links, W, H) {
   return pos;
 }
 
+// ─── Org sidebar ──────────────────────────────────────────────────────────────
+
+function OrgSidebar({ org, orgLinks, pool, onClose, onNavigate }) {
+  const color = STANCE_COLORS[org.stance] || "#5080A8";
+  const linkedItems = orgLinks
+    .filter(l => l.org_id === org.id)
+    .map(l => pool.find(p => p.id === l.item_id))
+    .filter(Boolean);
+
+  let websiteDisplay = "";
+  if (org.website) {
+    try { websiteDisplay = new URL(org.website).hostname.replace(/^www\./, ""); } catch { websiteDisplay = org.website; }
+  }
+
+  return (
+    <div style={{ position:"absolute", top:0, right:0, width:"280px", height:"100%", background:"rgba(224,238,255,0.99)", borderLeft:"1px solid rgba(0,100,200,0.14)", display:"flex", flexDirection:"column", zIndex:30, overflow:"hidden" }}>
+      <div style={{ padding:"14px 14px 10px", borderBottom:"1px solid rgba(0,100,200,0.1)", flexShrink:0 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"8px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:"7px" }}>
+            <div style={{ width:"9px", height:"9px", borderRadius:"50%", background:color, flexShrink:0 }} />
+            <span style={{ fontSize:"14px", fontWeight:500, color:"#0D1F35", lineHeight:1.2 }}>{org.name}</span>
+          </div>
+          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#0D1F35", cursor:"pointer", fontSize:"20px", lineHeight:1, flexShrink:0, paddingLeft:"8px" }}>×</button>
+        </div>
+        <div style={{ fontSize:"9px", color, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom: org.description || org.website ? "8px" : 0 }}>{org.stance}</div>
+        {org.website && (
+          <a href={org.website} target="_blank" rel="noopener noreferrer"
+            style={{ fontSize:"11px", color:"#D48010", textDecoration:"none", display:"inline-flex", alignItems:"center", gap:"3px", marginBottom:"6px" }}>
+            ↗ {websiteDisplay}
+          </a>
+        )}
+        {org.description && <p style={{ fontSize:"11px", color:"#5080A8", fontStyle:"italic", lineHeight:1.5, margin:0 }}>{org.description}</p>}
+      </div>
+
+      <div style={{ flex:1, overflowY:"auto", padding:"12px 14px" }}>
+        <div style={{ fontSize:"9px", color:"#5080A8", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px" }}>
+          Linked Articles ({linkedItems.length})
+        </div>
+        {linkedItems.length === 0 && (
+          <div style={{ fontSize:"11px", color:"rgba(80,128,168,0.5)", fontStyle:"italic" }}>No articles linked yet.</div>
+        )}
+        {linkedItems.map(item => (
+          <button key={item.id} onClick={() => { onNavigate(item.id); onClose(); }}
+            style={{ display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(0,100,200,0.07)", padding:"7px 0", cursor:"pointer" }}>
+            <div style={{ display:"flex", gap:"5px", alignItems:"center", marginBottom:"2px" }}>
+              <span style={{ fontSize:"9px", color: COLOR[item.theme]||"#426860", letterSpacing:"0.07em", textTransform:"uppercase", flexShrink:0 }}>{item.theme}</span>
+              <span style={{ fontSize:"9px", color:"#5080A8" }}>· {item.source}</span>
+            </div>
+            <div style={{ fontSize:"11px", color:"#0D1F35", lineHeight:1.4, fontFamily:"'Palatino Linotype',Palatino,serif" }}>
+              {item.title.length > 70 ? item.title.slice(0,70)+"…" : item.title}
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode, onRemove, paths = [], onSavePath, onDeletePath, orgs = [], orgLinks = [], onSaveOrgLink, onDeleteOrgLink }) {
   const svgRef        = useRef(null);
@@ -1340,6 +1397,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   const showOrgsRef   = useRef(false);
 
   const [selected,       setSelected]       = useState(null);
+  const [selectedOrg,    setSelectedOrg]    = useState(null);
   const [dimTheme,       setDimTheme]       = useState(null);
   const [ready,          setReady]          = useState(false);
   const [tooltip,        setTooltip]        = useState(null);
@@ -1577,7 +1635,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         d3.select(this).attr("r", rScale(d.degree)).attr("filter",null);
         resetOp();
       })
-      .on("click", (e,d) => { e.stopPropagation(); setSelected(d); });
+      .on("click", (e,d) => { e.stopPropagation(); setSelected(d); setSelectedOrg(null); });
 
     nodeSelRef.current = nodeSel;
 
@@ -1594,7 +1652,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       .style("pointer-events","none")
       .style("user-select","none");
 
-    svg.on("click", () => setSelected(null));
+    svg.on("click", () => { setSelected(null); setSelectedOrg(null); });
 
     function resetOp() {
       nodeSel.attr("fill-opacity", d => readRef.current.has(d.url) ? 0.2 : 0.82);
@@ -1656,6 +1714,12 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     if (!orgGroupRef.current) return;
     const og = orgGroupRef.current;
     og.selectAll("*").remove();
+    // Clean up old favicon clip paths
+    const svgEl = d3.select(svgRef.current);
+    let defs = svgEl.select("defs");
+    if (defs.empty()) defs = svgEl.append("defs");
+    defs.selectAll("[id^='org-clip-']").remove();
+
     if (!showOrgsRef.current) return;
     const currentOrgs = orgsRef.current || [];
     const currentLinks = orgLinksRef.current || [];
@@ -1664,11 +1728,38 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const H = svgRef.current?.clientHeight || (window.innerHeight - 88);
     const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
     const outerR = Math.min(W, H) * 0.50;
+
+    // Group orgs by stance into arc sections
+    const activeStances = ORG_STANCES.filter(s => currentOrgs.some(o => o.stance === s));
+    const numSections = activeStances.length || 1;
+    const arcSize = (2 * Math.PI) / numSections;
+    const gap = arcSize * 0.08;
     const orgPos = {};
-    currentOrgs.forEach((org, i) => {
-      const angle = (i / currentOrgs.length) * 2 * Math.PI - Math.PI / 2;
-      orgPos[org.id] = { x: W/2 + outerR * Math.cos(angle), y: H/2 + outerR * Math.sin(angle) };
+
+    activeStances.forEach((stance, si) => {
+      const stanceOrgs = currentOrgs.filter(o => o.stance === stance);
+      const arcStart = si * arcSize - Math.PI / 2 + gap / 2;
+      const arcEnd   = (si + 1) * arcSize - Math.PI / 2 - gap / 2;
+      stanceOrgs.forEach((org, oi) => {
+        const angle = stanceOrgs.length === 1
+          ? (arcStart + arcEnd) / 2
+          : arcStart + (oi / (stanceOrgs.length - 1)) * (arcEnd - arcStart);
+        orgPos[org.id] = { x: W/2 + outerR * Math.cos(angle), y: H/2 + outerR * Math.sin(angle) };
+      });
+      // Stance label just outside the ring at arc midpoint
+      const midAngle = (arcStart + arcEnd) / 2;
+      const labelR = outerR + 26;
+      const color = STANCE_COLORS[stance];
+      og.append("text")
+        .attr("x", W/2 + labelR * Math.cos(midAngle))
+        .attr("y", H/2 + labelR * Math.sin(midAngle))
+        .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+        .attr("font-size", "8px").attr("font-family", "'Palatino Linotype',Palatino,serif")
+        .attr("fill", color).attr("fill-opacity", 0.7)
+        .attr("letter-spacing", "0.09em").attr("pointer-events", "none")
+        .text(stance.toUpperCase());
     });
+
     // Lines first (below circles)
     currentLinks.forEach(link => {
       const op = orgPos[link.org_id], ap = nodePos[link.item_id];
@@ -1680,11 +1771,14 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         .attr("stroke-opacity", 0.22).attr("stroke-dasharray", "4 4")
         .attr("pointer-events", "none");
     });
-    // Org circles + labels
+
+    // Org circles + favicons + labels
     currentOrgs.forEach(org => {
       const pos = orgPos[org.id];
+      if (!pos) return;
       const color = STANCE_COLORS[org.stance] || "#5080A8";
-      const r = Math.max(12, Math.min(22, 10 + currentLinks.filter(l => l.org_id === org.id).length * 2));
+      const r = Math.max(14, Math.min(22, 10 + currentLinks.filter(l => l.org_id === org.id).length * 2));
+
       og.append("circle")
         .attr("cx", pos.x).attr("cy", pos.y).attr("r", r)
         .attr("fill", color).attr("fill-opacity", 0.13)
@@ -1694,7 +1788,25 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
           const rect = svgRef.current.getBoundingClientRect();
           setTooltip({ x: e.clientX-rect.left, y: e.clientY-rect.top-14, text: org.name + (org.stance ? ` · ${org.stance}` : "") });
         })
-        .on("mouseleave", () => setTooltip(null));
+        .on("mouseleave", () => setTooltip(null))
+        .on("click", (e) => { e.stopPropagation(); setSelectedOrg(org); setSelected(null); });
+
+      // Favicon from Google's service if org has a website
+      if (org.website) {
+        try {
+          const domain = new URL(org.website).hostname;
+          const clipId = `org-clip-${org.id}`;
+          defs.append("clipPath").attr("id", clipId)
+            .append("circle").attr("cx", pos.x).attr("cy", pos.y).attr("r", r - 2);
+          og.append("image")
+            .attr("href", `https://www.google.com/s2/favicons?domain=${domain}&sz=64`)
+            .attr("x", pos.x - r + 2).attr("y", pos.y - r + 2)
+            .attr("width", (r - 2) * 2).attr("height", (r - 2) * 2)
+            .attr("clip-path", `url(#${clipId})`)
+            .attr("pointer-events", "none");
+        } catch {}
+      }
+
       og.append("text")
         .attr("x", pos.x).attr("y", pos.y + r + 12)
         .attr("text-anchor", "middle").attr("font-size", "9px")
@@ -1805,7 +1917,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         </div>
       )}
 
-      <svg ref={svgRef} style={{ position:"absolute", inset:0, width:sideOpen?"calc(100% - 290px)":"100%", height:"100%", background:"transparent" }} />
+      <svg ref={svgRef} style={{ position:"absolute", inset:0, width:(sideOpen||!!selectedOrg)?"calc(100% - 290px)":"100%", height:"100%", background:"transparent" }} />
 
       {tooltip && (
         <div style={{ position:"absolute", left:tooltip.x, top:tooltip.y, transform:"translate(-50%,-100%)", background:"rgba(212,236,228,0.99)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"3px", padding:"5px 10px", fontSize:"11px", color:"#0D1F35", pointerEvents:"none", zIndex:50, maxWidth:"260px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", ...F }}>
@@ -1814,7 +1926,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       )}
 
       {/* Search box */}
-      <div ref={searchRef} style={{ position:"absolute", top:"10px", right: sideOpen ? "300px" : "10px", zIndex:20, transition:"right 0.2s" }}>
+      <div ref={searchRef} style={{ position:"absolute", top:"10px", right: (sideOpen||!!selectedOrg) ? "300px" : "10px", zIndex:20, transition:"right 0.2s" }}>
         <div style={{ display:"flex", alignItems:"center", background:"rgba(224,238,255,0.97)", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"3px", padding:"4px 8px", gap:"6px" }}>
           <span style={{ fontSize:"11px", color:"#5080A8", opacity:0.6 }}>⌕</span>
           <input
@@ -1849,6 +1961,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       </div>
 
       {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} paths={paths} onSavePath={onSavePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={onSaveOrgLink} onDeleteOrgLink={onDeleteOrgLink} />}
+      {selectedOrg && <OrgSidebar org={selectedOrg} orgLinks={orgLinks} pool={pool} onClose={() => setSelectedOrg(null)} onNavigate={nodeId => { navigateToNode(nodeId); setSelectedOrg(null); }} />}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
       {!ready    && <div style={{ position:"absolute",inset:0,background:"#F0F7FF",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"11px",color:"#5080A8",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
     </div>
