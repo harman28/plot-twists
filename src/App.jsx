@@ -2310,7 +2310,7 @@ export function PublicGardenPage() {
           {lastUpdated && <span style={{ ...F, fontSize:"11.5px", color:"#A16207", fontStyle:"italic", marginLeft:"auto" }}>Updated {lastUpdated}</span>}
         </div>
         <p style={{ ...F, fontSize:"12.5px", color:"#1A0A00", lineHeight:1.5, margin:"0 0 8px" }}>
-          Hi, I'm Prabhnoor — a researcher in critical AI studies. This is my digital garden exploring AI safety, policy, bias, decolonisation, and more.{" "}
+          Hi, I'm Prabhnoor, a researcher in critical AI studies. This is my digital garden exploring AI safety, policy, bias, decolonisation, and more.{" "}
           <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#D97706", textDecoration:"underline" }}>More about me & my work ↗</a>
         </p>
         {/* Tab bar */}
