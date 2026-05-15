@@ -1579,13 +1579,24 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         .attr("fill", "url(#rbg_" + t.name.replace(/\s/g,"_") + ")")
         .attr("stroke", t.color).attr("stroke-opacity", 0.18)
         .attr("stroke-width", 1.5).attr("stroke-dasharray", "4 3");
-      // Place label on the outward-facing edge (away from canvas centre)
-      const ang  = Math.atan2(bp.cy - H/2, bp.cx - W/2);
-      const lcos = Math.cos(ang), lsin = Math.sin(ang);
-      const lx   = bp.cx + (r + 18) * lcos;
-      const ly   = bp.cy + (r + 18) * lsin;
-      const anchor = lcos > 0.4 ? "start" : lcos < -0.4 ? "end" : "middle";
-      const dy     = lsin < -0.4 ? "-0.4em" : lsin > 0.4 ? "1em" : "0.35em";
+      // Place label on the edge pointing away from all other bubble centres.
+      // Summing inverse-square repulsion vectors gives the direction of most
+      // open space — more accurate than just pointing away from canvas centre.
+      let fx = 0, fy = 0;
+      THEMES.forEach(other => {
+        if (other.name === t.name) return;
+        const op = bubblePos[other.name];
+        const odx = bp.cx - op.cx, ody = bp.cy - op.cy;
+        const od2 = odx*odx + ody*ody || 1;
+        fx += odx / od2;
+        fy += ody / od2;
+      });
+      const flen = Math.sqrt(fx*fx + fy*fy) || 1;
+      const lcos = fx / flen, lsin = fy / flen;
+      const lx   = bp.cx + (r + 22) * lcos;
+      const ly   = bp.cy + (r + 22) * lsin;
+      const anchor = lcos > 0.35 ? "start" : lcos < -0.35 ? "end" : "middle";
+      const dy     = lsin < -0.35 ? "-0.4em" : lsin > 0.35 ? "1em" : "0.35em";
       // Halo for legibility
       bg.append("text")
         .attr("x", lx).attr("y", ly).attr("dy", dy)
