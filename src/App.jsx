@@ -1514,7 +1514,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     THEMES.forEach(t => { themeCount[t.name] = 0; });
     items.forEach(n => { if(themeCount[n.theme] !== undefined) themeCount[n.theme]++; });
     const bubbleR = {};
-    THEMES.forEach(t => { bubbleR[t.name] = Math.max(52, Math.sqrt(themeCount[t.name] || 0) * 23); });
+    THEMES.forEach(t => { bubbleR[t.name] = Math.max(70, Math.sqrt(themeCount[t.name] || 0) * 30); });
 
     // Smart bubble positions from inter-theme connection density
     const rawPos = computeBubblePositions(items, links, W, H);
@@ -1684,17 +1684,17 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     // Simulation
     const sim = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id).distance(220).strength(0.02))
-      .force("charge", d3.forceManyBody().strength(-280))
-      .force("collision", d3.forceCollide(d => rScale(d.degree) + 18))
+      .force("link", d3.forceLink(links).id(d => d.id).distance(260).strength(0.02))
+      .force("charge", d3.forceManyBody().strength(-420))
+      .force("collision", d3.forceCollide(d => rScale(d.degree) + 26))
       .force("bubble", () => {
         nodes.forEach(d => {
           const bp = bubblePos[d.theme], r = bubbleR[d.theme];
           const dx = d.x - bp.cx, dy = d.y - bp.cy;
           const dist = Math.sqrt(dx*dx+dy*dy) || 0.01;
           // Gentle pull toward bubble center
-          d.vx -= dx * 0.07;
-          d.vy -= dy * 0.07;
+          d.vx -= dx * 0.05;
+          d.vy -= dy * 0.05;
           // Hard wall at bubble edge
           const maxR = r - rScale(d.degree) - 3;
           if(dist > maxR) {
