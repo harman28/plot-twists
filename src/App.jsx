@@ -198,11 +198,12 @@ function BottomTabBar({ active, onChange }) {
 // ─── Notes modal ──────────────────────────────────────────────────────────────
 
 function NotesModal({ item, notes, onSave, onClose }) {
-  const existing = notes[item.url] || { argument:"", thoughts:"" };
+  const existing = notes[item.url] || { argument:"", thoughts:"", quote:"" };
   const [arg, setArg]     = useState(existing.argument);
   const [tho, setTho]     = useState(existing.thoughts);
+  const [quo, setQuo]     = useState(existing.quote || "");
   const c = COLOR[item.theme] || "#426860";
-  const hasContent = arg.trim() || tho.trim();
+  const hasContent = arg.trim() || tho.trim() || quo.trim();
 
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(10,30,20,0.65)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }} onClick={onClose}>
@@ -217,6 +218,11 @@ function NotesModal({ item, notes, onSave, onClose }) {
         </div>
         <div style={{ flex:1, overflowY:"auto", padding:"16px 18px", display:"flex", flexDirection:"column", gap:"14px" }}>
           <div>
+            <label style={{ fontSize:"10px", color:"#5080A8", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>Key quote</label>
+            <textarea value={quo} onChange={e => setQuo(e.target.value)} placeholder="Paste a passage worth keeping…" rows={3}
+              style={{ ...F, width:"100%", background:"rgba(0,100,200,0.04)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"3px", color:"#1A3C5E", fontSize:"13px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6, fontStyle:"italic" }} />
+          </div>
+          <div>
             <label style={{ fontSize:"10px", color:"#5080A8", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>What is being argued?</label>
             <textarea value={arg} onChange={e => setArg(e.target.value)} placeholder="Summarise the core argument…" rows={4}
               style={{ ...F, width:"100%", background:"rgba(0,100,200,0.05)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"3px", color:"#0D1F35", fontSize:"13px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6 }} />
@@ -230,7 +236,7 @@ function NotesModal({ item, notes, onSave, onClose }) {
         <div style={{ padding:"12px 18px", borderTop:"1px solid rgba(26,70,52,0.14)", display:"flex", gap:"8px", justifyContent:"flex-end" }}>
           {hasContent && <button onClick={() => { onSave(item.url, null); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid rgba(224,88,0,0.3)", color:"#E84E00", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Delete note</button>}
           <button onClick={onClose} style={{ ...F, background:"transparent", border:"1px solid rgba(0,100,200,0.2)", color:"#5080A8", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
-          <button onClick={() => { onSave(item.url, { argument:arg, thoughts:tho }); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid #9B6230", color:"#D48010", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Save note</button>
+          <button onClick={() => { onSave(item.url, { argument:arg, thoughts:tho, quote:quo }); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid #9B6230", color:"#D48010", padding:"6px 14px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Save note</button>
         </div>
       </div>
     </div>
@@ -242,7 +248,7 @@ function NotesModal({ item, notes, onSave, onClose }) {
 function DispatchItem({ item, show, idx, readItems, onToggleRead, notes, onOpenNote }) {
   const c = COLOR[item.theme] || "#426860";
   const isRead = readItems.has(item.url);
-  const hasNote = !!(notes[item.url]?.argument || notes[item.url]?.thoughts);
+  const hasNote = !!(notes[item.url]?.argument || notes[item.url]?.thoughts || notes[item.url]?.quote);
   return (
     <div style={{ opacity:show?(isRead?0.42:1):0, transform:show?"none":"translateY(8px)", transition:`opacity 0.35s ease ${idx*0.06}s, transform 0.35s ease ${idx*0.06}s`, borderBottom:"1px solid rgba(0,100,200,0.17)", paddingBottom:"18px", marginBottom:"18px" }}>
       <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center", marginBottom:"7px" }}>
@@ -615,8 +621,9 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
 
         {/* Notes preview */}
         {hasNote && (
-          <div style={{ background:"rgba(155,98,48,0.06)", border:"1px solid rgba(155,98,48,0.18)", borderRadius:"3px", padding:"10px 12px", marginBottom:"12px" }}>
-            {noteData.argument && <div style={{ fontSize:"11px", color:"#0D1F35", lineHeight:1.5, marginBottom: noteData.thoughts?"8px":0 }}><span style={{ fontSize:"9px", color:"#D48010", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>Argument</span>{publicMode ? noteData.argument : (noteData.argument.slice(0,120)+(noteData.argument.length>120?"…":""))}</div>}
+          <div style={{ background:"rgba(155,98,48,0.06)", border:"1px solid rgba(155,98,48,0.18)", borderRadius:"3px", padding:"10px 12px", marginBottom:"12px", display:"flex", flexDirection:"column", gap:"8px" }}>
+            {noteData.quote && <div style={{ fontSize:"11px", color:"#1A3C5E", lineHeight:1.6, fontStyle:"italic", borderLeft:"2px solid rgba(155,98,48,0.4)", paddingLeft:"8px" }}><span style={{ fontSize:"9px", color:"#D48010", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px", fontStyle:"normal" }}>Quote</span>{publicMode ? noteData.quote : (noteData.quote.slice(0,140)+(noteData.quote.length>140?"…":""))}</div>}
+            {noteData.argument && <div style={{ fontSize:"11px", color:"#0D1F35", lineHeight:1.5 }}><span style={{ fontSize:"9px", color:"#D48010", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>Argument</span>{publicMode ? noteData.argument : (noteData.argument.slice(0,120)+(noteData.argument.length>120?"…":""))}</div>}
             {noteData.thoughts && <div style={{ fontSize:"11px", color:"#0D1F35", lineHeight:1.5 }}><span style={{ fontSize:"9px", color:"#D48010", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>My thoughts</span>{publicMode ? noteData.thoughts : (noteData.thoughts.slice(0,120)+(noteData.thoughts.length>120?"…":""))}</div>}
           </div>
         )}
@@ -1264,6 +1271,12 @@ function StatsView({ pool, readItems, notes }) {
                     <span style={{ fontSize:"10px", color:"#0D1F35", fontStyle:"italic" }}>{item.source} · {item.published}</span>
                   </div>
                   <div style={{ fontSize:"13px", color:"#0D1F35", marginBottom:"10px", lineHeight:1.4, fontWeight:500 }}>{item.title}</div>
+                  {n.quote && (
+                    <div style={{ marginBottom:"8px", borderLeft:"2px solid rgba(155,98,48,0.35)", paddingLeft:"8px" }}>
+                      <div style={{ fontSize:"9px", color:"#D48010", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Quote</div>
+                      <div style={{ fontSize:"12px", color:"#1A3C5E", lineHeight:1.6, fontStyle:"italic" }}>{n.quote}</div>
+                    </div>
+                  )}
                   {n.argument && (
                     <div style={{ marginBottom: n.thoughts ? "8px" : 0 }}>
                       <div style={{ fontSize:"9px", color:"#D48010", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Argument</div>
@@ -1306,14 +1319,14 @@ export function PublicGardenPage() {
   useEffect(() => {
     Promise.all([
       supabase.from("custom_items").select("*"),
-      supabase.from("notes").select("url, argument, thoughts"),
+      supabase.from("notes").select("url, argument, thoughts, quote"),
       supabase.from("hidden_items").select("item_id"),
       supabase.from("garden_meta").select("last_updated").limit(1).single(),
     ]).then(([{ data: cd }, { data: nd }, { data: hd }, { data: gm }]) => {
       const hiddenSet = new Set((hd || []).map(h => h.item_id));
       const customMapped = (cd || []).map(c => ({ id: c.item_id, title: c.title, url: c.url, source: c.source, published: c.published, keywords: c.keywords || [], readingMinutes: c.reading_minutes, theme: c.theme, type: c.type }));
       setPool([...BUILTIN.filter(i => !hiddenSet.has(i.id)), ...customMapped.filter(i => !hiddenSet.has(i.id))]);
-      if (nd?.length) setNotes(Object.fromEntries(nd.map(n => [n.url, { argument: n.argument, thoughts: n.thoughts }])));
+      if (nd?.length) setNotes(Object.fromEntries(nd.map(n => [n.url, { argument: n.argument, thoughts: n.thoughts, quote: n.quote || "" }])));
       if (gm?.last_updated) setLastUpdated(new Date(gm.last_updated).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" }));
       setLoaded(true);
     });
@@ -1458,7 +1471,7 @@ export default function App() {
     if (!user) { setLoaded(false); return; }
     Promise.all([
       supabase.from("read_items").select("url").eq("user_id", user.id),
-      supabase.from("notes").select("url, argument, thoughts").eq("user_id", user.id),
+      supabase.from("notes").select("url, argument, thoughts, quote").eq("user_id", user.id),
       supabase.from("custom_items").select("*").eq("user_id", user.id),
       supabase.from("hidden_items").select("item_id").eq("user_id", user.id),
     ]).then(([{ data: rd }, { data: nd }, { data: cd }, { data: hd }]) => {
@@ -1498,7 +1511,7 @@ export default function App() {
     });
     const op = data === null
       ? supabase.from("notes").delete().eq("user_id", user.id).eq("url", url)
-      : supabase.from("notes").upsert({ user_id: user.id, url, argument: data.argument || "", thoughts: data.thoughts || "", updated_at: new Date().toISOString() }, { onConflict: "user_id,url" });
+      : supabase.from("notes").upsert({ user_id: user.id, url, argument: data.argument || "", thoughts: data.thoughts || "", quote: data.quote || "", updated_at: new Date().toISOString() }, { onConflict: "user_id,url" });
     op.then(({ error }) => { if (error) console.error("notes error:", error); else bumpLastUpdated(); });
   }, [user, bumpLastUpdated]);
 
