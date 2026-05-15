@@ -1727,8 +1727,17 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const W = svgRef.current?.clientWidth || window.innerWidth;
     const H = svgRef.current?.clientHeight || (window.innerHeight - 88);
     const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
-    const outerR = Math.min(W, H) * 0.50;
-    const bandHalf = 28; // half-width of the arc band
+
+    // Compute outerR dynamically so the org ring always clears the article bubbles.
+    // Bubble centres sit at 0.44*min(W,H); bubble radii are sqrt(count)*23 clamped to ≥52.
+    const themeCount = {};
+    nodesRef.current.forEach(n => { themeCount[n.theme] = (themeCount[n.theme] || 0) + 1; });
+    const maxBubbleR = Object.values(themeCount).length
+      ? Math.max(...Object.values(themeCount).map(c => Math.max(52, Math.sqrt(c) * 23)))
+      : 80;
+    const contentEdge = Math.min(W, H) * 0.44 + maxBubbleR;
+    const bandHalf = 22;
+    const outerR = contentEdge + 48; // 48px clearance beyond the furthest article
 
     const activeStances = ORG_STANCES.filter(s => currentOrgs.some(o => o.stance === s));
     const numSections = activeStances.length || 1;
