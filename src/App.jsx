@@ -1567,8 +1567,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       const grad = defs.append("radialGradient")
         .attr("id", "rbg_" + t.name.replace(/\s/g,"_"))
         .attr("cx","50%").attr("cy","50%").attr("r","50%");
-      grad.append("stop").attr("offset","0%").attr("stop-color", t.color).attr("stop-opacity", 0.1);
-      grad.append("stop").attr("offset","100%").attr("stop-color", t.color).attr("stop-opacity", 0.02);
+      grad.append("stop").attr("offset","0%").attr("stop-color", t.color).attr("stop-opacity", 0.16);
+      grad.append("stop").attr("offset","100%").attr("stop-color", t.color).attr("stop-opacity", 0.03);
     });
     const sf = defs.append("filter").attr("id","sticker-shadow").attr("x","-30%").attr("y","-30%").attr("width","160%").attr("height","160%");
     sf.append("feDropShadow").attr("dx",1).attr("dy",2).attr("stdDeviation",2.5).attr("flood-color","rgba(26,10,0,0.12)");
@@ -1613,20 +1613,22 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       const ay = bp.cy + (r + 16) * lsin;
       const label = t.name.toUpperCase();
       const FSIZ = 10.5, PX = 9, PY = 5;
-      const tw = label.length * FSIZ * 0.58;
-      const bw = tw + PX * 2, bh = FSIZ + PY * 2;
-      const bx = ax + lcos * (bw / 2 + 2) - bw / 2;
-      const by = ay + lsin * (bh / 2 + 2) - bh / 2;
       const sg = bg.append("g").attr("filter","url(#sticker-shadow)");
-      sg.append("rect").attr("x",bx).attr("y",by).attr("width",bw).attr("height",bh)
-        .attr("rx",3).attr("fill","#FFFBEB")
+      const sRect = sg.append("rect").attr("rx",3).attr("fill","#FFFBEB")
         .attr("stroke",t.color).attr("stroke-width",1.5).attr("stroke-opacity",0.85);
-      sg.append("text")
-        .attr("x", bx + bw/2).attr("y", by + bh/2 + FSIZ * 0.36)
+      // Render text first so getBBox() measures actual rendered width
+      const sTxt = sg.append("text")
+        .attr("x",0).attr("y",0)
         .attr("text-anchor","middle").attr("font-size", FSIZ+"px")
         .attr("font-family","'Palatino Linotype',Palatino,serif")
         .attr("letter-spacing","0.07em").attr("fill",t.color).attr("font-weight",600)
         .text(label);
+      const bb  = sTxt.node().getBBox();
+      const bw  = bb.width + PX * 2, bh = bb.height + PY * 2;
+      const bx  = ax + lcos * (bw / 2 + 2) - bw / 2;
+      const by  = ay + lsin * (bh / 2 + 2) - bh / 2;
+      sRect.attr("x",bx).attr("y",by).attr("width",bw).attr("height",bh);
+      sTxt.attr("x", bx + bw/2).attr("y", by + bh/2 + bb.height * 0.36);
     });
 
     // Draw ALL cross-bubble links (intra-bubble are too dense visually but all
