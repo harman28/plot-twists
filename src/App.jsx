@@ -1310,7 +1310,7 @@ export default function App() {
   const [loaded, setLoaded]       = useState(false);
   const [user,        setUser]        = useState(null);
   const [authReady,   setAuthReady]   = useState(false);
-  const [recovering,  setRecovering]  = useState(false);
+  const [recovering,  setRecovering]  = useState(() => window.location.hash.includes("type=recovery"));
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
