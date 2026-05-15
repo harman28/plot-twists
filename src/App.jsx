@@ -1417,10 +1417,12 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   const [ready,          setReady]          = useState(false);
   const [tooltip,        setTooltip]        = useState(null);
   const [noteItem,       setNoteItem]       = useState(null);
-  const [pathsPanelOpen, setPathsPanelOpen] = useState(false);
-  const [showOrgs,       setShowOrgs]       = useState(false);
-  const [trailsOpen,     setTrailsOpen]     = useState(false);
-  const pathsVisibleRef = useRef(!publicMode);
+  const [pathsPanelOpen,     setPathsPanelOpen]     = useState(false);
+  const [showOrgs,           setShowOrgs]           = useState(false);
+  const [trailsOpen,         setTrailsOpen]         = useState(false);
+  const [highlightedTrailId, setHighlightedTrailId] = useState(null);
+  const pathsVisibleRef      = useRef(!publicMode);
+  const highlightedTrailRef  = useRef(null);
 
   // Pan + zoom to a node by id, then open its sidebar
   const navigateToNode = useCallback((nodeId) => {
@@ -1450,8 +1452,10 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     pg.selectAll("*").remove();
     if (!pathsVisibleRef.current) return;
     const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
+    const hlId = highlightedTrailRef.current;
+    const activePaths = hlId ? (pathsRef.current || []).filter(p => p.id === hlId) : (pathsRef.current || []);
 
-    (pathsRef.current || []).forEach(p => {
+    activePaths.forEach(p => {
       const ids = p.item_ids || [];
       if (ids.length < 1) return;
       for (let i = 0; i < ids.length - 1; i++) {
@@ -1671,7 +1675,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       .style("pointer-events","none")
       .style("user-select","none");
 
-    svg.on("click", () => { setSelected(null); setSelectedOrg(null); });
+    svg.on("click", () => { setSelected(null); setSelectedOrg(null); setHighlightedTrailId(null); });
 
     function resetOp() {
       nodeSel.attr("fill-opacity", d => readRef.current.has(d.url) ? 0.2 : 0.82);
@@ -1732,6 +1736,12 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   useEffect(() => {
     if (publicMode) { pathsVisibleRef.current = trailsOpen; drawPathOverlay(); }
   }, [trailsOpen, publicMode, drawPathOverlay]);
+
+  // ── Redraw when highlighted trail changes ──
+  useEffect(() => {
+    highlightedTrailRef.current = highlightedTrailId;
+    drawPathOverlay();
+  }, [highlightedTrailId, drawPathOverlay]);
 
   // ── Draw/clear org overlay when showOrgs, orgs, or orgLinks change ──
   const drawOrgOverlay = useCallback(() => {
@@ -1971,7 +1981,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
           <button onClick={() => setPathsPanelOpen(v => !v)}
             style={{ ...F, marginTop:"6px", background: pathsPanelOpen?"rgba(212,128,16,0.14)":"rgba(237,232,218,0.97)", border:"1px solid "+(pathsPanelOpen?"rgba(212,128,16,0.5)":"rgba(155,98,48,0.17)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
             <span style={{ fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase", color: pathsPanelOpen?"#D48010":"#3A4030", whiteSpace:"nowrap" }}>
-              Paths{paths.length > 0 ? ` (${paths.length})` : ""}
+              Trails{paths.length > 0 ? ` (${paths.length})` : ""}
             </span>
           </button>
         )}
@@ -2044,7 +2054,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
               }
               if (r._type === "trail") {
                 return (
-                  <button key={"trail-"+r.id} onClick={() => { publicMode ? setTrailsOpen(true) : setPathsPanelOpen(true); setSearchOpen(false); setSearchQuery(""); }}
+                  <button key={"trail-"+r.id} onClick={() => { setHighlightedTrailId(r.id); if (publicMode) { setTrailsOpen(true); pathsVisibleRef.current = true; } else setPathsPanelOpen(true); setSearchOpen(false); setSearchQuery(""); }}
                     style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(155,98,48,0.07)", padding:"8px 12px", cursor:"pointer", transition:"background 0.1s" }}
                     onMouseEnter={e => e.currentTarget.style.background="rgba(155,98,48,0.05)"}
                     onMouseLeave={e => e.currentTarget.style.background="transparent"}>
@@ -2285,7 +2295,7 @@ export function PublicGardenPage() {
   if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F5F0E6", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#7A8068", letterSpacing:"0.15em", textTransform:"uppercase" }}>Growing the garden…</span></div>;
 
   const PUBLIC_TABS = [
-    { id:"garden", label:"The Grove", icon:"🌿", desc:"Digital garden of knowledge, actors, and ideas." },
+    { id:"garden", label:"The Grove", icon:"🌿", desc:"Network of knowledge, actors, and ideas." },
     { id:"paths",  label:"Trails",    icon:"🗺️", desc:"Theme specific curriculum for the intellectually curious." },
     { id:"field",  label:"The Field", icon:"🏛️", desc:"List of orgs and communities." },
   ];
@@ -2303,12 +2313,8 @@ export function PublicGardenPage() {
           Hi, I'm Prabhnoor — a researcher in critical AI studies. This is my digital garden exploring AI safety, policy, bias, decolonisation, and more.{" "}
           <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#D48010", textDecoration:"underline" }}>More about me & my work ↗</a>
         </p>
-        {/* Tab description */}
-        <p style={{ ...F, fontSize:"10px", color:"#7A8068", fontStyle:"italic", lineHeight:1.4, margin:"0 0 8px" }}>
-          {PUBLIC_TABS.find(t => t.id === tab)?.desc}
-        </p>
         {/* Tab bar */}
-        <div style={{ display:"flex", gap:"4px" }}>
+        <div style={{ display:"flex", gap:"4px", marginBottom:"6px" }}>
           {PUBLIC_TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
               style={{ ...F, background: tab===t.id ? "rgba(155,98,48,0.1)" : "transparent", border: tab===t.id ? "1px solid rgba(155,98,48,0.25)" : "1px solid transparent", borderRadius:"3px", padding:"4px 12px", fontSize:"10px", letterSpacing:"0.09em", textTransform:"uppercase", color: tab===t.id ? "#9B6230" : "#7A8068", cursor:"pointer", gap:"5px" }}>
@@ -2316,6 +2322,10 @@ export function PublicGardenPage() {
             </button>
           ))}
         </div>
+        {/* Tab description */}
+        <p style={{ ...F, fontSize:"10px", color:"#7A8068", fontStyle:"italic", lineHeight:1.4, margin:0 }}>
+          {PUBLIC_TABS.find(t => t.id === tab)?.desc}
+        </p>
       </div>
 
       {/* Content */}
