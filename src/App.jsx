@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import * as d3 from "d3";
+import { supabase } from "./supabase";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -1167,67 +1168,140 @@ function StatsView({ pool, readItems, notes }) {
 
 const NAV = { ...F, background:"transparent", border:"1px solid rgba(60,40,20,0.32)", color:"#6B5035", width:"28px", height:"28px", borderRadius:"3px", cursor:"pointer", fontSize:"14px", display:"inline-flex", alignItems:"center", justifyContent:"center" };
 
+function LoginScreen() {
+  const [email, setEmail] = useState("");
+  const [sent, setSent]   = useState(false);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const { error: err } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    setLoading(false);
+    if (err) setError(err.message);
+    else setSent(true);
+  }
+
+  return (
+    <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
+      <div style={{ textAlign:"center" }}>
+        <div style={{ fontSize:"13px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#2C2416" }}>Plot Twists</div>
+        <div style={{ fontSize:"11px", color:"#6B5035", fontStyle:"italic", marginTop:"6px" }}>Prabhnoor's Digital Garden</div>
+      </div>
+      {sent ? (
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontSize:"12px", color:"#2C2416", letterSpacing:"0.05em" }}>Check your email</div>
+          <div style={{ fontSize:"11px", color:"#6B5035", fontStyle:"italic", marginTop:"6px" }}>A login link has been sent to {email}</div>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"12px", width:"260px" }}>
+          <input
+            type="email"
+            required
+            placeholder="your@email.com"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            style={{ ...F, background:"rgba(228,220,205,0.8)", border:"1px solid rgba(60,40,20,0.3)", color:"#2C2416", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }}
+          />
+          {error && <div style={{ fontSize:"11px", color:"#A04040" }}>{error}</div>}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{ ...F, background:"#2C2416", color:"#F5F0E8", border:"none", padding:"10px", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}
+          >
+            {loading ? "Sending…" : "Send login link"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [tab, setTab]             = useState("dispatch");
   const [customItems, setCustomItems] = useState([]);
   const [readItems, setReadItems] = useState(new Set());
   const [notes, setNotes]         = useState({});
   const [loaded, setLoaded]       = useState(false);
+  const [user, setUser]           = useState(null);
+  const [authReady, setAuthReady] = useState(false);
 
-  // Load persisted state
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthReady(true);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) { setLoaded(false); return; }
     Promise.all([
-      Promise.resolve({ value: localStorage.getItem("read_items") }),
-      Promise.resolve({ value: localStorage.getItem("notes") }),
-      Promise.resolve({ value: localStorage.getItem("custom_items") }),
-    ]).then(([r,n,c]) => {
-      if(r?.value) setReadItems(new Set(JSON.parse(r.value)));
-      if(n?.value) setNotes(JSON.parse(n.value));
-      if(c?.value) setCustomItems(JSON.parse(c.value));
+      supabase.from("read_items").select("url").eq("user_id", user.id),
+      supabase.from("notes").select("url, argument, thoughts").eq("user_id", user.id),
+      supabase.from("custom_items").select("*").eq("user_id", user.id),
+    ]).then(([{ data: rd }, { data: nd }, { data: cd }]) => {
+      setReadItems(new Set((rd || []).map(r => r.url)));
+      setNotes(Object.fromEntries((nd || []).map(n => [n.url, { argument: n.argument, thoughts: n.thoughts }])));
+      setCustomItems((cd || []).map(c => ({ id: c.item_id, title: c.title, url: c.url, source: c.source, published: c.published, keywords: c.keywords || [], readingMinutes: c.reading_minutes, theme: c.theme, type: c.type })));
       setLoaded(true);
     });
-  }, []);
+  }, [user]);
 
   const pool = useMemo(() => [...BUILTIN, ...customItems], [customItems]);
 
   const toggleRead = useCallback(key => {
     setReadItems(prev => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      Promise.resolve(localStorage.setItem("read_items", JSON.stringify([...next])));
+      if (next.has(key)) {
+        next.delete(key);
+        supabase.from("read_items").delete().eq("user_id", user.id).eq("url", key);
+      } else {
+        next.add(key);
+        supabase.from("read_items").insert({ user_id: user.id, url: key });
+      }
       return next;
     });
-  }, []);
+  }, [user]);
 
   const saveNote = useCallback((url, data) => {
     setNotes(prev => {
-      const next = {...prev};
-      if(data === null) delete next[url]; else next[url] = data;
-      Promise.resolve(localStorage.setItem("notes", JSON.stringify(next)));
+      const next = { ...prev };
+      if (data === null) {
+        delete next[url];
+        supabase.from("notes").delete().eq("user_id", user.id).eq("url", url);
+      } else {
+        next[url] = data;
+        supabase.from("notes").upsert({ user_id: user.id, url, argument: data.argument || "", thoughts: data.thoughts || "", updated_at: new Date().toISOString() }, { onConflict: "user_id,url" });
+      }
       return next;
     });
-  }, []);
+  }, [user]);
 
   const addItem = useCallback(item => {
-    setCustomItems(prev => {
-      const next = [...prev, item];
-      Promise.resolve(localStorage.setItem("custom_items", JSON.stringify(next)));
-      return next;
-    });
-  }, []);
+    setCustomItems(prev => [...prev, item]);
+    supabase.from("custom_items").insert({ user_id: user.id, item_id: item.id, title: item.title, url: item.url, source: item.source, published: item.published, keywords: item.keywords, reading_minutes: item.readingMinutes, theme: item.theme, type: item.type });
+  }, [user]);
 
   const deleteItem = useCallback(id => {
-    setCustomItems(prev => {
-      const next = prev.filter(x => x.id !== id);
-      Promise.resolve(localStorage.setItem("custom_items", JSON.stringify(next)));
-      return next;
-    });
-  }, []);
+    setCustomItems(prev => prev.filter(x => x.id !== id));
+    supabase.from("custom_items").delete().eq("user_id", user.id).eq("item_id", id);
+  }, [user]);
 
   const totalNotes = Object.keys(notes).length;
   const totalRead  = readItems.size;
 
-  if(!loaded) return <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#6B5035", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
+  if (!authReady) return <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#6B5035", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
+  if (!user) return <LoginScreen />;
+  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#6B5035", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
 
   return (
     <div style={{ height:"100vh", background:"#F5F0E8", color:"#2C2416", display:"flex", flexDirection:"column", overflow:"hidden" }}>
@@ -1243,6 +1317,7 @@ export default function App() {
           {totalRead > 0  && <span style={{ fontSize:"10px", color:"#6B5035" }}>{totalRead} read</span>}
           {totalNotes > 0 && <span style={{ fontSize:"10px", color:"#6B5035" }}>{totalNotes} notes</span>}
           {customItems.length > 0 && <span style={{ fontSize:"10px", color:"#6340A888" }}>+{customItems.length} custom</span>}
+          <button onClick={() => supabase.auth.signOut()} style={{ ...NAV, fontSize:"10px", width:"auto", padding:"0 8px", letterSpacing:"0.06em" }}>Sign out</button>
         </div>
       </div>
 
