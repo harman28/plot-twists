@@ -1309,7 +1309,7 @@ function computeBubblePositions(items, links, W, H) {
         const dx = pos[b.name].x - pos[a.name].x;
         const dy = pos[b.name].y - pos[a.name].y;
         const dist = Math.sqrt(dx*dx+dy*dy) || 1;
-        const minDist = 300;
+        const minDist = Math.min(W, H) * 0.43;
         if(dist < minDist) {
           const push = (minDist - dist) / minDist * 0.4 * alpha;
           forces[a.name].x -= dx/dist * push;
@@ -1509,12 +1509,14 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const links = buildLinks(items);
     linksRef.current = links;
 
-    // Bubble radii — scale with node count, grows properly with custom items
+    // Bubble radii — scale with node count AND canvas size so density stays
+    // consistent across private (tall canvas) and public (shorter canvas)
     const themeCount = {};
     THEMES.forEach(t => { themeCount[t.name] = 0; });
     items.forEach(n => { if(themeCount[n.theme] !== undefined) themeCount[n.theme]++; });
+    const canvasScale = Math.min(W, H) / 700;
     const bubbleR = {};
-    THEMES.forEach(t => { bubbleR[t.name] = Math.max(70, Math.sqrt(themeCount[t.name] || 0) * 30); });
+    THEMES.forEach(t => { bubbleR[t.name] = Math.max(70 * canvasScale, Math.sqrt(themeCount[t.name] || 0) * 30 * canvasScale); });
 
     // Smart bubble positions from inter-theme connection density
     const rawPos = computeBubblePositions(items, links, W, H);
@@ -1766,9 +1768,10 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     // Bubble centres sit at 0.44*min(W,H); bubble radii are sqrt(count)*23 clamped to ≥52.
     const themeCount = {};
     nodesRef.current.forEach(n => { themeCount[n.theme] = (themeCount[n.theme] || 0) + 1; });
+    const cs = Math.min(W, H) / 700;
     const maxBubbleR = Object.values(themeCount).length
-      ? Math.max(...Object.values(themeCount).map(c => Math.max(52, Math.sqrt(c) * 23)))
-      : 80;
+      ? Math.max(...Object.values(themeCount).map(c => Math.max(70 * cs, Math.sqrt(c) * 30 * cs)))
+      : 80 * cs;
     const contentEdge = Math.min(W, H) * 0.44 + maxBubbleR;
     const bandHalf = 22;
     const outerR = contentEdge + 48; // 48px clearance beyond the furthest article
