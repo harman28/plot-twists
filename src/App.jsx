@@ -783,7 +783,12 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
   const [editDesc,   setEditDesc]   = useState("");
   const [editFocus,  setEditFocus]  = useState("name");
   const [expanded,   setExpanded]   = useState(null);
+  const editNameRef = useRef("");
+  const editDescRef = useRef("");
   const itemMap = Object.fromEntries(pool.map(n => [n.id, n]));
+
+  function setEditNameSynced(v) { editNameRef.current = v; setEditName(v); }
+  function setEditDescSynced(v) { editDescRef.current = v; setEditDesc(v); }
 
   function moveItem(p, fromIdx, toIdx) {
     const ids = [...(p.item_ids || [])];
@@ -797,15 +802,24 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
   }
 
   function commitEdit(p) {
-    onSavePath({ ...p, name: editName, description: editDesc });
+    onSavePath({ ...p, name: editNameRef.current, description: editDescRef.current });
     setEditingId(null);
+  }
+
+  function flushAndClose() {
+    if (editingId) {
+      const p = paths.find(q => q.id === editingId);
+      if (p) onSavePath({ ...p, name: editNameRef.current, description: editDescRef.current });
+      setEditingId(null);
+    }
+    onClose();
   }
 
   return (
     <div style={{ ...F, position:"absolute", bottom:"44px", left:"10px", zIndex:40, background:"rgba(224,238,255,0.99)", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"4px", padding:"12px", width:"270px", maxHeight:"72vh", overflowY:"auto", boxShadow:"0 4px 16px rgba(13,31,53,0.14)" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px" }}>
         <span style={{ fontSize:"9px", color:"#5080A8", letterSpacing:"0.12em", textTransform:"uppercase" }}>Reading Paths</span>
-        <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:"#5080A8", fontSize:"14px", padding:0, lineHeight:1 }}>×</button>
+        <button onClick={flushAndClose} style={{ background:"none", border:"none", cursor:"pointer", color:"#5080A8", fontSize:"14px", padding:0, lineHeight:1 }}>×</button>
       </div>
 
       {paths.length === 0 && (
@@ -821,12 +835,12 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
             {/* Name row */}
             <div style={{ display:"flex", alignItems:"center", gap:"5px" }}>
               {isEditing ? (
-                <input value={editName} onChange={e => setEditName(e.target.value)}
+                <input value={editName} onChange={e => setEditNameSynced(e.target.value)}
                   onKeyDown={e => { if(e.key==="Enter") commitEdit(p); if(e.key==="Escape") setEditingId(null); }}
                   onBlur={() => commitEdit(p)} autoFocus={editFocus === "name"}
                   style={{ ...F, flex:1, background:"transparent", border:"none", borderBottom:"1px solid rgba(0,100,200,0.3)", outline:"none", fontSize:"12px", color:"#0D1F35", padding:"1px 0", fontWeight:500 }} />
               ) : (
-                <span onClick={() => { setEditingId(p.id); setEditName(p.name); setEditDesc(p.description||""); setEditFocus("name"); }}
+                <span onClick={() => { setEditingId(p.id); setEditNameSynced(p.name); setEditDescSynced(p.description||""); setEditFocus("name"); }}
                   style={{ flex:1, fontSize:"12px", color:"#0D1F35", cursor:"text", fontWeight:500, lineHeight:1.3 }} title="Click to rename">{p.name}</span>
               )}
               <button onClick={() => setExpanded(v => v===p.id ? null : p.id)}
@@ -839,11 +853,12 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
 
             {/* Description */}
             {isEditing ? (
-              <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Describe this path…" rows={2}
+              <textarea value={editDesc} onChange={e => setEditDescSynced(e.target.value)} placeholder="Describe this path…" rows={2}
                 autoFocus={editFocus === "desc"}
+                onBlur={() => commitEdit(p)}
                 style={{ ...F, width:"100%", marginTop:"6px", background:"rgba(0,100,200,0.04)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"2px", color:"#1A3C5E", fontSize:"10px", padding:"4px 6px", resize:"none", outline:"none", boxSizing:"border-box", lineHeight:1.5, fontStyle:"italic" }} />
             ) : (
-              <div onClick={() => { setEditingId(p.id); setEditName(p.name); setEditDesc(p.description||""); setEditFocus("desc"); }}
+              <div onClick={() => { setEditingId(p.id); setEditNameSynced(p.name); setEditDescSynced(p.description||""); setEditFocus("desc"); }}
                 style={{ fontSize:"10px", color: p.description ? "#5080A8" : "rgba(80,128,168,0.45)", fontStyle:"italic", marginTop:"4px", lineHeight:1.4, cursor:"text" }}>
                 {p.description ? (p.description.length>80 ? p.description.slice(0,80)+"…" : p.description) : "Add a description…"}
               </div>
@@ -1082,7 +1097,7 @@ function AddOrgModal({ org, onSave, onClose }) {
 
 // ─── Org card ─────────────────────────────────────────────────────────────────
 
-function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onSaveOrgLink, onDeleteOrgLink }) {
+function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onSaveOrgLink, onDeleteOrgLink, publicMode }) {
   const [searchQ, setSearchQ]     = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const color = STANCE_COLORS[org.stance] || "#5080A8";
@@ -1111,8 +1126,8 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
             style={{ ...F, background:"transparent", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", fontSize:"9px", color:"#5080A8", letterSpacing:"0.07em", whiteSpace:"nowrap" }}>
             {links.length} {links.length===1?"article":"articles"} {isExpanded?"▲":"▼"}
           </button>
-          <button onClick={onEdit} style={{ background:"none", border:"none", cursor:"pointer", color:"#5080A8", fontSize:"12px", padding:"0 2px" }}>✎</button>
-          <button onClick={onDelete} style={{ background:"none", border:"none", cursor:"pointer", color:"#E84E00", fontSize:"13px", padding:0, opacity:0.6 }}>×</button>
+          {!publicMode && <button onClick={onEdit} style={{ background:"none", border:"none", cursor:"pointer", color:"#5080A8", fontSize:"12px", padding:"0 2px" }}>✎</button>}
+          {!publicMode && <button onClick={onDelete} style={{ background:"none", border:"none", cursor:"pointer", color:"#E84E00", fontSize:"13px", padding:0, opacity:0.6 }}>×</button>}
         </div>
       </div>
 
@@ -1122,12 +1137,12 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
             <div key={item.id} style={{ display:"flex", alignItems:"center", gap:"7px", marginBottom:"5px" }}>
               <Pill color={COLOR[item.theme]||"#426860"} small>{item.theme}</Pill>
               <span style={{ ...F, fontSize:"11px", color:"#0D1F35", flex:1, lineHeight:1.3 }}>{item.title.length>52 ? item.title.slice(0,52)+"…" : item.title}</span>
-              <button onClick={() => onDeleteOrgLink(org.id, item.id)} style={{ background:"none", border:"none", cursor:"pointer", color:"#E84E00", fontSize:"11px", padding:0, opacity:0.6, flexShrink:0 }}>×</button>
+              {!publicMode && <button onClick={() => onDeleteOrgLink(org.id, item.id)} style={{ background:"none", border:"none", cursor:"pointer", color:"#E84E00", fontSize:"11px", padding:0, opacity:0.6, flexShrink:0 }}>×</button>}
             </div>
           ))}
           {linkedItems.length === 0 && <div style={{ fontSize:"10px", color:"#5080A8", fontStyle:"italic", marginBottom:"8px" }}>No articles linked yet.</div>}
 
-          <div style={{ marginTop:"8px", position:"relative" }}>
+          {!publicMode && <div style={{ marginTop:"8px", position:"relative" }}>
             <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Search articles to link…"
               onFocus={() => setShowSearch(true)}
               onBlur={() => setTimeout(() => setShowSearch(false), 150)}
@@ -1145,7 +1160,7 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
                 ))}
               </div>
             )}
-          </div>
+          </div>}
         </div>
       )}
     </div>
@@ -1154,7 +1169,7 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
 
 // ─── Field view ───────────────────────────────────────────────────────────────
 
-function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink, onDeleteOrgLink }) {
+function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink, onDeleteOrgLink, publicMode }) {
   const [showAdd,   setShowAdd]   = useState(false);
   const [editOrg,   setEditOrg]   = useState(null);
   const [expanded,  setExpanded]  = useState(null);
@@ -1169,10 +1184,10 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
           <h2 style={{ fontSize:"20px", color:"#0D1F35", fontWeight:400, margin:"0 0 5px" }}>The Field</h2>
           <p style={{ ...F, fontSize:"12px", color:"#5080A8", fontStyle:"italic", margin:0 }}>Organisations, labs, journals, and actors shaping the discourse.</p>
         </div>
-        <button onClick={() => { setEditOrg(null); setShowAdd(true); }}
+        {!publicMode && <button onClick={() => { setEditOrg(null); setShowAdd(true); }}
           style={{ ...F, background:"transparent", border:"1px solid #9B6230", color:"#D48010", padding:"7px 16px", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", flexShrink:0 }}>
           + Add Organisation
-        </button>
+        </button>}
       </div>
 
       {orgs.length === 0 && (
@@ -1202,7 +1217,8 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
                   onEdit={() => { setEditOrg(org); setShowAdd(true); }}
                   onDelete={() => onDeleteOrg(org.id)}
                   onSaveOrgLink={onSaveOrgLink}
-                  onDeleteOrgLink={onDeleteOrgLink} />
+                  onDeleteOrgLink={onDeleteOrgLink}
+                  publicMode={publicMode} />
               ))}
             </div>
           </div>
@@ -2013,6 +2029,7 @@ export function PublicGardenPage() {
   const [orgLinks,    setOrgLinks]    = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [loaded,      setLoaded]      = useState(false);
+  const [tab,         setTab]         = useState("garden");
 
   useEffect(() => {
     Promise.all([
@@ -2038,22 +2055,41 @@ export function PublicGardenPage() {
 
   if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F0F7FF", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#5080A8", letterSpacing:"0.15em", textTransform:"uppercase" }}>Growing the garden…</span></div>;
 
+  const PUBLIC_TABS = [
+    { id:"garden", label:"Garden",  icon:"🌿" },
+    { id:"paths",  label:"Paths",   icon:"🗺️" },
+    { id:"field",  label:"Field",   icon:"🏛️" },
+  ];
+
   return (
     <div style={{ height:"100vh", background:"#F0F7FF", color:"#0D1F35", display:"flex", flexDirection:"column", overflow:"hidden" }}>
-      <div style={{ height:"44px", background:"rgba(224,238,255,0.99)", borderBottom:"1px solid rgba(0,100,200,0.14)", display:"flex", alignItems:"center", paddingLeft:"18px", paddingRight:"18px", flexShrink:0, gap:"12px", backdropFilter:"blur(4px)", zIndex:100 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:"8px", flexShrink:0 }}>
+      {/* Header */}
+      <div style={{ background:"rgba(224,238,255,0.99)", borderBottom:"1px solid rgba(0,100,200,0.14)", paddingLeft:"18px", paddingRight:"18px", paddingTop:"10px", paddingBottom:"10px", flexShrink:0, backdropFilter:"blur(4px)", zIndex:100 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px" }}>
           <span style={{ fontSize:"16px", lineHeight:1 }}>🪸</span>
           <span style={{ ...F, fontSize:"12px", color:"#0D1F35", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
+          {lastUpdated && <span style={{ ...F, fontSize:"10px", color:"#5080A8", fontStyle:"italic", marginLeft:"auto" }}>Updated {lastUpdated}</span>}
         </div>
-        <div style={{ height:"100%", borderLeft:"1px solid rgba(0,100,200,0.2)" }} />
-        <span style={{ ...F, fontSize:"11px", color:"#1A3C5E", lineHeight:1.4 }}>
-          Hi, I'm Prabhnoor, a researcher in critical AI studies. This is my digital garden, exploring AI safety, policy, bias, decolonisation, and more.{" "}
+        <p style={{ ...F, fontSize:"11px", color:"#1A3C5E", lineHeight:1.5, margin:"0 0 10px" }}>
+          Hi, I'm Prabhnoor — a researcher in critical AI studies. This is my digital garden exploring AI safety, policy, bias, decolonisation, and more.{" "}
           <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#D48010", textDecoration:"underline" }}>More about me & my work ↗</a>
-        </span>
-        {lastUpdated && <span style={{ ...F, fontSize:"10px", color:"#5080A8", fontStyle:"italic", marginLeft:"auto", flexShrink:0 }}>Updated {lastUpdated}</span>}
+        </p>
+        {/* Tab bar */}
+        <div style={{ display:"flex", gap:"4px" }}>
+          {PUBLIC_TABS.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              style={{ ...F, background: tab===t.id ? "rgba(0,100,200,0.1)" : "transparent", border: tab===t.id ? "1px solid rgba(0,100,200,0.25)" : "1px solid transparent", borderRadius:"3px", padding:"4px 12px", fontSize:"10px", letterSpacing:"0.09em", textTransform:"uppercase", color: tab===t.id ? "#1068D4" : "#5080A8", cursor:"pointer", gap:"5px" }}>
+              <span style={{ marginRight:"4px" }}>{t.icon}</span>{t.label}
+            </button>
+          ))}
+        </div>
       </div>
-      <div style={{ flex:1, overflow:"hidden", position:"relative" }}>
-        <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} paths={paths} orgs={orgs} orgLinks={orgLinks} />
+
+      {/* Content */}
+      <div style={{ flex:1, overflow: tab==="garden" ? "hidden" : "auto", position:"relative" }}>
+        {tab === "garden" && <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} paths={paths} orgs={orgs} orgLinks={orgLinks} />}
+        {tab === "paths"  && <PathsView paths={paths} pool={pool} notes={notes} />}
+        {tab === "field"  && <FieldView orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={() => {}} onDeleteOrg={() => {}} onSaveOrgLink={() => {}} onDeleteOrgLink={() => {}} publicMode={true} />}
       </div>
     </div>
   );
