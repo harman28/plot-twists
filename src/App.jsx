@@ -377,7 +377,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
             {issue.academic.map((item,i) => <DispatchItem key={item.url} item={item} show={show} idx={i} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />)}
           </div>
 
-          <div style={{ marginTop:"40px", paddingTop:"14px", borderTop:"1px solid rgba(155,98,48,0.09)", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"8px", opacity:show?1:0, transition:"opacity 0.4s ease 0.6s" }}>
+          <div style={{ marginTop:"40px", paddingTop:"14px", borderTop:"1px solid rgba(245,158,11,0.22)", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"8px", opacity:show?1:0, transition:"opacity 0.4s ease 0.6s" }}>
             <span style={{ fontSize:"11.5px", color:"#A16207", fontStyle:"italic" }}>{pool.length} items in pool · rotates daily</span>
             <button onClick={() => load(date)} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.42)", color:"#A16207", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"4px 11px", cursor:"pointer", borderRadius:"2px" }}>Reshuffle</button>
           </div>
@@ -622,7 +622,7 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
 
         {/* Notes preview */}
         {hasNote && (
-          <div style={{ background:"rgba(155,98,48,0.06)", border:"1px solid rgba(155,98,48,0.18)", borderRadius:"3px", padding:"10px 12px", marginBottom:"12px", display:"flex", flexDirection:"column", gap:"8px" }}>
+          <div style={{ background:"rgba(245,158,11,0.15)", border:"1px solid rgba(245,158,11,0.40)", borderRadius:"3px", padding:"10px 12px", marginBottom:"12px", display:"flex", flexDirection:"column", gap:"8px" }}>
             {noteData.quote && <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.6, fontStyle:"italic", borderLeft:"2px solid rgba(219,39,119,0.55)", paddingLeft:"8px" }}><span style={{ fontSize:"10.5px", color:"#D97706", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px", fontStyle:"normal" }}>Quote</span>{publicMode ? noteData.quote : (noteData.quote.slice(0,140)+(noteData.quote.length>140?"…":""))}</div>}
             {noteData.argument && <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.5 }}><span style={{ fontSize:"10.5px", color:"#D97706", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>Argument</span>{publicMode ? noteData.argument : (noteData.argument.slice(0,120)+(noteData.argument.length>120?"…":""))}</div>}
             {noteData.thoughts && <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.5 }}><span style={{ fontSize:"10.5px", color:"#D97706", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>My thoughts</span>{publicMode ? noteData.thoughts : (noteData.thoughts.slice(0,120)+(noteData.thoughts.length>120?"…":""))}</div>}
@@ -964,7 +964,7 @@ function PathsView({ paths, pool, notes }) {
                 <div style={{ flexShrink:0, width:"26px", height:"26px", borderRadius:"50%", background:selected.color, display:"flex", alignItems:"center", justifyContent:"center", marginTop:"2px" }}>
                   <span style={{ fontSize:"11.5px", color:"white", fontWeight:"bold" }}>{idx+1}</span>
                 </div>
-                <div style={{ flex:1, borderLeft:"1px solid rgba(155,98,48,0.12)", paddingLeft:"16px" }}>
+                <div style={{ flex:1, borderLeft:"1px solid rgba(245,158,11,0.28)", paddingLeft:"16px" }}>
                   <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", alignItems:"center", marginBottom:"7px" }}>
                     <Pill color={c}>{item.theme}</Pill>
                     {item.type==="foundational" && <Pill color="#D97706">Foundational</Pill>}
@@ -1091,7 +1091,7 @@ function AddOrgModal({ org, onSave, onClose }) {
             <input value={form.website} onChange={e => set("website",e.target.value)} placeholder="https://…" style={iStyle} />
           </div>
         </div>
-        <div style={{ padding:"12px 18px", borderTop:"1px solid rgba(155,98,48,0.12)", display:"flex", gap:"8px", justifyContent:"flex-end" }}>
+        <div style={{ padding:"12px 18px", borderTop:"1px solid rgba(245,158,11,0.28)", display:"flex", gap:"8px", justifyContent:"flex-end" }}>
           <button onClick={onClose} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.50)", color:"#A16207", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
           <button onClick={() => { if(form.name.trim()) onSave(form); }}
             style={{ ...F, background:"transparent", border:"1px solid #D97706", color:"#D97706", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>
@@ -1646,7 +1646,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         );
         nodeSel.attr("fill-opacity", n => n.id===d.id ? 1 : connIds.has(n.id) ? 0.9 : 0.08);
         linkSel
-          .attr("stroke", l => (l.source?.id===d.id||l.target?.id===d.id) ? COLOR[d.theme]+"dd" : "rgba(155,98,48,0.03)")
+          .attr("stroke", l => (l.source?.id===d.id||l.target?.id===d.id) ? COLOR[d.theme]+"dd" : "rgba(245,158,11,0.08)")
           .attr("stroke-width", l => (l.source?.id===d.id||l.target?.id===d.id) ? 2 : 0.3);
       })
       .on("mousemove", function(e) {
