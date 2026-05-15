@@ -1213,6 +1213,50 @@ export function PublicGardenPage() {
   );
 }
 
+function SetPasswordScreen({ onDone }) {
+  const [password,  setPassword]  = useState("");
+  const [confirm,   setConfirm]   = useState("");
+  const [error,     setError]     = useState(null);
+  const [loading,   setLoading]   = useState(false);
+  const [done,      setDone]      = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (password !== confirm) { setError("Passwords don't match."); return; }
+    if (password.length < 8)  { setError("Password must be at least 8 characters."); return; }
+    setLoading(true);
+    setError(null);
+    const { error: err } = await supabase.auth.updateUser({ password });
+    setLoading(false);
+    if (err) setError(err.message);
+    else { setDone(true); setTimeout(onDone, 1500); }
+  }
+
+  return (
+    <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
+      <div style={{ textAlign:"center" }}>
+        <div style={{ fontSize:"13px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#2C2416" }}>Plot Twists</div>
+        <div style={{ fontSize:"11px", color:"#6B5035", fontStyle:"italic", marginTop:"6px" }}>Set your password</div>
+      </div>
+      {done ? (
+        <div style={{ fontSize:"12px", color:"#2C2416" }}>Password set. Entering…</div>
+      ) : (
+        <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"12px", width:"260px" }}>
+          <input type="password" required placeholder="New password" value={password} onChange={e => setPassword(e.target.value)}
+            style={{ ...F, background:"rgba(228,220,205,0.8)", border:"1px solid rgba(60,40,20,0.3)", color:"#2C2416", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
+          <input type="password" required placeholder="Confirm password" value={confirm} onChange={e => setConfirm(e.target.value)}
+            style={{ ...F, background:"rgba(228,220,205,0.8)", border:"1px solid rgba(60,40,20,0.3)", color:"#2C2416", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
+          {error && <div style={{ fontSize:"11px", color:"#A04040" }}>{error}</div>}
+          <button type="submit" disabled={loading}
+            style={{ ...F, background:"#2C2416", color:"#F5F0E8", border:"none", padding:"10px", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}>
+            {loading ? "Saving…" : "Set password"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error,    setError]    = useState(null);
@@ -1264,15 +1308,17 @@ export default function App() {
   const [readItems, setReadItems] = useState(new Set());
   const [notes, setNotes]         = useState({});
   const [loaded, setLoaded]       = useState(false);
-  const [user, setUser]           = useState(null);
-  const [authReady, setAuthReady] = useState(false);
+  const [user,        setUser]        = useState(null);
+  const [authReady,   setAuthReady]   = useState(false);
+  const [recovering,  setRecovering]  = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setAuthReady(true);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") { setRecovering(true); return; }
       setUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
@@ -1336,6 +1382,7 @@ export default function App() {
   const totalRead  = readItems.size;
 
   if (!authReady) return <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#6B5035", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
+  if (recovering)  return <SetPasswordScreen onDone={() => setRecovering(false)} />;
   if (!user) return <LoginScreen />;
   if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#6B5035", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
 
