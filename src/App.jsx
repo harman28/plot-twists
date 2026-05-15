@@ -1266,6 +1266,21 @@ function interThemeWeights(items, links) {
   return w;
 }
 
+// Deterministic LCG random for consistent wobbly blob shapes
+function seededRand(seed) {
+  let s = Math.abs(seed * 1664525 + 1013904223) >>> 0;
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+}
+function blobPath(cx, cy, r, seed, nPts = 14) {
+  const rng = seededRand(seed);
+  const pts = Array.from({ length: nPts }, (_, i) => {
+    const a = (i / nPts) * Math.PI * 2;
+    const w = 1 + (rng() - 0.5) * 0.24;
+    return [cx + r * w * Math.cos(a), cy + r * w * Math.sin(a)];
+  });
+  return d3.line().curve(d3.curveBasisClosed)(pts);
+}
+
 // Run a tiny synchronous force layout to place bubbles by connection density
 function computeBubblePositions(items, links, W, H, bubbleR) {
   const weights = interThemeWeights(items, links);
@@ -1555,6 +1570,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       grad.append("stop").attr("offset","0%").attr("stop-color", t.color).attr("stop-opacity", 0.1);
       grad.append("stop").attr("offset","100%").attr("stop-color", t.color).attr("stop-opacity", 0.02);
     });
+    const sf = defs.append("filter").attr("id","sticker-shadow").attr("x","-30%").attr("y","-30%").attr("width","160%").attr("height","160%");
+    sf.append("feDropShadow").attr("dx",1).attr("dy",2).attr("stdDeviation",2.5).attr("flood-color","rgba(26,10,0,0.12)");
     const gf = defs.append("filter").attr("id","glow3").attr("x","-50%").attr("y","-50%").attr("width","200%").attr("height","200%");
     gf.append("feGaussianBlur").attr("stdDeviation","3").attr("result","blur");
     const fm = gf.append("feMerge");
@@ -1572,45 +1589,44 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     // Bubble backgrounds
     const bg = g.append("g");
-    THEMES.forEach(t => {
+    THEMES.forEach((t, ti) => {
       const bp = bubblePos[t.name], r = bubbleR[t.name];
-      bg.append("circle")
-        .attr("cx", bp.cx).attr("cy", bp.cy).attr("r", r)
-        .attr("fill", "url(#rbg_" + t.name.replace(/\s/g,"_") + ")")
-        .attr("stroke", t.color).attr("stroke-opacity", 0.18)
-        .attr("stroke-width", 1.5).attr("stroke-dasharray", "4 3");
-      // Place label on the edge pointing away from all other bubble centres.
-      // Summing inverse-square repulsion vectors gives the direction of most
-      // open space — more accurate than just pointing away from canvas centre.
+      const blob = blobPath(bp.cx, bp.cy, r, ti * 31 + 7);
+      bg.append("path").attr("d", blob)
+        .attr("fill", "url(#rbg_" + t.name.replace(/\s/g,"_") + ")");
+      bg.append("path").attr("d", blob)
+        .attr("fill","none").attr("stroke", t.color)
+        .attr("stroke-opacity", 0.42).attr("stroke-width", 1.8);
+
+      // Sticker label — direction away from all other bubble centres
       let fx = 0, fy = 0;
       THEMES.forEach(other => {
         if (other.name === t.name) return;
         const op = bubblePos[other.name];
         const odx = bp.cx - op.cx, ody = bp.cy - op.cy;
         const od2 = odx*odx + ody*ody || 1;
-        fx += odx / od2;
-        fy += ody / od2;
+        fx += odx / od2; fy += ody / od2;
       });
       const flen = Math.sqrt(fx*fx + fy*fy) || 1;
       const lcos = fx / flen, lsin = fy / flen;
-      const lx   = bp.cx + (r + 22) * lcos;
-      const ly   = bp.cy + (r + 22) * lsin;
-      const anchor = lcos > 0.35 ? "start" : lcos < -0.35 ? "end" : "middle";
-      const dy     = lsin < -0.35 ? "-0.4em" : lsin > 0.35 ? "1em" : "0.35em";
-      // Halo for legibility
-      bg.append("text")
-        .attr("x", lx).attr("y", ly).attr("dy", dy)
-        .attr("text-anchor", anchor).attr("font-size","15px")
+      const ax = bp.cx + (r + 16) * lcos;
+      const ay = bp.cy + (r + 16) * lsin;
+      const label = t.name.toUpperCase();
+      const FSIZ = 10.5, PX = 9, PY = 5;
+      const tw = label.length * FSIZ * 0.58;
+      const bw = tw + PX * 2, bh = FSIZ + PY * 2;
+      const bx = ax + lcos * (bw / 2 + 2) - bw / 2;
+      const by = ay + lsin * (bh / 2 + 2) - bh / 2;
+      const sg = bg.append("g").attr("filter","url(#sticker-shadow)");
+      sg.append("rect").attr("x",bx).attr("y",by).attr("width",bw).attr("height",bh)
+        .attr("rx",3).attr("fill","#FFFBEB")
+        .attr("stroke",t.color).attr("stroke-width",1.5).attr("stroke-opacity",0.85);
+      sg.append("text")
+        .attr("x", bx + bw/2).attr("y", by + bh/2 + FSIZ * 0.36)
+        .attr("text-anchor","middle").attr("font-size", FSIZ+"px")
         .attr("font-family","'Palatino Linotype',Palatino,serif")
-        .attr("stroke","#FFFBEB").attr("stroke-width", 4).attr("stroke-linejoin","round")
-        .attr("letter-spacing","0.06em").text(t.name.toUpperCase());
-      // Filled label on top
-      bg.append("text")
-        .attr("x", lx).attr("y", ly).attr("dy", dy)
-        .attr("text-anchor", anchor).attr("font-size","15px")
-        .attr("font-family","'Palatino Linotype',Palatino,serif")
-        .attr("fill", t.color).attr("opacity", 0.95)
-        .attr("letter-spacing","0.06em").text(t.name.toUpperCase());
+        .attr("letter-spacing","0.07em").attr("fill",t.color).attr("font-weight",600)
+        .text(label);
     });
 
     // Draw ALL cross-bubble links (intra-bubble are too dense visually but all
@@ -1622,8 +1638,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     });
 
     const linkSel = g.append("g")
-      .selectAll("line").data(crossLinks).enter().append("line")
-      .attr("stroke","rgba(245,158,11,0.28)").attr("stroke-width",0.8)
+      .selectAll("path").data(crossLinks).enter().append("path")
+      .attr("fill","none").attr("stroke","rgba(245,158,11,0.28)").attr("stroke-width",0.8)
       .style("pointer-events","none");
     linkSelRef.current = linkSel;
 
@@ -1734,7 +1750,13 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       })
       .alphaDecay(0.013)
       .on("tick", () => {
-        linkSel.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+        linkSel.attr("d", d => {
+          const mx=(d.source.x+d.target.x)/2, my=(d.source.y+d.target.y)/2;
+          const dx=d.target.x-d.source.x, dy=d.target.y-d.source.y;
+          const len=Math.sqrt(dx*dx+dy*dy)||1;
+          const cv=Math.min(len*0.18,55);
+          return `M${d.source.x} ${d.source.y} Q${mx-dy/len*cv} ${my+dx/len*cv} ${d.target.x} ${d.target.y}`;
+        });
         nodeSel.attr("cx",d=>d.x).attr("cy",d=>d.y);
         labelSel.attr("x",d=>d.x).attr("y",d=>d.y);
       });
