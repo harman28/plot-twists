@@ -23,6 +23,13 @@ const THEMES = [
   { name: "Ethics",             color: "#D03030" },
 ];
 const COLOR = Object.fromEntries(THEMES.map(t => [t.name, t.color]));
+// Palette for custom (user-defined) themes — distinct from the 8 built-in colours
+const CUSTOM_PALETTE = ["#1068D4","#0891B2","#5B21B6","#65A30D","#C2185B","#0369A1","#9333EA","#047857","#B45309","#0F766E"];
+function customThemeColor(name, customThemeColors = {}) {
+  if (customThemeColors[name]) return customThemeColors[name];
+  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+  return CUSTOM_PALETTE[h % CUSTOM_PALETTE.length];
+}
 const PATH_COLORS = ["#D48010","#0A9C60","#1068D4","#CC1E78","#8020D8","#E84E00"];
 
 const ORG_STANCES = ["Industry","Policy / Think Tank","Journalism","Academic","Civil Society / Advocacy","Other"];
@@ -391,14 +398,14 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
 
 // ─── Add Source view ──────────────────────────────────────────────────────────
 
-function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, onRestore }) {
+function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, onRestore, onSaveThemeColor }) {
   const allKeywords = useMemo(() => {
     const s = new Set();
     pool.forEach(p => p.keywords.forEach(k => s.add(k)));
     return [...s].sort();
   }, [pool]);
 
-  const [form, setForm] = useState({ title:"", url:"", source:"", published:"", readingMinutes:"", theme:THEMES[0].name, customTheme:"", type:"essay", year:"", keywords:[] });
+  const [form, setForm] = useState({ title:"", url:"", source:"", published:"", readingMinutes:"", theme:THEMES[0].name, customTheme:"", themeColor:CUSTOM_PALETTE[0], type:"essay", year:"", keywords:[] });
   const [kwInput, setKwInput] = useState("");
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState({});
@@ -441,8 +448,9 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
       keywords: form.keywords,
       custom: true,
     };
+    if (form.theme === "__other__" && resolvedTheme) onSaveThemeColor?.(resolvedTheme, form.themeColor);
     onAdd(newItem);
-    setForm({ title:"", url:"", source:"", published:"", readingMinutes:"", theme:THEMES[0].name, customTheme:"", type:"essay", year:"", keywords:[] });
+    setForm({ title:"", url:"", source:"", published:"", readingMinutes:"", theme:THEMES[0].name, customTheme:"", themeColor:CUSTOM_PALETTE[0], type:"essay", year:"", keywords:[] });
     setErrors({});
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
@@ -492,10 +500,15 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
             {THEMES.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
             <option value="__other__">Other / New theme…</option>
           </select>
-          {form.theme === "__other__" && (
+          {form.theme === "__other__" && (<>
             <input value={form.customTheme} onChange={e=>set("customTheme",e.target.value)}
               placeholder="Name your theme" style={{ ...inputStyle, marginTop:"6px" }} />
-          )}
+            <div style={{ display:"flex", alignItems:"center", gap:"8px", marginTop:"6px" }}>
+              <input type="color" value={form.themeColor} onChange={e=>set("themeColor",e.target.value)}
+                style={{ width:"34px", height:"32px", padding:"2px 3px", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", cursor:"pointer", background:"none" }} />
+              <span style={{ ...F, fontSize:"11.5px", color:"#A16207" }}>Colour for this theme in the grove</span>
+            </div>
+          </>)}
           {errors.customTheme && <div style={errStyle}>{errors.customTheme}</div>}
         </div>
         <div>
@@ -1282,9 +1295,9 @@ function blobPath(cx, cy, r, seed, nPts = 14) {
 }
 
 // Run a tiny synchronous force layout to place bubbles by connection density
-function computeBubblePositions(items, links, W, H, bubbleR) {
+function computeBubblePositions(items, links, W, H, bubbleR, themes = THEMES) {
   const weights = interThemeWeights(items, links);
-  const N = THEMES.length;
+  const N = themes.length;
   const maxBubR = bubbleR ? Math.max(...Object.values(bubbleR)) : 120;
   // Elliptical ring: use available width and height independently so
   // landscape canvases spread bubbles horizontally instead of cramming
@@ -1292,7 +1305,7 @@ function computeBubblePositions(items, links, W, H, bubbleR) {
   const outerRx = Math.max(120, W/2 - maxBubR - 40);
   const outerRy = Math.max(80,  H/2 - maxBubR - 40);
   const pos = {};
-  THEMES.forEach((t, i) => {
+  themes.forEach((t, i) => {
     const a = (i / N) * 2 * Math.PI - Math.PI / 2;
     pos[t.name] = { x: W/2 + outerRx * Math.cos(a), y: H/2 + outerRy * Math.sin(a) };
   });
@@ -1301,11 +1314,11 @@ function computeBubblePositions(items, links, W, H, bubbleR) {
   for(let iter = 0; iter < 120; iter++) {
     const alpha = 1 - iter / 120;
     const forces = {};
-    THEMES.forEach(t => { forces[t.name] = {x:0, y:0}; });
+    themes.forEach(t => { forces[t.name] = {x:0, y:0}; });
 
     // Attraction between theme pairs proportional to shared keyword connections
-    THEMES.forEach((a, i) => {
-      THEMES.forEach((b, j) => {
+    themes.forEach((a, i) => {
+      themes.forEach((b, j) => {
         if(i >= j) return;
         const key = [a.name,b.name].sort().join("||");
         const wt = weights[key] || 0;
@@ -1322,8 +1335,8 @@ function computeBubblePositions(items, links, W, H, bubbleR) {
     });
 
     // Repulsion: per-pair min distance based on actual bubble radii + gap
-    THEMES.forEach((a, i) => {
-      THEMES.forEach((b, j) => {
+    themes.forEach((a, i) => {
+      themes.forEach((b, j) => {
         if(i >= j) return;
         const dx = pos[b.name].x - pos[a.name].x;
         const dy = pos[b.name].y - pos[a.name].y;
@@ -1342,12 +1355,12 @@ function computeBubblePositions(items, links, W, H, bubbleR) {
     });
 
     // Pull all back toward canvas center
-    THEMES.forEach(t => {
+    themes.forEach(t => {
       forces[t.name].x += (W/2 - pos[t.name].x) * 0.01 * alpha;
       forces[t.name].y += (H/2 - pos[t.name].y) * 0.01 * alpha;
     });
 
-    THEMES.forEach(t => {
+    themes.forEach(t => {
       pos[t.name].x += forces[t.name].x;
       pos[t.name].y += forces[t.name].y;
       // clamp bubble centres so the bubble circle stays on-canvas
@@ -1417,7 +1430,7 @@ function OrgSidebar({ org, orgLinks, pool, onClose, onNavigate }) {
   );
 }
 
-function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode, onRemove, paths = [], onSavePath, onDeletePath, orgs = [], orgLinks = [], onSaveOrgLink, onDeleteOrgLink }) {
+function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode, onRemove, paths = [], onSavePath, onDeletePath, orgs = [], orgLinks = [], onSaveOrgLink, onDeleteOrgLink, customThemeColors = {} }) {
   const svgRef        = useRef(null);
   const simRef        = useRef(null);
   const linksRef      = useRef([]);
@@ -1519,6 +1532,12 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       .sort((a,b) => b.keywords.length - a.keywords.length);
   }, [selected, pool]);
 
+  // All themes: built-in + any custom themes found in pool
+  const allThemes = useMemo(() => {
+    const customNames = [...new Set(pool.map(i => i.theme))].filter(n => !THEMES.find(t => t.name === n));
+    return [...THEMES, ...customNames.map(n => ({ name: n, color: customThemeColor(n, customThemeColors) }))];
+  }, [pool, customThemeColors]);
+
   useEffect(() => { setTimeout(() => setReady(true), 120); }, []);
 
   // ── Main D3 effect — only reruns when pool changes, NOT on readItems ──
@@ -1535,17 +1554,17 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     // Multiplier 40 ensures nodes have room at ~60% packing even on the
     // smaller public-garden canvas (canvasScale ≈ 0.93).
     const themeCount = {};
-    THEMES.forEach(t => { themeCount[t.name] = 0; });
-    items.forEach(n => { if(themeCount[n.theme] !== undefined) themeCount[n.theme]++; });
+    allThemes.forEach(t => { themeCount[t.name] = 0; });
+    items.forEach(n => { themeCount[n.theme] = (themeCount[n.theme] || 0) + 1; });
     const canvasScale = Math.min(W, H) / 700;
     const bubbleR = {};
-    THEMES.forEach(t => { bubbleR[t.name] = Math.max(85 * canvasScale, Math.sqrt(themeCount[t.name] || 0) * 40 * canvasScale); });
+    allThemes.forEach(t => { bubbleR[t.name] = Math.max(85 * canvasScale, Math.sqrt(themeCount[t.name] || 0) * 40 * canvasScale); });
 
     // Smart bubble positions from inter-theme connection density
-    const rawPos = computeBubblePositions(items, links, W, H, bubbleR);
+    const rawPos = computeBubblePositions(items, links, W, H, bubbleR, allThemes);
     // Shift bubble center slightly inward so label above fits
     const bubblePos = {};
-    THEMES.forEach(t => {
+    allThemes.forEach(t => {
       bubblePos[t.name] = { cx: rawPos[t.name].x, cy: rawPos[t.name].y };
     });
 
@@ -1563,7 +1582,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     // Defs
     const defs = svg.append("defs");
-    THEMES.forEach(t => {
+    allThemes.forEach(t => {
       const grad = defs.append("radialGradient")
         .attr("id", "rbg_" + t.name.replace(/\s/g,"_"))
         .attr("cx","50%").attr("cy","50%").attr("r","50%");
@@ -1589,7 +1608,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     // Bubble backgrounds
     const bg = g.append("g");
-    THEMES.forEach((t, ti) => {
+    allThemes.forEach((t, ti) => {
       const bp = bubblePos[t.name], r = bubbleR[t.name];
       const blob = blobPath(bp.cx, bp.cy, r, ti * 31 + 7);
       bg.append("path").attr("d", blob)
@@ -1600,7 +1619,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
       // Sticker label — direction away from all other bubble centres
       let fx = 0, fy = 0;
-      THEMES.forEach(other => {
+      allThemes.forEach(other => {
         if (other.name === t.name) return;
         const op = bubblePos[other.name];
         const odx = bp.cx - op.cx, ody = bp.cy - op.cy;
@@ -2011,7 +2030,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     <div style={{ position:"relative", width:"100%", height:"100%" }}>
       {/* Theme filter pills */}
       <div style={{ position:"absolute", top:"10px", left:"10px", zIndex:10, display:"flex", flexDirection:"column", gap:"3px" }}>
-        {THEMES.map(t => (
+        {allThemes.map(t => (
           <button key={t.name} onClick={() => setDimTheme(d => d===t.name ? null : t.name)}
             style={{ ...F, display:"flex", alignItems:"center", gap:"6px", background:dimTheme===t.name?t.color+"22":"#FEFCE8", border:"1px solid "+(dimTheme===t.name?t.color:"rgba(245,158,11,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
             <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:t.color, flexShrink:0 }} />
@@ -2483,6 +2502,9 @@ function LoginScreen() {
 export default function App() {
   const [tab, setTab]             = useState("dispatch");
   const [customItems, setCustomItems] = useState([]);
+  const [customThemeColors, setCustomThemeColors] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("plottwists_theme_colors") || "{}"); } catch { return {}; }
+  });
   const [readItems, setReadItems] = useState(new Set());
   const [notes, setNotes]         = useState({});
   const [hiddenIds, setHiddenIds] = useState(new Set());
@@ -2559,6 +2581,14 @@ export default function App() {
       : supabase.from("notes").upsert({ user_id: user.id, url, argument: data.argument || "", thoughts: data.thoughts || "", quote: data.quote || "", updated_at: new Date().toISOString() }, { onConflict: "user_id,url" });
     op.then(({ error }) => { if (error) console.error("notes error:", error); else bumpLastUpdated(); });
   }, [user, bumpLastUpdated]);
+
+  const saveThemeColor = useCallback((name, color) => {
+    setCustomThemeColors(prev => {
+      const next = { ...prev, [name]: color };
+      localStorage.setItem("plottwists_theme_colors", JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const addItem = useCallback(item => {
     setCustomItems(prev => [...prev, item]);
@@ -2715,11 +2745,11 @@ export default function App() {
       {/* Main content */}
       <div style={{ flex:1, overflowY: tab==="garden"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
         {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} />}
-        {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
+        {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} customThemeColors={customThemeColors} />}
         {tab === "paths"    && <PathsView    paths={paths} pool={pool} notes={notes} />}
         {tab === "field"    && <FieldView    orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={saveOrg} onDeleteOrg={deleteOrg} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
         {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} />}
-        {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} />}
+        {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} onSaveThemeColor={saveThemeColor} />}
       </div>
 
       {isMobile && <BottomTabBar active={tab} onChange={setTab} />}
