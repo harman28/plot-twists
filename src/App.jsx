@@ -1214,26 +1214,20 @@ export function PublicGardenPage() {
 }
 
 function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [sent, setSent]   = useState(false);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error,    setError]    = useState(null);
+  const [loading,  setLoading]  = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (email.toLowerCase() !== "prabhnoorkohliwork@gmail.com") {
-      setError("This email is not authorised to access Plot Twists.");
-      return;
-    }
     setLoading(true);
     setError(null);
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: "prabhnoorkohliwork@gmail.com",
+      password,
     });
     setLoading(false);
-    if (err) setError(err.message);
-    else setSent(true);
+    if (err) setError("Incorrect password.");
   }
 
   return (
@@ -1242,31 +1236,24 @@ function LoginScreen() {
         <div style={{ fontSize:"13px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#2C2416" }}>Plot Twists</div>
         <div style={{ fontSize:"11px", color:"#6B5035", fontStyle:"italic", marginTop:"6px" }}>Prabhnoor's Digital Garden</div>
       </div>
-      {sent ? (
-        <div style={{ textAlign:"center" }}>
-          <div style={{ fontSize:"12px", color:"#2C2416", letterSpacing:"0.05em" }}>Check your email</div>
-          <div style={{ fontSize:"11px", color:"#6B5035", fontStyle:"italic", marginTop:"6px" }}>A login link has been sent to {email}</div>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"12px", width:"260px" }}>
-          <input
-            type="email"
-            required
-            placeholder="your@email.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            style={{ ...F, background:"rgba(228,220,205,0.8)", border:"1px solid rgba(60,40,20,0.3)", color:"#2C2416", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }}
-          />
-          {error && <div style={{ fontSize:"11px", color:"#A04040" }}>{error}</div>}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ ...F, background:"#2C2416", color:"#F5F0E8", border:"none", padding:"10px", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}
-          >
-            {loading ? "Sending…" : "Send login link"}
-          </button>
-        </form>
-      )}
+      <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"12px", width:"260px" }}>
+        <input
+          type="password"
+          required
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          style={{ ...F, background:"rgba(228,220,205,0.8)", border:"1px solid rgba(60,40,20,0.3)", color:"#2C2416", fontSize:"12px", padding:"9px 12px", borderRadius:"3px", outline:"none" }}
+        />
+        {error && <div style={{ fontSize:"11px", color:"#A04040" }}>{error}</div>}
+        <button
+          type="submit"
+          disabled={loading}
+          style={{ ...F, background:"#2C2416", color:"#F5F0E8", border:"none", padding:"10px", fontSize:"11px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}
+        >
+          {loading ? "Entering…" : "Enter"}
+        </button>
+      </form>
     </div>
   );
 }
