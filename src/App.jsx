@@ -953,9 +953,9 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     // Simulation
     const sim = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id).distance(75).strength(0.03))
-      .force("charge", d3.forceManyBody().strength(-20))
-      .force("collision", d3.forceCollide(d => rScale(d.degree) + 2))
+      .force("link", d3.forceLink(links).id(d => d.id).distance(120).strength(0.03))
+      .force("charge", d3.forceManyBody().strength(-80))
+      .force("collision", d3.forceCollide(d => rScale(d.degree) + 8))
       .force("bubble", () => {
         nodes.forEach(d => {
           const bp = bubblePos[d.theme], r = bubbleR[d.theme];
@@ -1243,9 +1243,6 @@ export function PublicGardenPage() {
         </span>
         {lastUpdated && <span style={{ ...F, fontSize:"10px", color:"#426860", fontStyle:"italic", marginLeft:"auto", flexShrink:0 }}>Updated {lastUpdated}</span>}
       </div>
-      <div style={{ height:"44px", background:"rgba(222,242,236,0.97)", borderBottom:"1px solid rgba(26,70,52,0.25)", display:"flex", alignItems:"center", padding:"0 18px", flexShrink:0 }}>
-        <span style={{ ...F, fontSize:"10px", color:"#426860", fontStyle:"italic" }}>{pool.length} items · bubbles positioned by keyword density · zoom in for labels · scroll to zoom · drag to pan</span>
-      </div>
       <div style={{ flex:1, overflow:"hidden", position:"relative" }}>
         <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} />
       </div>
@@ -1383,59 +1380,59 @@ export default function App() {
 
   const pool = useMemo(() => [...BUILTIN.filter(i => !hiddenIds.has(i.id)), ...customItems.filter(i => !hiddenIds.has(i.id))], [customItems, hiddenIds]);
 
+  const bumpLastUpdated = useCallback(() => {
+    supabase.from("garden_meta").upsert({ user_id: user.id, last_updated: new Date().toISOString() }, { onConflict: "user_id" })
+      .then(({ error }) => { if (error) console.error("garden_meta upsert:", error); });
+  }, [user]);
+
   const toggleRead = useCallback(key => {
+    const removing = readItems.has(key);
     setReadItems(prev => {
       const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-        supabase.from("read_items").delete().eq("user_id", user.id).eq("url", key);
-      } else {
-        next.add(key);
-        supabase.from("read_items").insert({ user_id: user.id, url: key });
-      }
-      supabase.from("garden_meta").upsert({ user_id: user.id, last_updated: new Date().toISOString() }, { onConflict: "user_id" });
+      if (removing) next.delete(key); else next.add(key);
       return next;
     });
-  }, [user]);
+    const op = removing
+      ? supabase.from("read_items").delete().eq("user_id", user.id).eq("url", key)
+      : supabase.from("read_items").insert({ user_id: user.id, url: key });
+    op.then(({ error }) => { if (error) console.error("read_items error:", error); else bumpLastUpdated(); });
+  }, [user, readItems, bumpLastUpdated]);
 
   const saveNote = useCallback((url, data) => {
     setNotes(prev => {
       const next = { ...prev };
-      if (data === null) {
-        delete next[url];
-        supabase.from("notes").delete().eq("user_id", user.id).eq("url", url);
-      } else {
-        next[url] = data;
-        supabase.from("notes").upsert({ user_id: user.id, url, argument: data.argument || "", thoughts: data.thoughts || "", updated_at: new Date().toISOString() }, { onConflict: "user_id,url" });
-      }
-      supabase.from("garden_meta").upsert({ user_id: user.id, last_updated: new Date().toISOString() }, { onConflict: "user_id" });
+      if (data === null) delete next[url]; else next[url] = data;
       return next;
     });
-  }, [user]);
+    const op = data === null
+      ? supabase.from("notes").delete().eq("user_id", user.id).eq("url", url)
+      : supabase.from("notes").upsert({ user_id: user.id, url, argument: data.argument || "", thoughts: data.thoughts || "", updated_at: new Date().toISOString() }, { onConflict: "user_id,url" });
+    op.then(({ error }) => { if (error) console.error("notes error:", error); else bumpLastUpdated(); });
+  }, [user, bumpLastUpdated]);
 
   const addItem = useCallback(item => {
     setCustomItems(prev => [...prev, item]);
-    supabase.from("custom_items").insert({ user_id: user.id, item_id: item.id, title: item.title, url: item.url, source: item.source, published: item.published, keywords: item.keywords, reading_minutes: item.readingMinutes, theme: item.theme, type: item.type });
-    supabase.from("garden_meta").upsert({ user_id: user.id, last_updated: new Date().toISOString() }, { onConflict: "user_id" });
-  }, [user]);
+    supabase.from("custom_items").insert({ user_id: user.id, item_id: item.id, title: item.title, url: item.url, source: item.source, published: item.published, keywords: item.keywords, reading_minutes: item.readingMinutes, theme: item.theme, type: item.type })
+      .then(({ error }) => { if (error) console.error("custom_items insert:", error); else bumpLastUpdated(); });
+  }, [user, bumpLastUpdated]);
 
   const deleteItem = useCallback(id => {
     setCustomItems(prev => prev.filter(x => x.id !== id));
-    supabase.from("custom_items").delete().eq("user_id", user.id).eq("item_id", id);
-    supabase.from("garden_meta").upsert({ user_id: user.id, last_updated: new Date().toISOString() }, { onConflict: "user_id" });
-  }, [user]);
+    supabase.from("custom_items").delete().eq("user_id", user.id).eq("item_id", id)
+      .then(({ error }) => { if (error) console.error("custom_items delete:", error); else bumpLastUpdated(); });
+  }, [user, bumpLastUpdated]);
 
   const hideItem = useCallback(id => {
     setHiddenIds(prev => new Set([...prev, id]));
-    supabase.from("hidden_items").insert({ user_id: user.id, item_id: id }).then(() => {});
-    supabase.from("garden_meta").upsert({ user_id: user.id, last_updated: new Date().toISOString() }, { onConflict: "user_id" });
-  }, [user]);
+    supabase.from("hidden_items").insert({ user_id: user.id, item_id: id })
+      .then(({ error }) => { if (error) console.error("hidden_items insert:", error); else bumpLastUpdated(); });
+  }, [user, bumpLastUpdated]);
 
   const restoreItem = useCallback(id => {
     setHiddenIds(prev => { const n = new Set(prev); n.delete(id); return n; });
-    supabase.from("hidden_items").delete().eq("user_id", user.id).eq("item_id", id);
-    supabase.from("garden_meta").upsert({ user_id: user.id, last_updated: new Date().toISOString() }, { onConflict: "user_id" });
-  }, [user]);
+    supabase.from("hidden_items").delete().eq("user_id", user.id).eq("item_id", id)
+      .then(({ error }) => { if (error) console.error("hidden_items delete:", error); else bumpLastUpdated(); });
+  }, [user, bumpLastUpdated]);
 
   const removeFromPool = useCallback(item => {
     const isCustom = customItems.some(c => c.id === item.id);
@@ -1469,12 +1466,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Subheader for garden */}
-      {tab === "garden" && (
-        <div style={{ height:"44px", background:"rgba(222,242,236,0.97)", borderBottom:"1px solid rgba(26,70,52,0.25)", display:"flex", alignItems:"center", padding:"0 18px", flexShrink:0 }}>
-          <span style={{ ...F, fontSize:"10px", color:"#426860", fontStyle:"italic" }}>{pool.length} items · bubbles positioned by keyword density · zoom in for labels · scroll to zoom · drag to pan</span>
-        </div>
-      )}
 
       {/* Main content */}
       <div style={{ flex:1, overflowY: tab==="garden"?"hidden":"auto", overflowX:"hidden", position:"relative" }}>
