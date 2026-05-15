@@ -530,7 +530,7 @@ function buildLinks(items) {
   return links;
 }
 
-function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNote, connectedTitles, onNavigate }) {
+function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNote, connectedTitles, onNavigate, publicMode }) {
   if(!node) return null;
   const c = COLOR[node.theme]||"#6B5035";
   const isRead = readItems.has(node.url);
@@ -557,8 +557,8 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
         {/* Notes preview */}
         {hasNote && (
           <div style={{ background:"rgba(184,134,11,0.06)", border:"1px solid rgba(184,134,11,0.18)", borderRadius:"3px", padding:"10px 12px", marginBottom:"12px" }}>
-            {noteData.argument && <div style={{ fontSize:"11px", color:"#2C2416", lineHeight:1.5, marginBottom: noteData.thoughts?"8px":0 }}><span style={{ fontSize:"9px", color:"#8B6508", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>Argument</span>{noteData.argument.slice(0,120)}{noteData.argument.length>120?"…":""}</div>}
-            {noteData.thoughts && <div style={{ fontSize:"11px", color:"#2C2416", lineHeight:1.5 }}><span style={{ fontSize:"9px", color:"#8B6508", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>My thoughts</span>{noteData.thoughts.slice(0,120)}{noteData.thoughts.length>120?"…":""}</div>}
+            {noteData.argument && <div style={{ fontSize:"11px", color:"#2C2416", lineHeight:1.5, marginBottom: noteData.thoughts?"8px":0 }}><span style={{ fontSize:"9px", color:"#8B6508", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>Argument</span>{publicMode ? noteData.argument : (noteData.argument.slice(0,120)+(noteData.argument.length>120?"…":""))}</div>}
+            {noteData.thoughts && <div style={{ fontSize:"11px", color:"#2C2416", lineHeight:1.5 }}><span style={{ fontSize:"9px", color:"#8B6508", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>My thoughts</span>{publicMode ? noteData.thoughts : (noteData.thoughts.slice(0,120)+(noteData.thoughts.length>120?"…":""))}</div>}
           </div>
         )}
 
@@ -597,12 +597,12 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
       </div>
       <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(60,40,20,0.32)", display:"flex", gap:"5px", flexWrap:"wrap" }}>
         <a href={node.url} target="_blank" rel="noopener noreferrer" style={{ flex:1, textAlign:"center", padding:"7px 4px", background:"transparent", border:"1px solid "+c, color:c, borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", textDecoration:"none", ...F }}>Read ↗</a>
-        <button onClick={() => onOpenNote(node)} style={{ flex:1, padding:"7px 4px", background:hasNote?"rgba(232,197,71,0.1)":"transparent", border:hasNote?"1px solid rgba(232,197,71,0.35)":"1px solid rgba(60,40,20,0.22)", color:hasNote?"#8B6508":"#3D2B1A", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
+        {!publicMode && <button onClick={() => onOpenNote(node)} style={{ flex:1, padding:"7px 4px", background:hasNote?"rgba(232,197,71,0.1)":"transparent", border:hasNote?"1px solid rgba(232,197,71,0.35)":"1px solid rgba(60,40,20,0.22)", color:hasNote?"#8B6508":"#3D2B1A", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
           {hasNote?"✎ Note":"Note"}
-        </button>
-        <button onClick={() => onToggleRead(node.url)} style={{ flex:1, padding:"7px 4px", background:isRead?"rgba(52,211,153,0.1)":"transparent", border:isRead?"1px solid rgba(52,211,153,0.35)":"1px solid rgba(60,40,20,0.22)", color:isRead?"#34D399":"#3D2B1A", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
+        </button>}
+        {!publicMode && <button onClick={() => onToggleRead(node.url)} style={{ flex:1, padding:"7px 4px", background:isRead?"rgba(52,211,153,0.1)":"transparent", border:isRead?"1px solid rgba(52,211,153,0.35)":"1px solid rgba(60,40,20,0.22)", color:isRead?"#34D399":"#3D2B1A", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
           {isRead?"✓ Read":"To Read"}
-        </button>
+        </button>}
       </div>
     </div>
   );
@@ -696,7 +696,7 @@ function computeBubblePositions(items, links, W, H) {
   return pos;
 }
 
-function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
+function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode }) {
   const svgRef     = useRef(null);
   const simRef     = useRef(null);
   const linksRef   = useRef([]);
@@ -1001,7 +1001,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
         </div>
       )}
 
-      {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} />}
+      {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} />}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
       {!ready    && <div style={{ position:"absolute",inset:0,background:"#F5F0E8",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"11px",color:"#6B5035",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
     </div>
@@ -1167,6 +1167,51 @@ function StatsView({ pool, readItems, notes }) {
 // ─── Root app ─────────────────────────────────────────────────────────────────
 
 const NAV = { ...F, background:"transparent", border:"1px solid rgba(60,40,20,0.32)", color:"#6B5035", width:"28px", height:"28px", borderRadius:"3px", cursor:"pointer", fontSize:"14px", display:"inline-flex", alignItems:"center", justifyContent:"center" };
+
+export function PublicGardenPage() {
+  const [pool,    setPool]    = useState(BUILTIN);
+  const [notes,   setNotes]   = useState({});
+  const [loaded,  setLoaded]  = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from("custom_items").select("*"),
+      supabase.from("notes").select("url, argument, thoughts"),
+    ]).then(([{ data: cd }, { data: nd }]) => {
+      if (cd?.length) {
+        setPool([...BUILTIN, ...cd.map(c => ({ id: c.item_id, title: c.title, url: c.url, source: c.source, published: c.published, keywords: c.keywords || [], readingMinutes: c.reading_minutes, theme: c.theme, type: c.type }))]);
+      }
+      if (nd?.length) {
+        setNotes(Object.fromEntries(nd.map(n => [n.url, { argument: n.argument, thoughts: n.thoughts }])));
+      }
+      setLoaded(true);
+    });
+  }, []);
+
+  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F5F0E8", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#6B5035", letterSpacing:"0.15em", textTransform:"uppercase" }}>Growing the garden…</span></div>;
+
+  return (
+    <div style={{ height:"100vh", background:"#F5F0E8", color:"#2C2416", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+      <div style={{ height:"44px", background:"rgba(228,220,205,0.99)", borderBottom:"1px solid rgba(60,40,20,0.25)", display:"flex", alignItems:"center", paddingLeft:"18px", paddingRight:"18px", flexShrink:0, gap:"12px", backdropFilter:"blur(4px)", zIndex:100 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:"8px", flexShrink:0 }}>
+          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#8B6508" }} />
+          <span style={{ ...F, fontSize:"12px", color:"#2C2416", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
+        </div>
+        <div style={{ height:"100%", borderLeft:"1px solid rgba(60,40,20,0.32)" }} />
+        <span style={{ ...F, fontSize:"11px", color:"#3D2B1A", lineHeight:1.4 }}>
+          Hi, I'm Prabhnoor, a researcher in critical AI studies. This is my digital garden, exploring AI safety, policy, bias, decolonisation, and more.{" "}
+          <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#8B6508", textDecoration:"underline" }}>More about me & my work ↗</a>
+        </span>
+      </div>
+      <div style={{ height:"44px", background:"rgba(228,220,205,0.97)", borderBottom:"1px solid rgba(60,40,20,0.28)", display:"flex", alignItems:"center", padding:"0 18px", flexShrink:0 }}>
+        <span style={{ ...F, fontSize:"10px", color:"#6B5035", fontStyle:"italic" }}>{pool.length} items · bubbles positioned by keyword density · zoom in for labels · scroll to zoom · drag to pan</span>
+      </div>
+      <div style={{ flex:1, overflow:"hidden", position:"relative" }}>
+        <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} />
+      </div>
+    </div>
+  );
+}
 
 function LoginScreen() {
   const [email, setEmail] = useState("");
