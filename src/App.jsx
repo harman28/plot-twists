@@ -1267,15 +1267,19 @@ function interThemeWeights(items, links) {
 }
 
 // Run a tiny synchronous force layout to place bubbles by connection density
-function computeBubblePositions(items, links, W, H) {
+function computeBubblePositions(items, links, W, H, bubbleR) {
   const weights = interThemeWeights(items, links);
-  // seed positions evenly, then let attraction pull related themes together
   const N = THEMES.length;
-  const outerR = Math.min(W, H) * 0.44;
+  const maxBubR = bubbleR ? Math.max(...Object.values(bubbleR)) : 120;
+  // Elliptical ring: use available width and height independently so
+  // landscape canvases spread bubbles horizontally instead of cramming
+  // everything into a circle constrained by the shorter dimension.
+  const outerRx = Math.max(120, W/2 - maxBubR - 40);
+  const outerRy = Math.max(80,  H/2 - maxBubR - 40);
   const pos = {};
   THEMES.forEach((t, i) => {
     const a = (i / N) * 2 * Math.PI - Math.PI / 2;
-    pos[t.name] = { x: W/2 + outerR * Math.cos(a), y: H/2 + outerR * Math.sin(a) };
+    pos[t.name] = { x: W/2 + outerRx * Math.cos(a), y: H/2 + outerRy * Math.sin(a) };
   });
 
   // 120 iterations of force-directed bubble placement
@@ -1302,14 +1306,16 @@ function computeBubblePositions(items, links, W, H) {
       });
     });
 
-    // Repulsion between all bubble pairs (keep them from collapsing)
+    // Repulsion: per-pair min distance based on actual bubble radii + gap
     THEMES.forEach((a, i) => {
       THEMES.forEach((b, j) => {
         if(i >= j) return;
         const dx = pos[b.name].x - pos[a.name].x;
         const dy = pos[b.name].y - pos[a.name].y;
         const dist = Math.sqrt(dx*dx+dy*dy) || 1;
-        const minDist = Math.min(W, H) * 0.43;
+        const ra = (bubbleR && bubbleR[a.name]) || maxBubR;
+        const rb = (bubbleR && bubbleR[b.name]) || maxBubR;
+        const minDist = ra + rb + 50;
         if(dist < minDist) {
           const push = (minDist - dist) / minDist * 0.4 * alpha;
           forces[a.name].x -= dx/dist * push;
@@ -1329,9 +1335,10 @@ function computeBubblePositions(items, links, W, H) {
     THEMES.forEach(t => {
       pos[t.name].x += forces[t.name].x;
       pos[t.name].y += forces[t.name].y;
-      // clamp to canvas
-      pos[t.name].x = Math.max(150, Math.min(W-150, pos[t.name].x));
-      pos[t.name].y = Math.max(130, Math.min(H-130, pos[t.name].y));
+      // clamp bubble centres so the bubble circle stays on-canvas
+      const margin = (bubbleR && bubbleR[t.name]) ? bubbleR[t.name] + 20 : maxBubR + 20;
+      pos[t.name].x = Math.max(margin, Math.min(W - margin, pos[t.name].x));
+      pos[t.name].y = Math.max(margin, Math.min(H - margin, pos[t.name].y));
     });
   }
   return pos;
@@ -1509,17 +1516,18 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const links = buildLinks(items);
     linksRef.current = links;
 
-    // Bubble radii — scale with node count AND canvas size so density stays
-    // consistent across private (tall canvas) and public (shorter canvas)
+    // Bubble radii scale with both node count and canvas size.
+    // Multiplier 40 ensures nodes have room at ~60% packing even on the
+    // smaller public-garden canvas (canvasScale ≈ 0.93).
     const themeCount = {};
     THEMES.forEach(t => { themeCount[t.name] = 0; });
     items.forEach(n => { if(themeCount[n.theme] !== undefined) themeCount[n.theme]++; });
     const canvasScale = Math.min(W, H) / 700;
     const bubbleR = {};
-    THEMES.forEach(t => { bubbleR[t.name] = Math.max(70 * canvasScale, Math.sqrt(themeCount[t.name] || 0) * 30 * canvasScale); });
+    THEMES.forEach(t => { bubbleR[t.name] = Math.max(85 * canvasScale, Math.sqrt(themeCount[t.name] || 0) * 40 * canvasScale); });
 
     // Smart bubble positions from inter-theme connection density
-    const rawPos = computeBubblePositions(items, links, W, H);
+    const rawPos = computeBubblePositions(items, links, W, H, bubbleR);
     // Shift bubble center slightly inward so label above fits
     const bubblePos = {};
     THEMES.forEach(t => {
@@ -1686,9 +1694,9 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     // Simulation
     const sim = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id).distance(260).strength(0.02))
-      .force("charge", d3.forceManyBody().strength(-420))
-      .force("collision", d3.forceCollide(d => rScale(d.degree) + 26))
+      .force("link", d3.forceLink(links).id(d => d.id).distance(280).strength(0.02))
+      .force("charge", d3.forceManyBody().strength(-700))
+      .force("collision", d3.forceCollide(d => rScale(d.degree) + 20))
       .force("bubble", () => {
         nodes.forEach(d => {
           const bp = bubblePos[d.theme], r = bubbleR[d.theme];
@@ -1770,8 +1778,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     nodesRef.current.forEach(n => { themeCount[n.theme] = (themeCount[n.theme] || 0) + 1; });
     const cs = Math.min(W, H) / 700;
     const maxBubbleR = Object.values(themeCount).length
-      ? Math.max(...Object.values(themeCount).map(c => Math.max(70 * cs, Math.sqrt(c) * 30 * cs)))
-      : 80 * cs;
+      ? Math.max(...Object.values(themeCount).map(c => Math.max(85 * cs, Math.sqrt(c) * 40 * cs)))
+      : 100 * cs;
     const contentEdge = Math.min(W, H) * 0.44 + maxBubbleR;
     const bandHalf = 22;
     const outerR = contentEdge + 48; // 48px clearance beyond the furthest article
