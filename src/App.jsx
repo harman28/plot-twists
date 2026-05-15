@@ -1442,9 +1442,6 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   useEffect(() => { pathsRef.current = paths; }, [paths]);
   useEffect(() => { orgsRef.current = orgs; orgLinksRef.current = orgLinks; }, [orgs, orgLinks]);
   useEffect(() => { showOrgsRef.current = showOrgs; }, [showOrgs]);
-  useEffect(() => {
-    if (publicMode) { pathsVisibleRef.current = trailsOpen; drawPathOverlay(); }
-  }, [trailsOpen, publicMode, drawPathOverlay]);
 
   // Draw path overlay lines + step badges from settled node positions
   const drawPathOverlay = useCallback(() => {
@@ -1730,6 +1727,11 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   useEffect(() => {
     drawPathOverlay();
   }, [paths, drawPathOverlay]);
+
+  // ── In public mode, sync trails visibility with toggle state ──
+  useEffect(() => {
+    if (publicMode) { pathsVisibleRef.current = trailsOpen; drawPathOverlay(); }
+  }, [trailsOpen, publicMode, drawPathOverlay]);
 
   // ── Draw/clear org overlay when showOrgs, orgs, or orgLinks change ──
   const drawOrgOverlay = useCallback(() => {
