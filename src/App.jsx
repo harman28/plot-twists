@@ -1728,36 +1728,69 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const H = svgRef.current?.clientHeight || (window.innerHeight - 88);
     const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
     const outerR = Math.min(W, H) * 0.50;
+    const bandHalf = 28; // half-width of the arc band
 
-    // Group orgs by stance into arc sections
     const activeStances = ORG_STANCES.filter(s => currentOrgs.some(o => o.stance === s));
     const numSections = activeStances.length || 1;
     const arcSize = (2 * Math.PI) / numSections;
-    const gap = arcSize * 0.08;
+    const gap = arcSize * 0.06;
     const orgPos = {};
 
+    // helper: SVG arc path between two angles at a given radius
+    function arcPath(cx, cy, r, a1, a2) {
+      const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+      const x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
+      const large = (a2 - a1) > Math.PI ? 1 : 0;
+      return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+    }
+
     activeStances.forEach((stance, si) => {
+      const color = STANCE_COLORS[stance];
       const stanceOrgs = currentOrgs.filter(o => o.stance === stance);
       const arcStart = si * arcSize - Math.PI / 2 + gap / 2;
       const arcEnd   = (si + 1) * arcSize - Math.PI / 2 - gap / 2;
+      const midAngle = (arcStart + arcEnd) / 2;
+
+      // ── Arc band background (pie-slice donut segment) ──
+      const r1 = outerR - bandHalf, r2 = outerR + bandHalf;
+      const x1s = W/2 + r1*Math.cos(arcStart), y1s = H/2 + r1*Math.sin(arcStart);
+      const x1e = W/2 + r1*Math.cos(arcEnd),   y1e = H/2 + r1*Math.sin(arcEnd);
+      const x2s = W/2 + r2*Math.cos(arcStart), y2s = H/2 + r2*Math.sin(arcStart);
+      const x2e = W/2 + r2*Math.cos(arcEnd),   y2e = H/2 + r2*Math.sin(arcEnd);
+      const large = (arcEnd - arcStart) > Math.PI ? 1 : 0;
+      const bandD = [
+        `M ${x1s} ${y1s}`,
+        `A ${r1} ${r1} 0 ${large} 1 ${x1e} ${y1e}`,
+        `L ${x2e} ${y2e}`,
+        `A ${r2} ${r2} 0 ${large} 0 ${x2s} ${y2s}`,
+        "Z"
+      ].join(" ");
+      og.append("path")
+        .attr("d", bandD)
+        .attr("fill", color).attr("fill-opacity", 0.07)
+        .attr("stroke", color).attr("stroke-opacity", 0.28).attr("stroke-width", 1)
+        .attr("pointer-events", "none");
+
+      // ── Stance label inside the band at arc midpoint ──
+      const shortName = stance === "Policy / Think Tank" ? "POLICY" :
+                        stance === "Civil Society / Advocacy" ? "CIVIL SOCIETY" :
+                        stance.toUpperCase();
+      og.append("text")
+        .attr("x", W/2 + outerR * Math.cos(midAngle))
+        .attr("y", H/2 + outerR * Math.sin(midAngle))
+        .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+        .attr("font-size", "8px").attr("font-family", "'Palatino Linotype',Palatino,serif")
+        .attr("fill", color).attr("fill-opacity", 0.8)
+        .attr("letter-spacing", "0.1em").attr("pointer-events", "none")
+        .text(shortName);
+
+      // ── Position orgs within their band arc ──
       stanceOrgs.forEach((org, oi) => {
         const angle = stanceOrgs.length === 1
-          ? (arcStart + arcEnd) / 2
+          ? midAngle
           : arcStart + (oi / (stanceOrgs.length - 1)) * (arcEnd - arcStart);
         orgPos[org.id] = { x: W/2 + outerR * Math.cos(angle), y: H/2 + outerR * Math.sin(angle) };
       });
-      // Stance label just outside the ring at arc midpoint
-      const midAngle = (arcStart + arcEnd) / 2;
-      const labelR = outerR + 26;
-      const color = STANCE_COLORS[stance];
-      og.append("text")
-        .attr("x", W/2 + labelR * Math.cos(midAngle))
-        .attr("y", H/2 + labelR * Math.sin(midAngle))
-        .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
-        .attr("font-size", "8px").attr("font-family", "'Palatino Linotype',Palatino,serif")
-        .attr("fill", color).attr("fill-opacity", 0.7)
-        .attr("letter-spacing", "0.09em").attr("pointer-events", "none")
-        .text(stance.toUpperCase());
     });
 
     // Lines first (below circles)
