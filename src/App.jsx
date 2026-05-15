@@ -667,7 +667,7 @@ function computeBubblePositions(items, links, W, H) {
   const weights = interThemeWeights(items, links);
   // seed positions evenly, then let attraction pull related themes together
   const N = THEMES.length;
-  const outerR = Math.min(W, H) * 0.34;
+  const outerR = Math.min(W, H) * 0.44;
   const pos = {};
   THEMES.forEach((t, i) => {
     const a = (i / N) * 2 * Math.PI - Math.PI / 2;
@@ -705,7 +705,7 @@ function computeBubblePositions(items, links, W, H) {
         const dx = pos[b.name].x - pos[a.name].x;
         const dy = pos[b.name].y - pos[a.name].y;
         const dist = Math.sqrt(dx*dx+dy*dy) || 1;
-        const minDist = 190;
+        const minDist = 300;
         if(dist < minDist) {
           const push = (minDist - dist) / minDist * 0.4 * alpha;
           forces[a.name].x -= dx/dist * push;
@@ -726,80 +726,15 @@ function computeBubblePositions(items, links, W, H) {
       pos[t.name].x += forces[t.name].x;
       pos[t.name].y += forces[t.name].y;
       // clamp to canvas
-      pos[t.name].x = Math.max(120, Math.min(W-120, pos[t.name].x));
-      pos[t.name].y = Math.max(100, Math.min(H-100, pos[t.name].y));
+      pos[t.name].x = Math.max(150, Math.min(W-150, pos[t.name].x));
+      pos[t.name].y = Math.max(130, Math.min(H-130, pos[t.name].y));
     });
   }
   return pos;
 }
 
-function StickyNote({ note, onUpdate, onDelete, readOnly }) {
-  const ref = useRef(null);
-  const dragStart = useRef(null);
-  const COLORS = ["#FFF8E1","#FFE4E4","#E4F4FF","#E4FFE8","#F3E4FF"];
-  const COLOR_LABELS = ["Yellow","Coral","Sky","Mint","Lavender"];
 
-  function onHeaderPointerDown(e) {
-    if (readOnly || e.target.tagName === "BUTTON") return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dragStart.current = { mx: e.clientX, my: e.clientY, ox: note.x, oy: note.y };
-  }
-  function onHeaderPointerMove(e) {
-    if (!dragStart.current) return;
-    const cont = ref.current?.parentElement;
-    if (!cont) return;
-    const { width, height } = cont.getBoundingClientRect();
-    const nx = Math.max(0, Math.min(90, dragStart.current.ox + ((e.clientX - dragStart.current.mx) / width) * 100));
-    const ny = Math.max(0, Math.min(90, dragStart.current.oy + ((e.clientY - dragStart.current.my) / height) * 100));
-    ref.current.style.left = nx + "%";
-    ref.current.style.top  = ny + "%";
-  }
-  function onHeaderPointerUp(e) {
-    if (!dragStart.current) return;
-    const cont = ref.current?.parentElement;
-    if (!cont) return;
-    const { width, height } = cont.getBoundingClientRect();
-    const nx = Math.max(0, Math.min(90, dragStart.current.ox + ((e.clientX - dragStart.current.mx) / width) * 100));
-    const ny = Math.max(0, Math.min(90, dragStart.current.oy + ((e.clientY - dragStart.current.my) / height) * 100));
-    dragStart.current = null;
-    if (onUpdate) onUpdate(note.id, { x: nx, y: ny });
-  }
-  function onResizeEnd() {
-    if (!ref.current || !onUpdate) return;
-    onUpdate(note.id, { width: ref.current.offsetWidth, height: ref.current.offsetHeight });
-  }
-
-  return (
-    <div ref={ref} onMouseUp={onResizeEnd}
-      style={{ position:"absolute", left:note.x+"%", top:note.y+"%", width:note.width+"px", height:note.height+"px",
-               minWidth:"160px", minHeight:"120px", resize:readOnly?"none":"both", overflow:"hidden",
-               background:note.color, border:"1px solid rgba(0,100,200,0.18)", borderRadius:"4px",
-               zIndex:30, display:"flex", flexDirection:"column", boxShadow:"0 4px 16px rgba(13,31,53,0.14)" }}>
-      {!readOnly && (
-        <div onPointerDown={onHeaderPointerDown} onPointerMove={onHeaderPointerMove} onPointerUp={onHeaderPointerUp}
-          style={{ display:"flex", alignItems:"center", gap:"4px", padding:"5px 8px", borderBottom:"1px solid rgba(0,100,200,0.1)", flexShrink:0, cursor:"grab", userSelect:"none" }}>
-          {COLORS.map((c,i) => (
-            <button key={c} onClick={() => onUpdate(note.id, { color: c })} title={COLOR_LABELS[i]}
-              style={{ width:"11px", height:"11px", borderRadius:"50%", background:c, border: note.color===c ? "2px solid rgba(0,100,200,0.5)" : "1px solid rgba(0,100,200,0.2)", cursor:"pointer", padding:0, flexShrink:0 }} />
-          ))}
-          <button onClick={() => onDelete(note.id)}
-            style={{ marginLeft:"auto", background:"none", border:"none", cursor:"pointer", color:"rgba(0,100,200,0.45)", fontSize:"14px", padding:0, lineHeight:1 }}>×</button>
-        </div>
-      )}
-      <textarea
-        value={note.content} readOnly={readOnly}
-        onChange={e => onUpdate && onUpdate(note.id, { content: e.target.value })}
-        onBlur={e => onUpdate && onUpdate(note.id, { content: e.target.value })}
-        placeholder={readOnly ? "" : "Write a note…"}
-        style={{ flex:1, width:"100%", background:"transparent", border:"none", outline:"none", resize:"none",
-                 padding:"8px", fontSize:"11px", color:"rgba(13,31,53,0.88)", lineHeight:1.5,
-                 fontFamily:"'Palatino Linotype',Palatino,serif", overflow:"auto", cursor:"text", boxSizing:"border-box" }}
-      />
-    </div>
-  );
-}
-
-function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode, onRemove, stickyNotes, onAddSticky, onUpdateSticky, onDeleteSticky }) {
+function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode, onRemove }) {
   const svgRef     = useRef(null);
   const simRef     = useRef(null);
   const linksRef   = useRef([]);
@@ -907,7 +842,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       labelSel.attr("opacity", k < 0.4 ? 0 : k < 0.8 ? (k-0.4)*1.5 : Math.min(1, 0.6 + (k-0.8)*0.8));
     });
     zoomRef.current = zoom;
-    svg.call(zoom).on("dblclick.zoom", null);
+    svg.call(zoom);
     const g = svg.append("g");
 
     // Bubble backgrounds
@@ -1017,16 +952,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       .style("pointer-events","none")
       .style("user-select","none");
 
-    svg.on("click", () => setSelected(null))
-       .on("dblclick", function(e) {
-         if (!onAddSticky) return;
-         const rect = svgRef.current.getBoundingClientRect();
-         const cont = svgRef.current.parentElement;
-         const { width, height } = cont.getBoundingClientRect();
-         const x = ((e.clientX - rect.left) / width) * 100;
-         const y = ((e.clientY - rect.top)  / height) * 100;
-         onAddSticky(Math.max(0, Math.min(85, x)), Math.max(0, Math.min(85, y)));
-       });
+    svg.on("click", () => setSelected(null));
 
     function resetOp() {
       nodeSel.attr("fill-opacity", d => readRef.current.has(d.url) ? 0.2 : 0.82);
@@ -1181,14 +1107,6 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         )}
       </div>
 
-      {(stickyNotes || []).map(n => (
-        <StickyNote key={n.id} note={n} onUpdate={onUpdateSticky} onDelete={onDeleteSticky} readOnly={!onUpdateSticky} />
-      ))}
-      {!publicMode && onAddSticky && (
-        <div style={{ position:"absolute", bottom:"12px", right: sideOpen?"300px":"12px", fontSize:"10px", color:"rgba(255,82,82,0.35)", fontStyle:"italic", pointerEvents:"none", transition:"right 0.2s" }}>
-          double-click to add note
-        </div>
-      )}
       {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} />}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
       {!ready    && <div style={{ position:"absolute",inset:0,background:"#F0F7FF",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"11px",color:"#5080A8",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
@@ -1359,7 +1277,6 @@ const NAV = { ...F, background:"transparent", border:"1px solid rgba(0,100,200,0
 export function PublicGardenPage() {
   const [pool,        setPool]        = useState(BUILTIN);
   const [notes,       setNotes]       = useState({});
-  const [stickyNotes, setStickyNotes] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [loaded,      setLoaded]      = useState(false);
 
@@ -1369,14 +1286,12 @@ export function PublicGardenPage() {
       supabase.from("notes").select("url, argument, thoughts"),
       supabase.from("hidden_items").select("item_id"),
       supabase.from("garden_meta").select("last_updated").limit(1).single(),
-      supabase.from("sticky_notes").select("*"),
-    ]).then(([{ data: cd }, { data: nd }, { data: hd }, { data: gm }, { data: sd }]) => {
+    ]).then(([{ data: cd }, { data: nd }, { data: hd }, { data: gm }]) => {
       const hiddenSet = new Set((hd || []).map(h => h.item_id));
       const customMapped = (cd || []).map(c => ({ id: c.item_id, title: c.title, url: c.url, source: c.source, published: c.published, keywords: c.keywords || [], readingMinutes: c.reading_minutes, theme: c.theme, type: c.type }));
       setPool([...BUILTIN.filter(i => !hiddenSet.has(i.id)), ...customMapped.filter(i => !hiddenSet.has(i.id))]);
       if (nd?.length) setNotes(Object.fromEntries(nd.map(n => [n.url, { argument: n.argument, thoughts: n.thoughts }])));
       if (gm?.last_updated) setLastUpdated(new Date(gm.last_updated).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" }));
-      setStickyNotes((sd || []).map(s => ({ id: s.id, content: s.content, x: s.x, y: s.y, width: s.width, height: s.height, color: s.color })));
       setLoaded(true);
     });
   }, []);
@@ -1387,7 +1302,7 @@ export function PublicGardenPage() {
     <div style={{ height:"100vh", background:"#F0F7FF", color:"#0D1F35", display:"flex", flexDirection:"column", overflow:"hidden" }}>
       <div style={{ height:"44px", background:"rgba(224,238,255,0.99)", borderBottom:"1px solid rgba(0,100,200,0.14)", display:"flex", alignItems:"center", paddingLeft:"18px", paddingRight:"18px", flexShrink:0, gap:"12px", backdropFilter:"blur(4px)", zIndex:100 }}>
         <div style={{ display:"flex", alignItems:"center", gap:"8px", flexShrink:0 }}>
-          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#D48010" }} />
+          <span style={{ fontSize:"16px", lineHeight:1 }}>🪸</span>
           <span style={{ ...F, fontSize:"12px", color:"#0D1F35", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
         </div>
         <div style={{ height:"100%", borderLeft:"1px solid rgba(0,100,200,0.2)" }} />
@@ -1398,7 +1313,7 @@ export function PublicGardenPage() {
         {lastUpdated && <span style={{ ...F, fontSize:"10px", color:"#5080A8", fontStyle:"italic", marginLeft:"auto", flexShrink:0 }}>Updated {lastUpdated}</span>}
       </div>
       <div style={{ flex:1, overflow:"hidden", position:"relative" }}>
-        <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} stickyNotes={stickyNotes} onAddSticky={null} onUpdateSticky={null} onDeleteSticky={null} />
+        <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} />
       </div>
     </div>
   );
@@ -1499,7 +1414,6 @@ export default function App() {
   const [readItems, setReadItems] = useState(new Set());
   const [notes, setNotes]         = useState({});
   const [hiddenIds, setHiddenIds] = useState(new Set());
-  const [stickyNotes, setStickyNotes] = useState([]);
   const [loaded, setLoaded]       = useState(false);
   const [user,        setUser]        = useState(null);
   const [authReady,   setAuthReady]   = useState(false);
@@ -1524,13 +1438,11 @@ export default function App() {
       supabase.from("notes").select("url, argument, thoughts").eq("user_id", user.id),
       supabase.from("custom_items").select("*").eq("user_id", user.id),
       supabase.from("hidden_items").select("item_id").eq("user_id", user.id),
-      supabase.from("sticky_notes").select("*").eq("user_id", user.id),
-    ]).then(([{ data: rd }, { data: nd }, { data: cd }, { data: hd }, { data: sd }]) => {
+    ]).then(([{ data: rd }, { data: nd }, { data: cd }, { data: hd }]) => {
       setReadItems(new Set((rd || []).map(r => r.url)));
       setNotes(Object.fromEntries((nd || []).map(n => [n.url, { argument: n.argument, thoughts: n.thoughts }])));
       setCustomItems((cd || []).map(c => ({ id: c.item_id, title: c.title, url: c.url, source: c.source, published: c.published, keywords: c.keywords || [], readingMinutes: c.reading_minutes, theme: c.theme, type: c.type })));
       setHiddenIds(new Set((hd || []).map(h => h.item_id)));
-      setStickyNotes((sd || []).map(s => ({ id: s.id, content: s.content, x: s.x, y: s.y, width: s.width, height: s.height, color: s.color })));
       setLoaded(true);
     });
   }, [user]);
@@ -1597,26 +1509,6 @@ export default function App() {
     else hideItem(item.id);
   }, [customItems, deleteItem, hideItem]);
 
-  const addStickyNote = useCallback((x, y) => {
-    const id = crypto.randomUUID();
-    const note = { id, content: "", x, y, width: 200, height: 150, color: "#EDE4FF" };
-    setStickyNotes(prev => [...prev, note]);
-    supabase.from("sticky_notes").insert({ id, user_id: user.id, content: "", x, y, width: 200, height: 150, color: "#EDE4FF" })
-      .then(({ error }) => { if (error) console.error("sticky_notes insert:", error); });
-  }, [user]);
-
-  const updateStickyNote = useCallback((id, changes) => {
-    setStickyNotes(prev => prev.map(n => n.id === id ? { ...n, ...changes } : n));
-    supabase.from("sticky_notes").update(changes).eq("id", id)
-      .then(({ error }) => { if (error) console.error("sticky_notes update:", error); });
-  }, []);
-
-  const deleteStickyNote = useCallback(id => {
-    setStickyNotes(prev => prev.filter(n => n.id !== id));
-    supabase.from("sticky_notes").delete().eq("id", id)
-      .then(({ error }) => { if (error) console.error("sticky_notes delete:", error); });
-  }, []);
-
   const totalNotes = Object.keys(notes).length;
   const totalRead  = readItems.size;
 
@@ -1647,7 +1539,7 @@ export default function App() {
       {/* Main content */}
       <div style={{ flex:1, overflowY: tab==="garden"?"hidden":"auto", overflowX:"hidden", position:"relative" }}>
         {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} />}
-        {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} stickyNotes={stickyNotes} onAddSticky={addStickyNote} onUpdateSticky={updateStickyNote} onDeleteSticky={deleteStickyNote} />}
+        {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} />}
         {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} />}
         {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} />}
       </div>
