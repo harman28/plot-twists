@@ -1579,17 +1579,24 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         .attr("fill", "url(#rbg_" + t.name.replace(/\s/g,"_") + ")")
         .attr("stroke", t.color).attr("stroke-opacity", 0.18)
         .attr("stroke-width", 1.5).attr("stroke-dasharray", "4 3");
-      // Halo (stroke behind) for legibility
+      // Place label on the outward-facing edge (away from canvas centre)
+      const ang  = Math.atan2(bp.cy - H/2, bp.cx - W/2);
+      const lcos = Math.cos(ang), lsin = Math.sin(ang);
+      const lx   = bp.cx + (r + 18) * lcos;
+      const ly   = bp.cy + (r + 18) * lsin;
+      const anchor = lcos > 0.4 ? "start" : lcos < -0.4 ? "end" : "middle";
+      const dy     = lsin < -0.4 ? "-0.4em" : lsin > 0.4 ? "1em" : "0.35em";
+      // Halo for legibility
       bg.append("text")
-        .attr("x", bp.cx).attr("y", bp.cy + r + 20)
-        .attr("text-anchor","middle").attr("font-size","15px")
+        .attr("x", lx).attr("y", ly).attr("dy", dy)
+        .attr("text-anchor", anchor).attr("font-size","15px")
         .attr("font-family","'Palatino Linotype',Palatino,serif")
         .attr("stroke","#FFFBEB").attr("stroke-width", 4).attr("stroke-linejoin","round")
         .attr("letter-spacing","0.06em").text(t.name.toUpperCase());
       // Filled label on top
       bg.append("text")
-        .attr("x", bp.cx).attr("y", bp.cy + r + 20)
-        .attr("text-anchor","middle").attr("font-size","15px")
+        .attr("x", lx).attr("y", ly).attr("dy", dy)
+        .attr("text-anchor", anchor).attr("font-size","15px")
         .attr("font-family","'Palatino Linotype',Palatino,serif")
         .attr("fill", t.color).attr("opacity", 0.95)
         .attr("letter-spacing","0.06em").text(t.name.toUpperCase());
