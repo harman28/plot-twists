@@ -1178,9 +1178,10 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
 // ─── Field view ───────────────────────────────────────────────────────────────
 
 function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink, onDeleteOrgLink, publicMode }) {
-  const [showAdd,   setShowAdd]   = useState(false);
-  const [editOrg,   setEditOrg]   = useState(null);
-  const [expanded,  setExpanded]  = useState(null);
+  const [showAdd,          setShowAdd]          = useState(false);
+  const [editOrg,          setEditOrg]          = useState(null);
+  const [expanded,         setExpanded]         = useState(null);
+  const [collapsedStances, setCollapsedStances] = useState(new Set());
 
   const grouped = Object.fromEntries(ORG_STANCES.map(s => [s, []]));
   orgs.forEach(org => { (grouped[org.stance] || grouped["Industry"]).push(org); });
@@ -1208,27 +1209,33 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
         const group = grouped[stance] || [];
         if (group.length === 0) return null;
         const color = STANCE_COLORS[stance];
+        const isCollapsed = collapsedStances.has(stance);
         return (
           <div key={stance} style={{ marginBottom:"32px" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"12px", paddingBottom:"8px", borderBottom:"1px solid "+color+"35" }}>
-              <div style={{ width:"8px", height:"8px", borderRadius:"50%", background:color }} />
-              <span style={{ fontSize:"10px", color, letterSpacing:"0.12em", textTransform:"uppercase", fontWeight:600 }}>{stance}</span>
-              <span style={{ fontSize:"10px", color:"#7A8068" }}>{group.length}</span>
-            </div>
-            <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
-              {group.map(org => (
-                <OrgCard key={org.id} org={org}
-                  links={orgLinks.filter(l => l.org_id === org.id)}
-                  pool={pool}
-                  isExpanded={expanded === org.id}
-                  onToggle={() => setExpanded(v => v===org.id ? null : org.id)}
-                  onEdit={() => { setEditOrg(org); setShowAdd(true); }}
-                  onDelete={() => onDeleteOrg(org.id)}
-                  onSaveOrgLink={onSaveOrgLink}
-                  onDeleteOrgLink={onDeleteOrgLink}
-                  publicMode={publicMode} />
-              ))}
-            </div>
+            <button
+              onClick={() => setCollapsedStances(prev => { const s = new Set(prev); s.has(stance) ? s.delete(stance) : s.add(stance); return s; })}
+              style={{ ...F, width:"100%", display:"flex", alignItems:"center", gap:"10px", marginBottom: isCollapsed ? 0 : "12px", padding:"0 0 8px 0", borderBottom:"1px solid "+color+"35", background:"none", border:"none", cursor:"pointer", textAlign:"left" }}>
+              <div style={{ width:"8px", height:"8px", borderRadius:"50%", background:color, flexShrink:0 }} />
+              <span style={{ fontSize:"11px", color, letterSpacing:"0.12em", textTransform:"uppercase", fontWeight:600 }}>{stance}</span>
+              <span style={{ fontSize:"11px", color:"#7A8068" }}>{group.length}</span>
+              <span style={{ marginLeft:"auto", fontSize:"11px", color:"#7A8068", opacity:0.6 }}>{isCollapsed ? "▸" : "▾"}</span>
+            </button>
+            {!isCollapsed && (
+              <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+                {group.map(org => (
+                  <OrgCard key={org.id} org={org}
+                    links={orgLinks.filter(l => l.org_id === org.id)}
+                    pool={pool}
+                    isExpanded={expanded === org.id}
+                    onToggle={() => setExpanded(v => v===org.id ? null : org.id)}
+                    onEdit={() => { setEditOrg(org); setShowAdd(true); }}
+                    onDelete={() => onDeleteOrg(org.id)}
+                    onSaveOrgLink={onSaveOrgLink}
+                    onDeleteOrgLink={onDeleteOrgLink}
+                    publicMode={publicMode} />
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
@@ -1412,6 +1419,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   const [noteItem,       setNoteItem]       = useState(null);
   const [pathsPanelOpen, setPathsPanelOpen] = useState(false);
   const [showOrgs,       setShowOrgs]       = useState(false);
+  const [trailsOpen,     setTrailsOpen]     = useState(false);
+  const pathsVisibleRef = useRef(!publicMode);
 
   // Pan + zoom to a node by id, then open its sidebar
   const navigateToNode = useCallback((nodeId) => {
@@ -1433,13 +1442,18 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   useEffect(() => { pathsRef.current = paths; }, [paths]);
   useEffect(() => { orgsRef.current = orgs; orgLinksRef.current = orgLinks; }, [orgs, orgLinks]);
   useEffect(() => { showOrgsRef.current = showOrgs; }, [showOrgs]);
+  useEffect(() => {
+    if (publicMode) { pathsVisibleRef.current = trailsOpen; drawPathOverlay(); }
+  }, [trailsOpen, publicMode, drawPathOverlay]);
 
   // Draw path overlay lines + step badges from settled node positions
   const drawPathOverlay = useCallback(() => {
     if (!pathGroupRef.current || !nodesRef.current.length) return;
     const pg = pathGroupRef.current;
-    const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
     pg.selectAll("*").remove();
+    if (!pathsVisibleRef.current) return;
+    const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
+
     (pathsRef.current || []).forEach(p => {
       const ids = p.item_ids || [];
       if (ids.length < 1) return;
@@ -1556,15 +1570,15 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         .attr("stroke-width", 1.5).attr("stroke-dasharray", "4 3");
       // Halo (stroke behind) for legibility
       bg.append("text")
-        .attr("x", bp.cx).attr("y", bp.cy + r + 18)
-        .attr("text-anchor","middle").attr("font-size","13px")
+        .attr("x", bp.cx).attr("y", bp.cy + r + 20)
+        .attr("text-anchor","middle").attr("font-size","15px")
         .attr("font-family","'Palatino Linotype',Palatino,serif")
         .attr("stroke","#F5F0E6").attr("stroke-width", 4).attr("stroke-linejoin","round")
         .attr("letter-spacing","0.06em").text(t.name.toUpperCase());
       // Filled label on top
       bg.append("text")
-        .attr("x", bp.cx).attr("y", bp.cy + r + 18)
-        .attr("text-anchor","middle").attr("font-size","13px")
+        .attr("x", bp.cx).attr("y", bp.cy + r + 20)
+        .attr("text-anchor","middle").attr("font-size","15px")
         .attr("font-family","'Palatino Linotype',Palatino,serif")
         .attr("fill", t.color).attr("opacity", 0.95)
         .attr("letter-spacing","0.06em").text(t.name.toUpperCase());
@@ -1651,7 +1665,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const labelSel = g.append("g")
       .selectAll("text").data(nodes).enter().append("text")
       .text(d => d.title.split(":")[0].split("—")[0].trim().slice(0, 22))
-      .attr("font-size","8px")
+      .attr("font-size","10px")
       .attr("font-family","'Palatino Linotype',Palatino,serif")
       .attr("fill","#1C2B1C")
       .attr("text-anchor","middle")
@@ -1796,7 +1810,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         .attr("x", W/2 + outerR * Math.cos(midAngle))
         .attr("y", H/2 + outerR * Math.sin(midAngle))
         .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
-        .attr("font-size", "8px").attr("font-family", "'Palatino Linotype',Palatino,serif")
+        .attr("font-size", "10px").attr("font-family", "'Palatino Linotype',Palatino,serif")
         .attr("fill", color).attr("fill-opacity", 0.8)
         .attr("letter-spacing", "0.1em").attr("pointer-events", "none")
         .text(shortName);
@@ -1858,8 +1872,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       }
 
       og.append("text")
-        .attr("x", pos.x).attr("y", pos.y + r + 12)
-        .attr("text-anchor", "middle").attr("font-size", "9px")
+        .attr("x", pos.x).attr("y", pos.y + r + 13)
+        .attr("text-anchor", "middle").attr("font-size", "11px")
         .attr("font-family", "'Palatino Linotype',Palatino,serif")
         .attr("fill", color).attr("fill-opacity", 0.85)
         .attr("letter-spacing", "0.04em").attr("pointer-events", "none")
@@ -1926,23 +1940,32 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
           <button key={t.name} onClick={() => setDimTheme(d => d===t.name ? null : t.name)}
             style={{ ...F, display:"flex", alignItems:"center", gap:"6px", background:dimTheme===t.name?t.color+"22":"rgba(237,232,218,0.97)", border:"1px solid "+(dimTheme===t.name?t.color:"rgba(155,98,48,0.17)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
             <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:t.color, flexShrink:0 }} />
-            <span style={{ fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase", color:dimTheme===t.name?t.color:"#3A4030", whiteSpace:"nowrap" }}>{t.name}</span>
+            <span style={{ fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase", color:dimTheme===t.name?t.color:"#3A4030", whiteSpace:"nowrap" }}>{t.name}</span>
           </button>
         ))}
         {dimTheme && (
-          <button onClick={() => setDimTheme(null)} style={{ ...F, background:"rgba(237,232,218,0.97)", border:"1px solid rgba(155,98,48,0.17)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", color:"#7A8068", fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase" }}>Clear</button>
+          <button onClick={() => setDimTheme(null)} style={{ ...F, background:"rgba(237,232,218,0.97)", border:"1px solid rgba(155,98,48,0.17)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", color:"#7A8068", fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase" }}>Clear</button>
         )}
-        {!publicMode && (
+        {publicMode ? (
+          paths.length > 0 && (
+            <button onClick={() => setTrailsOpen(v => !v)}
+              style={{ ...F, marginTop:"6px", background: trailsOpen?"rgba(212,128,16,0.14)":"rgba(237,232,218,0.97)", border:"1px solid "+(trailsOpen?"rgba(212,128,16,0.5)":"rgba(155,98,48,0.17)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
+              <span style={{ fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase", color: trailsOpen?"#D48010":"#3A4030", whiteSpace:"nowrap" }}>
+                Trails ({paths.length})
+              </span>
+            </button>
+          )
+        ) : (
           <button onClick={() => setPathsPanelOpen(v => !v)}
             style={{ ...F, marginTop:"6px", background: pathsPanelOpen?"rgba(212,128,16,0.14)":"rgba(237,232,218,0.97)", border:"1px solid "+(pathsPanelOpen?"rgba(212,128,16,0.5)":"rgba(155,98,48,0.17)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
-            <span style={{ fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase", color: pathsPanelOpen?"#D48010":"#3A4030", whiteSpace:"nowrap" }}>
+            <span style={{ fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase", color: pathsPanelOpen?"#D48010":"#3A4030", whiteSpace:"nowrap" }}>
               Paths{paths.length > 0 ? ` (${paths.length})` : ""}
             </span>
           </button>
         )}
         <button onClick={() => setShowOrgs(v => !v)}
           style={{ ...F, marginTop:"3px", background: showOrgs?"rgba(16,104,212,0.13)":"rgba(237,232,218,0.97)", border:"1px solid "+(showOrgs?"rgba(16,104,212,0.5)":"rgba(155,98,48,0.17)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
-          <span style={{ fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase", color: showOrgs?"#9B6230":"#3A4030", whiteSpace:"nowrap" }}>
+          <span style={{ fontSize:"10px", letterSpacing:"0.07em", textTransform:"uppercase", color: showOrgs?"#9B6230":"#3A4030", whiteSpace:"nowrap" }}>
             Orgs{orgs.length > 0 ? ` (${orgs.length})` : ""}
           </span>
         </button>
@@ -1952,7 +1975,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         <PathsPanel paths={paths} pool={pool} onSavePath={onSavePath} onDeletePath={onDeletePath} onClose={() => setPathsPanelOpen(false)} />
       )}
 
-      {publicMode && paths.length > 0 && (
+      {publicMode && trailsOpen && paths.length > 0 && (
         <div style={{ ...F, position:"absolute", bottom:"12px", left:"10px", zIndex:10, background:"rgba(237,232,218,0.97)", border:"1px solid rgba(155,98,48,0.14)", borderRadius:"4px", padding:"10px 12px" }}>
           <div style={{ fontSize:"9px", color:"#7A8068", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"7px" }}>Trails</div>
           {paths.map(p => (
@@ -2219,9 +2242,9 @@ export function PublicGardenPage() {
   if (!loaded) return <div style={{ ...F, height:"100vh", background:"#F5F0E6", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"11px", color:"#7A8068", letterSpacing:"0.15em", textTransform:"uppercase" }}>Growing the garden…</span></div>;
 
   const PUBLIC_TABS = [
-    { id:"garden", label:"The Grove", icon:"🌿" },
-    { id:"paths",  label:"Trails",    icon:"🗺️" },
-    { id:"field",  label:"The Field", icon:"🏛️" },
+    { id:"garden", label:"The Grove", icon:"🌿", desc:"A live knowledge graph of articles, papers, and essays — connected by shared ideas. Click any node to explore." },
+    { id:"paths",  label:"Trails",    icon:"🗺️", desc:"Curated reading sequences I've assembled through the material — each trail has a focus and a direction." },
+    { id:"field",  label:"The Field", icon:"🏛️", desc:"The organisations, labs, and actors shaping these debates — mapped by their stance in the discourse." },
   ];
 
   return (
@@ -2233,9 +2256,13 @@ export function PublicGardenPage() {
           <span style={{ ...F, fontSize:"12px", color:"#1C2B1C", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
           {lastUpdated && <span style={{ ...F, fontSize:"10px", color:"#7A8068", fontStyle:"italic", marginLeft:"auto" }}>Updated {lastUpdated}</span>}
         </div>
-        <p style={{ ...F, fontSize:"11px", color:"#3A4030", lineHeight:1.5, margin:"0 0 10px" }}>
+        <p style={{ ...F, fontSize:"11px", color:"#3A4030", lineHeight:1.5, margin:"0 0 8px" }}>
           Hi, I'm Prabhnoor — a researcher in critical AI studies. This is my digital garden exploring AI safety, policy, bias, decolonisation, and more.{" "}
           <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#D48010", textDecoration:"underline" }}>More about me & my work ↗</a>
+        </p>
+        {/* Tab description */}
+        <p style={{ ...F, fontSize:"10px", color:"#7A8068", fontStyle:"italic", lineHeight:1.4, margin:"0 0 8px" }}>
+          {PUBLIC_TABS.find(t => t.id === tab)?.desc}
         </p>
         {/* Tab bar */}
         <div style={{ display:"flex", gap:"4px" }}>
@@ -2535,9 +2562,9 @@ export default function App() {
           </>
         )}
         <div style={{ marginLeft:"auto", display:"flex", gap:"14px", alignItems:"center" }}>
-          {!isMobile && totalRead > 0  && <span style={{ fontSize:"10px", color:"#7A8068" }}>{totalRead} read</span>}
-          {!isMobile && totalNotes > 0 && <span style={{ fontSize:"10px", color:"#7A8068" }}>{totalNotes} notes</span>}
-          {!isMobile && customItems.length > 0 && <span style={{ fontSize:"10px", color:"#6340A888" }}>+{customItems.length} custom</span>}
+          {!isMobile && totalRead > 0  && <span style={{ fontSize:"12px", color:"#7A8068" }}>{totalRead} read</span>}
+          {!isMobile && totalNotes > 0 && <span style={{ fontSize:"12px", color:"#7A8068" }}>{totalNotes} notes</span>}
+          {!isMobile && customItems.length > 0 && <span style={{ fontSize:"12px", color:"#6340A888" }}>+{customItems.length} custom</span>}
           <button onClick={() => supabase.auth.signOut()} style={{ ...NAV, fontSize:"10px", width:"auto", padding:"0 8px", letterSpacing:"0.06em" }}>Sign out</button>
         </div>
       </div>
