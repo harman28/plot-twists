@@ -23,6 +23,7 @@ const THEMES = [
   { name: "Ethics",             color: "#D03030" },
 ];
 const COLOR = Object.fromEntries(THEMES.map(t => [t.name, t.color]));
+const PATH_COLORS = ["#D48010","#0A9C60","#1068D4","#CC1E78","#8020D8","#E84E00"];
 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 function fmtDate(d) { return new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" }); }
@@ -576,11 +577,11 @@ function buildLinks(items) {
   return links;
 }
 
-function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNote, connectedTitles, onNavigate, publicMode, onRemove }) {
+function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNote, connectedTitles, onNavigate, publicMode, onRemove, paths, onSavePath }) {
   if(!node) return null;
   const c = COLOR[node.theme]||"#426860";
   const isRead = readItems.has(node.url);
-  const hasNote = !!(notes[node.url]?.argument||notes[node.url]?.thoughts);
+  const hasNote = !!(notes[node.url]?.argument||notes[node.url]?.thoughts||notes[node.url]?.quote);
   const noteData = notes[node.url];
   return (
     <div style={{ ...F, position:"absolute", top:0, right:0, bottom:0, width:"290px", background:"rgba(196,222,255,1.0)", borderLeft:"1px solid rgba(26,70,52,0.2)", zIndex:30, display:"flex", flexDirection:"column" }}>
@@ -641,6 +642,23 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
             )}
           </div>
         )}
+
+        {/* Reading paths */}
+        {!publicMode && paths && (
+          <div style={{ marginTop:"14px", paddingTop:"12px", borderTop:"1px solid rgba(0,100,200,0.1)" }}>
+            <div style={{ fontSize:"9px", color:"#5080A8", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>Reading Paths</div>
+            {paths.filter(p => (p.item_ids||[]).includes(node.id)).map(p => (
+              <div key={p.id} style={{ display:"flex", alignItems:"center", gap:"5px", marginBottom:"4px", background:p.color+"12", border:"1px solid "+p.color+"30", borderRadius:"3px", padding:"4px 7px" }}>
+                <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:p.color, flexShrink:0 }} />
+                <span style={{ ...F, fontSize:"10px", color:"#0D1F35", flex:1 }}>{p.name}</span>
+                <span style={{ fontSize:"9px", color:p.color }}>#{(p.item_ids||[]).indexOf(node.id)+1}</span>
+                <button onClick={() => onSavePath({...p, item_ids:(p.item_ids||[]).filter(id=>id!==node.id)})}
+                  style={{ background:"none", border:"none", cursor:"pointer", color:p.color, fontSize:"13px", padding:0, lineHeight:1, opacity:0.7 }}>×</button>
+              </div>
+            ))}
+            <PathSelector node={node} paths={paths} onSavePath={onSavePath} />
+          </div>
+        )}
       </div>
       <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(0,100,200,0.2)", display:"flex", gap:"5px", flexWrap:"wrap" }}>
         <a href={node.url} target="_blank" rel="noopener noreferrer" style={{ flex:1, textAlign:"center", padding:"7px 4px", background:"transparent", border:"1px solid "+c, color:c, borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", textDecoration:"none", ...F }}>Read ↗</a>
@@ -652,6 +670,183 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
         </button>}
         {!publicMode && onRemove && <button onClick={() => { onRemove(node); onClose(); }} style={{ flex:1, padding:"7px 4px", background:"transparent", border:"1px solid rgba(224,88,0,0.25)", color:"#E84E00", borderRadius:"3px", fontSize:"10px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>Remove</button>}
       </div>
+    </div>
+  );
+}
+
+// ─── Path selector (inline in sidebar) ───────────────────────────────────────
+
+function PathSelector({ node, paths, onSavePath }) {
+  const [open,     setOpen]     = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newName,  setNewName]  = useState("");
+  const [newColor, setNewColor] = useState(PATH_COLORS[0]);
+  const available = paths.filter(p => !(p.item_ids || []).includes(node.id));
+
+  function addToPath(p) {
+    onSavePath({ ...p, item_ids: [...(p.item_ids || []), node.id] });
+    setOpen(false);
+  }
+
+  function createAndAdd() {
+    if (!newName.trim()) return;
+    onSavePath({ id: crypto.randomUUID(), name: newName.trim(), description: "", color: newColor, item_ids: [node.id] });
+    setNewName(""); setCreating(false);
+  }
+
+  if (creating) return (
+    <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
+      <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Path name…" autoFocus
+        onKeyDown={e => { if(e.key==="Enter") createAndAdd(); if(e.key==="Escape") setCreating(false); }}
+        style={{ ...F, background:"rgba(0,100,200,0.05)", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"3px", color:"#0D1F35", fontSize:"11px", padding:"5px 8px", outline:"none" }} />
+      <div style={{ display:"flex", gap:"4px", flexWrap:"wrap" }}>
+        {PATH_COLORS.map(c => (
+          <button key={c} onClick={() => setNewColor(c)}
+            style={{ width:"16px", height:"16px", borderRadius:"50%", background:c, border: newColor===c?"2px solid #0D1F35":"1px solid transparent", cursor:"pointer", padding:0, flexShrink:0 }} />
+        ))}
+      </div>
+      <div style={{ display:"flex", gap:"5px" }}>
+        <button onClick={createAndAdd} style={{ ...F, flex:1, background:"transparent", border:"1px solid #9B6230", color:"#D48010", padding:"4px", borderRadius:"3px", fontSize:"9px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Create</button>
+        <button onClick={() => setCreating(false)} style={{ ...F, flex:1, background:"transparent", border:"1px solid rgba(0,100,200,0.17)", color:"#5080A8", padding:"4px", borderRadius:"3px", fontSize:"9px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ position:"relative" }}>
+      <button onClick={() => setOpen(v => !v)}
+        style={{ ...F, width:"100%", background:"transparent", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"3px", padding:"5px 8px", fontSize:"9px", letterSpacing:"0.1em", textTransform:"uppercase", color:"#5080A8", cursor:"pointer", textAlign:"left" }}>
+        + Add to path {open ? "▲" : "▼"}
+      </button>
+      {open && (
+        <div style={{ position:"absolute", bottom:"calc(100% + 4px)", left:0, right:0, background:"rgba(224,238,255,0.99)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"3px", boxShadow:"0 -4px 12px rgba(13,31,53,0.1)", overflow:"hidden", zIndex:50 }}>
+          {paths.length > 0 && available.length === 0 && (
+            <div style={{ padding:"7px 10px", fontSize:"10px", color:"#5080A8", fontStyle:"italic" }}>Already in all paths</div>
+          )}
+          {available.map(p => (
+            <button key={p.id} onClick={() => addToPath(p)}
+              style={{ ...F, display:"flex", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(0,100,200,0.07)", padding:"6px 10px", cursor:"pointer", alignItems:"center", gap:"6px" }}
+              onMouseEnter={e => e.currentTarget.style.background="rgba(0,100,200,0.05)"}
+              onMouseLeave={e => e.currentTarget.style.background="transparent"}>
+              <div style={{ width:"7px", height:"7px", borderRadius:"50%", background:p.color, flexShrink:0 }} />
+              <span style={{ fontSize:"10px", color:"#0D1F35", flex:1 }}>{p.name}</span>
+              <span style={{ fontSize:"9px", color:"#5080A8" }}>{(p.item_ids||[]).length} items</span>
+            </button>
+          ))}
+          <button onClick={() => { setOpen(false); setCreating(true); }}
+            style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", padding:"6px 10px", cursor:"pointer", fontSize:"9px", color:"#D48010", letterSpacing:"0.08em", textTransform:"uppercase" }}
+            onMouseEnter={e => e.currentTarget.style.background="rgba(0,100,200,0.05)"}
+            onMouseLeave={e => e.currentTarget.style.background="transparent"}>
+            + New path…
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Paths management panel ───────────────────────────────────────────────────
+
+function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
+  const [editingId, setEditingId] = useState(null);
+  const [editName,  setEditName]  = useState("");
+  const [editDesc,  setEditDesc]  = useState("");
+  const [expanded,  setExpanded]  = useState(null);
+  const itemMap = Object.fromEntries(pool.map(n => [n.id, n]));
+
+  function moveItem(p, fromIdx, toIdx) {
+    const ids = [...(p.item_ids || [])];
+    const [moved] = ids.splice(fromIdx, 1);
+    ids.splice(toIdx, 0, moved);
+    onSavePath({ ...p, item_ids: ids });
+  }
+
+  function removeItemFromPath(p, itemId) {
+    onSavePath({ ...p, item_ids: (p.item_ids || []).filter(id => id !== itemId) });
+  }
+
+  function commitEdit(p) {
+    onSavePath({ ...p, name: editName, description: editDesc });
+    setEditingId(null);
+  }
+
+  return (
+    <div style={{ ...F, position:"absolute", bottom:"44px", left:"10px", zIndex:40, background:"rgba(224,238,255,0.99)", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"4px", padding:"12px", width:"270px", maxHeight:"72vh", overflowY:"auto", boxShadow:"0 4px 16px rgba(13,31,53,0.14)" }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px" }}>
+        <span style={{ fontSize:"9px", color:"#5080A8", letterSpacing:"0.12em", textTransform:"uppercase" }}>Reading Paths</span>
+        <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:"#5080A8", fontSize:"14px", padding:0, lineHeight:1 }}>×</button>
+      </div>
+
+      {paths.length === 0 && (
+        <div style={{ fontSize:"11px", color:"#5080A8", fontStyle:"italic" }}>No paths yet. Open any source in the garden and add it to a new path.</div>
+      )}
+
+      {paths.map(p => {
+        const isExpanded = expanded === p.id;
+        const isEditing  = editingId === p.id;
+        return (
+          <div key={p.id} style={{ marginBottom:"10px", background:"rgba(0,100,200,0.04)", border:"1px solid rgba(0,100,200,0.1)", borderLeft:"3px solid "+p.color, borderRadius:"3px", padding:"8px 10px" }}>
+
+            {/* Name row */}
+            <div style={{ display:"flex", alignItems:"center", gap:"5px" }}>
+              {isEditing ? (
+                <input value={editName} onChange={e => setEditName(e.target.value)}
+                  onKeyDown={e => { if(e.key==="Enter") commitEdit(p); if(e.key==="Escape") setEditingId(null); }}
+                  onBlur={() => commitEdit(p)} autoFocus
+                  style={{ ...F, flex:1, background:"transparent", border:"none", borderBottom:"1px solid rgba(0,100,200,0.3)", outline:"none", fontSize:"12px", color:"#0D1F35", padding:"1px 0", fontWeight:500 }} />
+              ) : (
+                <span onClick={() => { setEditingId(p.id); setEditName(p.name); setEditDesc(p.description||""); }}
+                  style={{ flex:1, fontSize:"12px", color:"#0D1F35", cursor:"text", fontWeight:500, lineHeight:1.3 }} title="Click to rename">{p.name}</span>
+              )}
+              <button onClick={() => setExpanded(v => v===p.id ? null : p.id)}
+                style={{ background:"none", border:"none", cursor:"pointer", color:"#5080A8", fontSize:"10px", padding:"0 2px", lineHeight:1, flexShrink:0 }}>
+                {(p.item_ids||[]).length} {isExpanded ? "▲" : "▼"}
+              </button>
+              <button onClick={() => onDeletePath(p.id)}
+                style={{ background:"none", border:"none", cursor:"pointer", color:"#E84E00", fontSize:"13px", padding:0, lineHeight:1, flexShrink:0, opacity:0.6 }}>×</button>
+            </div>
+
+            {/* Description */}
+            {isEditing ? (
+              <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Describe this path…" rows={2}
+                style={{ ...F, width:"100%", marginTop:"6px", background:"rgba(0,100,200,0.04)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"2px", color:"#1A3C5E", fontSize:"10px", padding:"4px 6px", resize:"none", outline:"none", boxSizing:"border-box", lineHeight:1.5, fontStyle:"italic" }} />
+            ) : (
+              <div onClick={() => { setEditingId(p.id); setEditName(p.name); setEditDesc(p.description||""); }}
+                style={{ fontSize:"10px", color: p.description ? "#5080A8" : "rgba(80,128,168,0.45)", fontStyle:"italic", marginTop:"4px", lineHeight:1.4, cursor:"text" }}>
+                {p.description ? (p.description.length>80 ? p.description.slice(0,80)+"…" : p.description) : "Add a description…"}
+              </div>
+            )}
+
+            {/* Expanded item list with reorder */}
+            {isExpanded && (p.item_ids||[]).length > 0 && (
+              <div style={{ marginTop:"8px", borderTop:"1px solid rgba(0,100,200,0.1)", paddingTop:"6px" }}>
+                {(p.item_ids||[]).map((id, idx) => {
+                  const item = itemMap[id];
+                  if (!item) return null;
+                  const last = idx === (p.item_ids||[]).length - 1;
+                  return (
+                    <div key={id} style={{ display:"flex", alignItems:"center", gap:"4px", marginBottom:"4px" }}>
+                      <span style={{ fontSize:"9px", color:p.color, fontWeight:"bold", width:"14px", flexShrink:0, textAlign:"right" }}>{idx+1}</span>
+                      <span style={{ flex:1, fontSize:"10px", color:"#0D1F35", lineHeight:1.3 }}>
+                        {item.title.length>34 ? item.title.slice(0,34)+"…" : item.title}
+                      </span>
+                      <button onClick={() => moveItem(p, idx, idx-1)} disabled={idx===0}
+                        style={{ background:"none", border:"none", cursor:idx===0?"default":"pointer", color:idx===0?"rgba(80,128,168,0.25)":"#5080A8", fontSize:"9px", padding:0, lineHeight:1, flexShrink:0 }}>▲</button>
+                      <button onClick={() => moveItem(p, idx, idx+1)} disabled={last}
+                        style={{ background:"none", border:"none", cursor:last?"default":"pointer", color:last?"rgba(80,128,168,0.25)":"#5080A8", fontSize:"9px", padding:0, lineHeight:1, flexShrink:0 }}>▼</button>
+                      <button onClick={() => removeItemFromPath(p, id)}
+                        style={{ background:"none", border:"none", cursor:"pointer", color:"#E84E00", fontSize:"11px", padding:0, lineHeight:1, flexShrink:0, opacity:0.6 }}>×</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {isExpanded && (p.item_ids||[]).length === 0 && (
+              <div style={{ marginTop:"6px", fontSize:"10px", color:"#5080A8", fontStyle:"italic" }}>No items yet.</div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -745,21 +940,24 @@ function computeBubblePositions(items, links, W, H) {
 }
 
 
-function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode, onRemove }) {
-  const svgRef     = useRef(null);
-  const simRef     = useRef(null);
-  const linksRef   = useRef([]);
-  const nodeSelRef = useRef(null);
-  const linkSelRef = useRef(null);
-  const readRef    = useRef(readItems);
-  const zoomRef    = useRef(null);   // stores d3 zoom behaviour for programmatic navigation
-  const nodesRef   = useRef([]);     // stores live node positions
+function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMode, onRemove, paths = [], onSavePath, onDeletePath }) {
+  const svgRef        = useRef(null);
+  const simRef        = useRef(null);
+  const linksRef      = useRef([]);
+  const nodeSelRef    = useRef(null);
+  const linkSelRef    = useRef(null);
+  const readRef       = useRef(readItems);
+  const zoomRef       = useRef(null);
+  const nodesRef      = useRef([]);
+  const pathGroupRef  = useRef(null);
+  const pathsRef      = useRef(paths);
 
-  const [selected,  setSelected]  = useState(null);
-  const [dimTheme,  setDimTheme]  = useState(null);
-  const [ready,     setReady]     = useState(false);
-  const [tooltip,   setTooltip]   = useState(null);
-  const [noteItem,  setNoteItem]  = useState(null);
+  const [selected,       setSelected]       = useState(null);
+  const [dimTheme,       setDimTheme]       = useState(null);
+  const [ready,          setReady]          = useState(false);
+  const [tooltip,        setTooltip]        = useState(null);
+  const [noteItem,       setNoteItem]       = useState(null);
+  const [pathsPanelOpen, setPathsPanelOpen] = useState(false);
 
   // Pan + zoom to a node by id, then open its sidebar
   const navigateToNode = useCallback((nodeId) => {
@@ -776,8 +974,43 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     setSelected({...node});
   }, []);
 
-  // Keep readRef in sync without triggering sim rebuild
+  // Keep readRef and pathsRef in sync without triggering sim rebuild
   useEffect(() => { readRef.current = readItems; }, [readItems]);
+  useEffect(() => { pathsRef.current = paths; }, [paths]);
+
+  // Draw path overlay lines + step badges from settled node positions
+  const drawPathOverlay = useCallback(() => {
+    if (!pathGroupRef.current || !nodesRef.current.length) return;
+    const pg = pathGroupRef.current;
+    const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
+    pg.selectAll("*").remove();
+    (pathsRef.current || []).forEach(p => {
+      const ids = p.item_ids || [];
+      if (ids.length < 1) return;
+      for (let i = 0; i < ids.length - 1; i++) {
+        const a = nodePos[ids[i]], b = nodePos[ids[i+1]];
+        if (!a || !b) continue;
+        pg.append("line")
+          .attr("x1", a.x).attr("y1", a.y).attr("x2", b.x).attr("y2", b.y)
+          .attr("stroke", p.color || "#D48010").attr("stroke-width", 2.5)
+          .attr("stroke-opacity", 0.55).attr("stroke-dasharray", "8 4")
+          .attr("pointer-events", "none");
+      }
+      ids.forEach((id, idx) => {
+        const pos = nodePos[id];
+        if (!pos) return;
+        pg.append("circle").attr("cx", pos.x).attr("cy", pos.y).attr("r", 9)
+          .attr("fill", p.color || "#D48010").attr("fill-opacity", 0.88)
+          .attr("pointer-events", "none");
+        pg.append("text").attr("x", pos.x).attr("y", pos.y)
+          .attr("text-anchor", "middle").attr("dominant-baseline", "central")
+          .attr("font-size", "7px").attr("fill", "white")
+          .attr("font-family", "'Palatino Linotype',Palatino,serif")
+          .attr("font-weight", "bold").attr("pointer-events", "none")
+          .text(idx + 1);
+      });
+    });
+  }, []);
 
   const connectedTitles = useMemo(() => {
     if(!selected) return [];
@@ -895,6 +1128,10 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       .style("pointer-events","none");
     linkSelRef.current = linkSel;
 
+    // Path overlay — sits between links and nodes
+    const pathGroup = g.append("g");
+    pathGroupRef.current = pathGroup;
+
     const NR = 5;
 
     // Compute degree for node sizing
@@ -920,7 +1157,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       .call(d3.drag()
         .on("start", (e,d) => { if(!e.active && simRef.current) simRef.current.alphaTarget(0.2).restart(); d.fx=d.x; d.fy=d.y; })
         .on("drag",  (e,d) => { d.fx=e.x; d.fy=e.y; })
-        .on("end",   (e,d) => { if(!e.active && simRef.current) simRef.current.alphaTarget(0); d.fx=null; d.fy=null; })
+        .on("end",   (e,d) => { if(!e.active && simRef.current) simRef.current.alphaTarget(0); d.fx=null; d.fy=null; drawPathOverlay(); })
       )
       .on("mouseenter", function(e, d) {
         const rect = svgRef.current.getBoundingClientRect();
@@ -1001,16 +1238,24 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     simRef.current = sim;
     linksRef.current = links;
-    nodesRef.current = nodes; // keep live positions for navigation
+    nodesRef.current = nodes;
 
-    return () => { sim.stop(); };
-  }, [ready, pool]); // ← readItems intentionally NOT here
+    sim.on("end", drawPathOverlay);
+    const pathTimer = setTimeout(drawPathOverlay, 2500);
+
+    return () => { sim.stop(); clearTimeout(pathTimer); };
+  }, [ready, pool]); // ← readItems, paths, drawPathOverlay intentionally NOT here
 
   // ── Opacity-only update when readItems changes — no sim restart ──
   useEffect(() => {
     if(!nodeSelRef.current) return;
     nodeSelRef.current.attr("fill-opacity", d => readItems.has(d.url) ? 0.2 : 0.82);
   }, [readItems]);
+
+  // ── Redraw path overlay whenever paths change ──
+  useEffect(() => {
+    drawPathOverlay();
+  }, [paths, drawPathOverlay]);
 
   // ── Theme filter ──
   useEffect(() => {
@@ -1073,7 +1318,34 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         {dimTheme && (
           <button onClick={() => setDimTheme(null)} style={{ ...F, background:"rgba(224,238,255,0.97)", border:"1px solid rgba(0,100,200,0.17)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", color:"#5080A8", fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase" }}>Clear</button>
         )}
+        {!publicMode && (
+          <button onClick={() => setPathsPanelOpen(v => !v)}
+            style={{ ...F, marginTop:"6px", background: pathsPanelOpen?"rgba(212,128,16,0.14)":"rgba(224,238,255,0.97)", border:"1px solid "+(pathsPanelOpen?"rgba(212,128,16,0.5)":"rgba(0,100,200,0.17)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
+            <span style={{ fontSize:"9px", letterSpacing:"0.07em", textTransform:"uppercase", color: pathsPanelOpen?"#D48010":"#1A3C5E", whiteSpace:"nowrap" }}>
+              Paths{paths.length > 0 ? ` (${paths.length})` : ""}
+            </span>
+          </button>
+        )}
       </div>
+
+      {pathsPanelOpen && !publicMode && (
+        <PathsPanel paths={paths} pool={pool} onSavePath={onSavePath} onDeletePath={onDeletePath} onClose={() => setPathsPanelOpen(false)} />
+      )}
+
+      {publicMode && paths.length > 0 && (
+        <div style={{ ...F, position:"absolute", bottom:"12px", left:"10px", zIndex:10, background:"rgba(224,238,255,0.97)", border:"1px solid rgba(0,100,200,0.14)", borderRadius:"4px", padding:"10px 12px" }}>
+          <div style={{ fontSize:"9px", color:"#5080A8", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"7px" }}>Reading Paths</div>
+          {paths.map(p => (
+            <div key={p.id} style={{ display:"flex", alignItems:"center", gap:"7px", marginBottom:"4px" }}>
+              <svg width="18" height="5" style={{ flexShrink:0 }}>
+                <line x1="0" y1="2.5" x2="18" y2="2.5" stroke={p.color} strokeWidth="2.5" strokeDasharray="5 2" />
+              </svg>
+              <span style={{ fontSize:"10px", color:"#1A3C5E" }}>{p.name}</span>
+              {p.description && <span style={{ fontSize:"9px", color:"#5080A8", fontStyle:"italic" }}>— {p.description.length>36 ? p.description.slice(0,36)+"…" : p.description}</span>}
+            </div>
+          ))}
+        </div>
+      )}
 
       <svg ref={svgRef} style={{ position:"absolute", inset:0, width:sideOpen?"calc(100% - 290px)":"100%", height:"100%", background:"transparent" }} />
 
@@ -1118,7 +1390,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         )}
       </div>
 
-      {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} />}
+      {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} paths={paths} onSavePath={onSavePath} />}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
       {!ready    && <div style={{ position:"absolute",inset:0,background:"#F0F7FF",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"11px",color:"#5080A8",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
     </div>
@@ -1294,6 +1566,7 @@ const NAV = { ...F, background:"transparent", border:"1px solid rgba(0,100,200,0
 export function PublicGardenPage() {
   const [pool,        setPool]        = useState(BUILTIN);
   const [notes,       setNotes]       = useState({});
+  const [paths,       setPaths]       = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [loaded,      setLoaded]      = useState(false);
 
@@ -1303,12 +1576,14 @@ export function PublicGardenPage() {
       supabase.from("notes").select("url, argument, thoughts, quote"),
       supabase.from("hidden_items").select("item_id"),
       supabase.from("garden_meta").select("last_updated").limit(1).single(),
-    ]).then(([{ data: cd }, { data: nd }, { data: hd }, { data: gm }]) => {
+      supabase.from("paths").select("*"),
+    ]).then(([{ data: cd }, { data: nd }, { data: hd }, { data: gm }, { data: pd }]) => {
       const hiddenSet = new Set((hd || []).map(h => h.item_id));
       const customMapped = (cd || []).map(c => ({ id: c.item_id, title: c.title, url: c.url, source: c.source, published: c.published, keywords: c.keywords || [], readingMinutes: c.reading_minutes, theme: c.theme, type: c.type }));
       setPool([...BUILTIN.filter(i => !hiddenSet.has(i.id)), ...customMapped.filter(i => !hiddenSet.has(i.id))]);
       if (nd?.length) setNotes(Object.fromEntries(nd.map(n => [n.url, { argument: n.argument, thoughts: n.thoughts, quote: n.quote || "" }])));
       if (gm?.last_updated) setLastUpdated(new Date(gm.last_updated).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" }));
+      if (pd?.length) setPaths(pd.map(p => ({ id: p.id, name: p.name, description: p.description || "", color: p.color, item_ids: p.item_ids || [] })));
       setLoaded(true);
     });
   }, []);
@@ -1330,7 +1605,7 @@ export function PublicGardenPage() {
         {lastUpdated && <span style={{ ...F, fontSize:"10px", color:"#5080A8", fontStyle:"italic", marginLeft:"auto", flexShrink:0 }}>Updated {lastUpdated}</span>}
       </div>
       <div style={{ flex:1, overflow:"hidden", position:"relative" }}>
-        <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} />
+        <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} paths={paths} />
       </div>
     </div>
   );
@@ -1431,6 +1706,7 @@ export default function App() {
   const [readItems, setReadItems] = useState(new Set());
   const [notes, setNotes]         = useState({});
   const [hiddenIds, setHiddenIds] = useState(new Set());
+  const [paths, setPaths]         = useState([]);
   const [loaded, setLoaded]       = useState(false);
   const [user,        setUser]        = useState(null);
   const [authReady,   setAuthReady]   = useState(false);
@@ -1455,11 +1731,13 @@ export default function App() {
       supabase.from("notes").select("url, argument, thoughts, quote").eq("user_id", user.id),
       supabase.from("custom_items").select("*").eq("user_id", user.id),
       supabase.from("hidden_items").select("item_id").eq("user_id", user.id),
-    ]).then(([{ data: rd }, { data: nd }, { data: cd }, { data: hd }]) => {
+      supabase.from("paths").select("*").eq("user_id", user.id),
+    ]).then(([{ data: rd }, { data: nd }, { data: cd }, { data: hd }, { data: pd }]) => {
       setReadItems(new Set((rd || []).map(r => r.url)));
-      setNotes(Object.fromEntries((nd || []).map(n => [n.url, { argument: n.argument, thoughts: n.thoughts }])));
+      setNotes(Object.fromEntries((nd || []).map(n => [n.url, { argument: n.argument, thoughts: n.thoughts, quote: n.quote || "" }])));
       setCustomItems((cd || []).map(c => ({ id: c.item_id, title: c.title, url: c.url, source: c.source, published: c.published, keywords: c.keywords || [], readingMinutes: c.reading_minutes, theme: c.theme, type: c.type })));
       setHiddenIds(new Set((hd || []).map(h => h.item_id)));
+      setPaths((pd || []).map(p => ({ id: p.id, name: p.name, description: p.description || "", color: p.color, item_ids: p.item_ids || [] })));
       setLoaded(true);
     });
   }, [user]);
@@ -1520,6 +1798,26 @@ export default function App() {
       .then(({ error }) => { if (error) console.error("hidden_items delete:", error); else bumpLastUpdated(); });
   }, [user, bumpLastUpdated]);
 
+  const savePath = useCallback((path) => {
+    setPaths(prev => {
+      const isNew = !prev.some(p => p.id === path.id);
+      if (isNew) {
+        supabase.from("paths").insert({ id: path.id, user_id: user.id, name: path.name, description: path.description || "", color: path.color, item_ids: path.item_ids, updated_at: new Date().toISOString() })
+          .then(({ error }) => { if (error) console.error("paths insert:", error); });
+        return [...prev, path];
+      }
+      supabase.from("paths").update({ name: path.name, description: path.description || "", color: path.color, item_ids: path.item_ids, updated_at: new Date().toISOString() }).eq("user_id", user.id).eq("id", path.id)
+        .then(({ error }) => { if (error) console.error("paths update:", error); });
+      return prev.map(p => p.id === path.id ? path : p);
+    });
+  }, [user]);
+
+  const deletePath = useCallback((id) => {
+    setPaths(prev => prev.filter(p => p.id !== id));
+    supabase.from("paths").delete().eq("user_id", user.id).eq("id", id)
+      .then(({ error }) => { if (error) console.error("paths delete:", error); });
+  }, [user]);
+
   const removeFromPool = useCallback(item => {
     const isCustom = customItems.some(c => c.id === item.id);
     if (isCustom) deleteItem(item.id);
@@ -1560,7 +1858,7 @@ export default function App() {
       {/* Main content */}
       <div style={{ flex:1, overflowY: tab==="garden"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
         {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} />}
-        {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} />}
+        {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} />}
         {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} />}
         {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} />}
       </div>
