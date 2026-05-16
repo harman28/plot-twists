@@ -1878,14 +1878,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       const bp = bubblePos[t.name], r = bubbleR[t.name];
       const blob = blobPath(bp.cx, bp.cy, r, ti * 31 + 7);
       bg.append("path").attr("d", blob)
-        .attr("fill", "url(#rbg_" + t.name.replace(/\s/g,"_") + ")")
-        .style("cursor", "pointer")
-        .on("click", (e) => {
-          if (!isMobileRef.current) return;
-          e.stopPropagation();
-          setMobileThemeSheet({ theme: t.name, color: t.color, items: pool.filter(n => n.theme === t.name) });
-          setSelected(null);
-        });
+        .attr("fill", "url(#rbg_" + t.name.replace(/\s/g,"_") + ")");
       bg.append("path").attr("d", blob)
         .attr("fill","none").attr("stroke", t.color)
         .attr("stroke-opacity", 0.42).attr("stroke-width", 1.8);
@@ -1905,7 +1898,14 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       const ay = bp.cy + (r + 16) * lsin;
       const label = t.name.toUpperCase();
       const FSIZ = 10.5, PX = 9, PY = 5;
-      const sg = bg.append("g").attr("filter","url(#sticker-shadow)");
+      const sg = bg.append("g").attr("filter","url(#sticker-shadow)")
+        .style("cursor", "pointer")
+        .on("click", (e) => {
+          if (!isMobileRef.current) return;
+          e.stopPropagation();
+          setMobileThemeSheet({ theme: t.name, color: t.color, items: pool.filter(n => n.theme === t.name) });
+          setSelected(null);
+        });
       const sRect = sg.append("rect").attr("rx",3).attr("fill","#FFFFFF")
         .attr("stroke",t.color).attr("stroke-width",1.5).attr("stroke-opacity",0.85);
       // Render text first so getBBox() measures actual rendered width
@@ -2358,7 +2358,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         </div>
       )}
 
-      <svg ref={svgRef} style={{ position:"absolute", inset:0, width:(sideOpen||!!selectedOrg)?"calc(100% - 290px)":"100%", height:"100%", background:"transparent" }} />
+      <svg ref={svgRef} style={{ position:"absolute", inset:0, width:(!isMobile && (sideOpen||!!selectedOrg))?"calc(100% - 290px)":"100%", height:"100%", background:"transparent" }} />
 
       {tooltip && (
         <div style={{ position:"absolute", left:tooltip.x, top:tooltip.y, transform:"translate(-50%,-100%)", background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", padding:"5px 10px", fontSize:"12.5px", color:"#1C1410", pointerEvents:"none", zIndex:50, maxWidth:"260px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", ...F }}>
@@ -2367,7 +2367,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       )}
 
       {/* Search box */}
-      <div ref={searchRef} style={{ position:"absolute", top:"10px", right: (sideOpen||!!selectedOrg) ? "300px" : "10px", zIndex:20, transition:"right 0.2s" }}>
+      <div ref={searchRef} style={{ position:"absolute", top:"10px", right: (!isMobile && (sideOpen||!!selectedOrg)) ? "300px" : "10px", zIndex:20, transition:"right 0.2s" }}>
         <div style={{ display:"flex", alignItems:"center", background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"3px", padding:"4px 8px", gap:"6px" }}>
           <span style={{ fontSize:"12.5px", color:"#B45309", opacity:0.6 }}>⌕</span>
           <input
@@ -2436,7 +2436,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       {selectedOrg && <OrgSidebar org={selectedOrg} orgLinks={orgLinks} pool={pool} onClose={() => setSelectedOrg(null)} onNavigate={nodeId => { navigateToNode(nodeId); setSelectedOrg(null); }} />}
       {isMobile && !mobileThemeSheet && !sideOpen && (
         <div style={{ position:"absolute", bottom:"14px", left:"50%", transform:"translateX(-50%)", background:"rgba(250,250,248,0.92)", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"16px", padding:"5px 14px", fontSize:"9.5px", color:"#B45309", letterSpacing:"0.08em", pointerEvents:"none", zIndex:10, whiteSpace:"nowrap" }}>
-          Tap a bubble to explore
+          Tap a node or label to explore
         </div>
       )}
       {mobileThemeSheet && (
@@ -2701,9 +2701,6 @@ export function PublicGardenPage() {
       <div style={{ height:"26px", background:"#FAFAF8", borderBottom:"1px solid rgba(194,65,12,0.15)", display:"flex", alignItems:"center", paddingLeft:"18px", flexShrink:0 }}>
         {TAB_SUBTITLES[tab] && <span style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#B45309", fontStyle:"italic" }}>{TAB_SUBTITLES[tab]}</span>}
       </div>
-
-      {/* Mobile tab strip */}
-      {isMobile && <MobileTabStrip tabs={PUBLIC_TABS} active={tab} onChange={setTab} />}
 
       {/* Content */}
       <div style={{ flex:1, overflow: tab==="garden"||tab==="field"||(tab==="paths"&&isMobile) ? "hidden" : "auto", position:"relative" }}>
