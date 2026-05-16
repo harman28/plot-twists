@@ -195,19 +195,6 @@ function TabBar({ active, onChange }) {
   );
 }
 
-function BottomTabBar({ active, onChange }) {
-  return (
-    <div style={{ position:"fixed", bottom:0, left:0, right:0, height:"56px", background:"#FAFAF8", borderTop:"1px solid rgba(194,65,12,0.35)", display:"flex", zIndex:200, backdropFilter:"blur(8px)" }}>
-      {TABS.map(t => (
-        <button key={t.id} onClick={() => onChange(t.id)}
-          style={{ flex:1, background:"transparent", border:"none", borderTop: active===t.id ? "2px solid #C2410C" : "2px solid transparent", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"2px", cursor:"pointer", color: active===t.id ? "#1C1410" : "#B45309", transition:"color 0.15s", padding:0 }}>
-          <span style={{ fontSize:"17.5px", lineHeight:1 }}>{t.icon}</span>
-          <span style={{ ...F, fontSize:"10.5px", letterSpacing:"0.08em", textTransform:"uppercase" }}>{t.label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function MobileTabStrip({ tabs, active, onChange }) {
   return (
@@ -940,7 +927,7 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
   }
 
   return (
-    <div style={{ ...F, position:"absolute", bottom:"44px", left:"10px", zIndex:40, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"4px", padding:"12px", width:"270px", maxHeight:"72vh", overflowY:"auto", boxShadow:"0 4px 16px rgba(43,45,66,0.1)" }}>
+    <div style={{ ...F, position:"absolute", bottom:"10px", left:"10px", zIndex:40, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"4px", padding:"12px", width:"270px", maxHeight:"72vh", overflowY:"auto", boxShadow:"0 4px 16px rgba(43,45,66,0.1)" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px" }}>
         <span style={{ fontSize:"10.5px", color:"#B45309", letterSpacing:"0.12em", textTransform:"uppercase" }}>Trails</span>
         <button onClick={flushAndClose} style={{ background:"none", border:"none", cursor:"pointer", color:"#B45309", fontSize:"14.5px", padding:0, lineHeight:1 }}>×</button>
@@ -1158,7 +1145,7 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
           </div>
 
           {/* Reading list */}
-          <div style={{ flex:1, overflowY:"auto", padding:"12px 44px 80px" }}>
+          <div style={{ flex:1, overflowY:"auto", padding: selectedItem && !isMobile ? "12px 302px 80px 44px" : "12px 44px 80px" }}>
             {(selected.item_ids||[]).length === 0 && (
               <div style={{ fontSize:"12.5px", color:"#B45309", fontStyle:"italic" }}>No sources in this trail yet.</div>
             )}
@@ -1413,9 +1400,9 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
     if (!sidebarItem) return [];
     const links = buildLinks(pool);
     return links
-      .filter(l => l.source?.id === sidebarItem.id || l.target?.id === sidebarItem.id)
+      .filter(l => l.source === sidebarItem.id || l.target === sidebarItem.id)
       .map(l => {
-        const oid = l.source?.id === sidebarItem.id ? l.target?.id : l.source?.id;
+        const oid = l.source === sidebarItem.id ? l.target : l.source;
         const o = pool.find(p => p.id === oid);
         return o ? { ...o, keywords: l.keywords } : null;
       })
@@ -1630,6 +1617,7 @@ function computeBubblePositions(items, links, W, H, bubbleR, themes = THEMES) {
 // ─── Org sidebar ──────────────────────────────────────────────────────────────
 
 function OrgSidebar({ org, orgLinks, pool, onClose, onNavigate }) {
+  const isMobile = useIsMobile();
   const color = STANCE_COLORS[org.stance] || "#B45309";
   const linkedItems = orgLinks
     .filter(l => l.org_id === org.id)
@@ -1642,7 +1630,12 @@ function OrgSidebar({ org, orgLinks, pool, onClose, onNavigate }) {
   }
 
   return (
-    <div style={{ position:"absolute", top:0, right:0, width:"280px", height:"100%", background:"#FAFAF8", borderLeft:"1px solid rgba(194,65,12,0.35)", display:"flex", flexDirection:"column", zIndex:30, overflow:"hidden" }}>
+    <Fragment>
+      {isMobile && <div onClick={onClose} style={{ position:"absolute", inset:0, background:"rgba(28,20,16,0.18)", zIndex:29 }} />}
+    <div style={isMobile
+      ? { ...F, position:"absolute", bottom:0, left:0, right:0, height:"72%", background:"rgba(250,250,248,1.0)", borderTop:"1px solid rgba(194,65,12,0.42)", borderRadius:"18px 18px 0 0", zIndex:30, display:"flex", flexDirection:"column", boxShadow:"0 -8px 32px rgba(28,20,16,0.12)", overflow:"hidden" }
+      : { position:"absolute", top:0, right:0, width:"280px", height:"100%", background:"#FAFAF8", borderLeft:"1px solid rgba(194,65,12,0.35)", display:"flex", flexDirection:"column", zIndex:30, overflow:"hidden" }}>
+      {isMobile && <div style={{ width:"36px", height:"4px", background:"rgba(194,65,12,0.28)", borderRadius:"2px", margin:"10px auto 4px", flexShrink:0 }} />}
       <div style={{ padding:"14px 14px 10px", borderBottom:"1px solid rgba(194,65,12,0.22)", flexShrink:0 }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"8px" }}>
           <div style={{ display:"flex", alignItems:"center", gap:"7px" }}>
@@ -1682,6 +1675,7 @@ function OrgSidebar({ org, orgLinks, pool, onClose, onNavigate }) {
         ))}
       </div>
     </div>
+    </Fragment>
   );
 }
 
@@ -2303,7 +2297,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   return (
     <div style={{ position:"relative", width:"100%", height:"100%" }}>
       {/* Theme filter pills */}
-      <div style={{ position:"absolute", top:"10px", left:"10px", zIndex:10, display:"flex", flexDirection:"column", gap:"3px" }}>
+      <div style={{ position:"absolute", top:"10px", left:"10px", zIndex:10, display:"flex", flexDirection:"column", gap:"3px", maxHeight:"calc(100% - 20px)", overflowY:"auto", scrollbarWidth:"none" }}>
         {allThemes.map(t => (
           <button key={t.name} onClick={() => setDimTheme(d => d===t.name ? null : t.name)}
             style={{ ...F, display:"flex", alignItems:"center", gap:"6px", background:dimTheme===t.name?t.color+"22":"#FAFAF8", border:"1px solid "+(dimTheme===t.name?t.color:"rgba(194,65,12,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
@@ -2482,7 +2476,7 @@ function StatBar({ value, max, color }) {
   );
 }
 
-function StatsView({ pool, readItems, notes }) {
+function StatsView({ pool, readItems, notes, customThemeColors = {} }) {
   const essays      = pool.filter(x => x.type === "essay");
   const papers      = pool.filter(x => x.type !== "essay");
   const foundational= pool.filter(x => x.type === "foundational");
@@ -2497,12 +2491,15 @@ function StatsView({ pool, readItems, notes }) {
   const totalMins   = pool.filter(x => readItems.has(x.url)).reduce((s,x) => s + x.readingMinutes, 0);
   const totalNotes  = Object.keys(notes).length;
 
-  // Per-theme breakdown
-  const themeStats  = THEMES.map(t => {
-    const all  = pool.filter(x => x.theme === t.name);
+  // Per-theme breakdown — includes custom themes
+  const allThemeNames = [...new Set(pool.map(x => x.theme))];
+  const themeStats  = allThemeNames.map(name => {
+    const builtin = THEMES.find(t => t.name === name);
+    const color = builtin ? builtin.color : customThemeColor(name, customThemeColors);
+    const all  = pool.filter(x => x.theme === name);
     const done = all.filter(x => readItems.has(x.url));
     const noted= all.filter(x => notes[x.url]);
-    return { ...t, total: all.length, read: done.length, noted: noted.length };
+    return { name, color, total: all.length, read: done.length, noted: noted.length };
   }).sort((a, b) => b.read - a.read);
 
   const maxThemeTotal = Math.max(...themeStats.map(t => t.total));
@@ -3057,7 +3054,7 @@ export default function App() {
         {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} customThemeColors={customThemeColors} />}
         {tab === "paths"    && <PathsView    paths={paths} pool={pool} notes={notes} readItems={readItems} onToggleRead={toggleRead} onOpenNote={node => { saveNote(node); }} onRemove={removeFromPool} onSavePath={savePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
         {tab === "field"    && <FieldView    orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={saveOrg} onDeleteOrg={deleteOrg} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} notes={notes} readItems={readItems} onToggleRead={toggleRead} paths={paths} />}
-        {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} />}
+        {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} customThemeColors={customThemeColors} />}
         {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} onSaveThemeColor={saveThemeColor} />}
       </div>
     </div>
