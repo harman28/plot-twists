@@ -2512,6 +2512,11 @@ export function PublicGardenPage() {
         </div>
       </div>
 
+      {/* Subtitle strip */}
+      <div style={{ height:"26px", background:"#FEFCE8", borderBottom:"1px solid rgba(245,158,11,0.15)", display:"flex", alignItems:"center", paddingLeft:"18px", flexShrink:0 }}>
+        {TAB_SUBTITLES[tab] && <span style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#A16207", fontStyle:"italic" }}>{TAB_SUBTITLES[tab]}</span>}
+      </div>
+
       {/* Content */}
       <div style={{ flex:1, overflow: tab==="garden" ? "hidden" : "auto", position:"relative" }}>
         {tab === "garden" && <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} paths={paths} orgs={orgs} orgLinks={orgLinks} />}
