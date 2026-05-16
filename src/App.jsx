@@ -253,44 +253,69 @@ function NotesModal({ item, notes, onSave, onClose }) {
 
 // ─── Dispatch item row ────────────────────────────────────────────────────────
 
-function DispatchItem({ item, show, idx, readItems, onToggleRead, notes, onOpenNote }) {
+const DISPATCH_WAVE = "M0,5 Q45,1 90,5 Q135,9 180,5 Q225,1 270,5 Q315,9 360,5 Q405,1 450,5 Q495,9 540,5";
+
+function DispatchItem({ item, show, idx, isLast, waveColor, readItems, onToggleRead, notes, onOpenNote }) {
   const c = COLOR[item.theme] || "#A16207";
   const isRead = readItems.has(item.url);
   const hasNote = !!(notes[item.url]?.argument || notes[item.url]?.thoughts || notes[item.url]?.quote);
   return (
-    <div style={{ opacity:show?(isRead?0.42:1):0, transform:show?"none":"translateY(8px)", transition:`opacity 0.35s ease ${idx*0.06}s, transform 0.35s ease ${idx*0.06}s`, borderBottom:"1px solid rgba(245,158,11,0.42)", paddingBottom:"18px", marginBottom:"18px" }}>
-      <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center", marginBottom:"7px" }}>
-        <Pill color={c}>{item.theme}</Pill>
-        {item.type==="foundational" && <Pill color="#D97706">Foundational</Pill>}
-        {item.custom && <Pill color="#A78BFA">Custom</Pill>}
-        <span style={{ fontSize:"11.5px", color:"#1A0A00" }}>{item.published}</span>
-      </div>
-      <a href={item.url} target="_blank" rel="noopener noreferrer"
-        style={{ fontSize:"15.5px", color:isRead?"#1A0A00":"#1A0A00", textDecoration:isRead?"line-through":"none", textDecorationColor:"#444", display:"block", lineHeight:"1.4", marginBottom:"8px", fontWeight:500, transition:"color 0.15s", ...F }}
-        onMouseEnter={e => { if(!isRead) e.currentTarget.style.color=c; }}
-        onMouseLeave={e => { if(!isRead) e.currentTarget.style.color="#1A0A00"; }}>
-        {item.title} <span style={{ opacity:0.3, fontSize:"12.5px" }}>↗</span>
-      </a>
-      <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center" }}>
-        <span style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic" }}>{item.source}</span>
-        <span style={{ color:"#A16207" }}>·</span>
-        {item.keywords.map((kw,j) => <span key={j} style={{ fontSize:"11.5px", color:"#D97706", background:"rgba(217,119,6,0.25)", border:"1px solid rgba(217,119,6,0.40)", padding:"1px 6px", borderRadius:"2px" }}>#{kw}</span>)}
-        <div style={{ marginLeft:"auto", display:"flex", gap:"5px" }}>
-          <button onClick={() => onOpenNote(item)}
-            style={{ ...F, background: hasNote?"rgba(219,39,119,0.22)":"rgba(254,252,232,0.98)", border: hasNote?"1px solid rgba(219,39,119,0.50)":"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", padding:"2px 8px", cursor:"pointer", fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: hasNote?"#DB2777":"#A16207" }}>
-            {hasNote ? "✎ Note" : "Note"}
-          </button>
-          <button onClick={() => onToggleRead(item.url)}
-            style={{ ...F, background: isRead?"rgba(22,163,74,0.15)":"rgba(254,252,232,0.98)", border: isRead?"1px solid rgba(22,163,74,0.50)":"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", padding:"2px 8px", cursor:"pointer", fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: isRead?"#16A34A":"#A16207" }}>
-            {isRead ? "✓ Read" : "To Read"}
-          </button>
+    <Fragment>
+      <div style={{ opacity:show?(isRead?0.42:1):0, transform:show?"none":"translateY(8px)", transition:`opacity 0.35s ease ${idx*0.06}s, transform 0.35s ease ${idx*0.06}s`, padding:"20px 0 4px" }}>
+        <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center", marginBottom:"7px" }}>
+          <Pill color={c}>{item.theme}</Pill>
+          {item.type==="foundational" && <Pill color="#D97706">Foundational</Pill>}
+          {item.custom && <Pill color="#A78BFA">Custom</Pill>}
+          <span style={{ fontSize:"11.5px", color:"#1A0A00" }}>{item.published}</span>
+        </div>
+        <a href={item.url} target="_blank" rel="noopener noreferrer"
+          style={{ fontSize:"14.5px", color:"#1A0A00", textDecoration:isRead?"line-through":"none", textDecorationColor:"#444", display:"block", lineHeight:"1.45", marginBottom:"10px", fontWeight:500, transition:"color 0.15s", ...F }}
+          onMouseEnter={e => { if(!isRead) e.currentTarget.style.color=c; }}
+          onMouseLeave={e => { if(!isRead) e.currentTarget.style.color="#1A0A00"; }}>
+          {item.title} <span style={{ opacity:0.3, fontSize:"12px" }}>↗</span>
+        </a>
+        <div style={{ display:"flex", gap:"6px", flexWrap:"wrap", alignItems:"center", paddingBottom:"4px" }}>
+          <span style={{ fontSize:"11px", color:"#A16207", fontStyle:"italic" }}>{item.source}</span>
+          {item.keywords.slice(0,2).map((kw,j) => <span key={j} style={{ fontSize:"10px", color:"#D97706", background:"rgba(217,119,6,0.12)", border:"1px solid rgba(217,119,6,0.28)", padding:"1px 5px", borderRadius:"2px" }}>#{kw}</span>)}
+          <div style={{ marginLeft:"auto", display:"flex", gap:"4px", flexShrink:0 }}>
+            <button onClick={() => onOpenNote(item)}
+              style={{ ...F, background: hasNote?"rgba(219,39,119,0.12)":"rgba(254,252,232,0.85)", border: hasNote?"1px solid rgba(219,39,119,0.40)":"1px solid rgba(245,158,11,0.38)", borderRadius:"2px", padding:"2px 7px", cursor:"pointer", fontSize:"9.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: hasNote?"#DB2777":"#A16207" }}>
+              {hasNote ? "✎ Note" : "Note"}
+            </button>
+            <button onClick={() => onToggleRead(item.url)}
+              style={{ ...F, background: isRead?"rgba(22,163,74,0.10)":"rgba(254,252,232,0.85)", border: isRead?"1px solid rgba(22,163,74,0.40)":"1px solid rgba(245,158,11,0.38)", borderRadius:"2px", padding:"2px 7px", cursor:"pointer", fontSize:"9.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: isRead?"#16A34A":"#A16207" }}>
+              {isRead ? "✓ Read" : "To Read"}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+      {!isLast && (
+        <svg width="100%" height="10" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d={DISPATCH_WAVE} fill="none" stroke={waveColor} strokeWidth="1" strokeOpacity="0.18"/>
+        </svg>
+      )}
+    </Fragment>
   );
 }
 
 // ─── Dispatch view ────────────────────────────────────────────────────────────
+
+function SectionHead({ label, sub, color }) {
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:"14px", marginBottom:"22px" }}>
+      <svg style={{ flex:1, minWidth:0 }} height="8" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d={DISPATCH_WAVE} fill="none" stroke={color} strokeWidth="1" strokeOpacity="0.4"/>
+      </svg>
+      <div style={{ textAlign:"center", flexShrink:0 }}>
+        <div style={{ ...F, fontSize:"10px", letterSpacing:"0.22em", textTransform:"uppercase", fontWeight:600, color, whiteSpace:"nowrap" }}>{label}</div>
+        <div style={{ ...F, fontSize:"10.5px", color:"#A16207", fontStyle:"italic", whiteSpace:"nowrap", marginTop:"2px" }}>{sub}</div>
+      </div>
+      <svg style={{ flex:1, minWidth:0 }} height="8" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d={DISPATCH_WAVE} fill="none" stroke={color} strokeWidth="1" strokeOpacity="0.4"/>
+      </svg>
+    </div>
+  );
+}
 
 function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
   const [date, setDate]         = useState(todayStr());
@@ -300,7 +325,6 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
   const [pickerVal, setPickerVal]   = useState(todayStr());
   const [noteItem, setNoteItem]     = useState(null);
 
-  // When pool changes (item removed/hidden), filter it out of the current issue
   useEffect(() => {
     if (!issue) return;
     const poolUrls = new Set(pool.map(i => i.url));
@@ -322,7 +346,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
   const readCount = allItems.filter(i => readItems.has(i.url)).length;
 
   return (
-    <div style={{ ...F, maxWidth:"680px", margin:"0 auto", padding:"0 24px 80px" }}>
+    <div style={{ ...F, maxWidth:"980px", margin:"0 auto", padding:"0 32px 80px" }}>
       {/* Date header */}
       <div style={{ paddingTop:"32px", paddingBottom:"20px" }}>
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"20px", flexWrap:"wrap" }}>
@@ -361,31 +385,45 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
       {issue && (
         <>
           {/* Progress bar */}
-          <div style={{ height:"2px", background:"rgba(245,158,11,0.50)", borderRadius:"1px", marginBottom:"26px", overflow:"hidden", opacity:show?1:0, transition:"opacity 0.4s ease 0.2s" }}>
+          <div style={{ height:"2px", background:"rgba(245,158,11,0.25)", borderRadius:"1px", marginBottom:"32px", overflow:"hidden", opacity:show?1:0, transition:"opacity 0.4s ease 0.2s" }}>
             <div style={{ height:"100%", width:`${allItems.length?(readCount/allItems.length)*100:0}%`, background:"#16A34A", transition:"width 0.5s", borderRadius:"1px" }} />
           </div>
 
-          {/* Section I */}
-          <div style={{ marginBottom:"40px" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:"12px", marginBottom:"20px", paddingBottom:"10px", borderBottom:"1px solid rgba(245,158,11,0.35)" }}>
-              <span style={{ fontSize:"11.5px", color:"#D97706", letterSpacing:"0.18em", textTransform:"uppercase" }}>I — In the Field</span>
-              <span style={{ fontSize:"12.5px", color:"#A16207", fontStyle:"italic" }}>Essays · Reports · Journalism</span>
+          {/* Two-column layout */}
+          <div style={{ position:"relative" }}>
+            {/* Center rule */}
+            <div style={{ position:"absolute", left:"50%", top:0, bottom:0, width:"1px", background:"linear-gradient(to bottom, transparent 0%, rgba(245,158,11,0.18) 8%, rgba(245,158,11,0.18) 92%, transparent 100%)", pointerEvents:"none" }} />
+
+            {/* Column headers */}
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0 56px", marginBottom:"8px" }}>
+              <SectionHead label="I — In the Field"   sub="Essays · Reports · Journalism" color="#D97706" />
+              <SectionHead label="II — The Literature" sub="Papers · Foundational works"   color="#1068D4" />
             </div>
-            {issue.nonAcademic.map((item,i) => <DispatchItem key={item.url} item={item} show={show} idx={i} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />)}
+
+            {/* Items */}
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0 56px" }}>
+              <div>
+                {issue.nonAcademic.map((item,i) => (
+                  <DispatchItem key={item.url} item={item} show={show} idx={i}
+                    isLast={i === issue.nonAcademic.length - 1}
+                    waveColor="#D97706"
+                    readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />
+                ))}
+              </div>
+              <div>
+                {issue.academic.map((item,i) => (
+                  <DispatchItem key={item.url} item={item} show={show} idx={i}
+                    isLast={i === issue.academic.length - 1}
+                    waveColor="#1068D4"
+                    readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Section II */}
-          <div>
-            <div style={{ display:"flex", alignItems:"center", gap:"12px", marginBottom:"20px", paddingBottom:"10px", borderBottom:"1px solid rgba(0,191,255,0.22)" }}>
-              <span style={{ fontSize:"11.5px", color:"#D97706", letterSpacing:"0.18em", textTransform:"uppercase" }}>II — The Literature</span>
-              <span style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic" }}>Papers · Foundational works</span>
-            </div>
-            {issue.academic.map((item,i) => <DispatchItem key={item.url} item={item} show={show} idx={i} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />)}
-          </div>
-
-          <div style={{ marginTop:"40px", paddingTop:"14px", borderTop:"1px solid rgba(245,158,11,0.22)", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"8px", opacity:show?1:0, transition:"opacity 0.4s ease 0.6s" }}>
+          <div style={{ marginTop:"44px", paddingTop:"14px", borderTop:"1px solid rgba(245,158,11,0.20)", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"8px", opacity:show?1:0, transition:"opacity 0.4s ease 0.6s" }}>
             <span style={{ fontSize:"11.5px", color:"#A16207", fontStyle:"italic" }}>{pool.length} items in pool · rotates daily</span>
-            <button onClick={() => load(date)} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.42)", color:"#A16207", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"4px 11px", cursor:"pointer", borderRadius:"2px" }}>Reshuffle</button>
+            <button onClick={() => load(date)} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.38)", color:"#A16207", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"4px 11px", cursor:"pointer", borderRadius:"2px" }}>Reshuffle</button>
           </div>
         </>
       )}
@@ -2743,7 +2781,6 @@ export default function App() {
         <div ref={topbarPanelRef} style={{ marginLeft:"auto", display:"flex", gap:"14px", alignItems:"center", position:"relative" }}>
           {!isMobile && totalRead > 0  && <button onClick={() => setTopbarPanel(v => v==="read"  ? null : "read")}  style={{ ...F, background:"none", border:"none", cursor:"pointer", fontSize:"12.5px", color: topbarPanel==="read"  ?"#D97706":"#A16207", textDecoration: topbarPanel==="read"  ?"underline":"none", padding:0 }}>{totalRead} read</button>}
           {!isMobile && totalNotes > 0 && <button onClick={() => setTopbarPanel(v => v==="notes" ? null : "notes")} style={{ ...F, background:"none", border:"none", cursor:"pointer", fontSize:"12.5px", color: topbarPanel==="notes" ?"#DB2777":"#A16207", textDecoration: topbarPanel==="notes" ?"underline":"none", padding:0 }}>{totalNotes} notes</button>}
-          {!isMobile && customItems.length > 0 && <span style={{ fontSize:"12.5px", color:"#A1620788" }}>+{customItems.length} custom</span>}
           <button onClick={() => supabase.auth.signOut()} style={{ ...NAV, fontSize:"11.5px", width:"auto", padding:"0 8px", letterSpacing:"0.06em" }}>Sign out</button>
           {topbarPanel && (() => {
             const items = topbarPanel === "read"
