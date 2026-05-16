@@ -209,6 +209,23 @@ function BottomTabBar({ active, onChange }) {
   );
 }
 
+function MobileTabStrip({ tabs, active, onChange }) {
+  return (
+    <div style={{ display:"flex", overflowX:"auto", scrollbarWidth:"none", msOverflowStyle:"none", background:"#FAFAF8", borderBottom:"1px solid rgba(194,65,12,0.35)", flexShrink:0 }}>
+      {tabs.map(t => (
+        <button key={t.id} onClick={() => onChange(t.id)}
+          style={{ ...F, flexShrink:0, padding:"9px 14px", background:"transparent", border:"none",
+            borderBottom: active===t.id ? "2px solid #C2410C" : "2px solid transparent",
+            color: active===t.id ? "#C2410C" : "#B45309",
+            fontSize:"10.5px", letterSpacing:"0.12em", textTransform:"uppercase",
+            cursor:"pointer", whiteSpace:"nowrap", transition:"color 0.15s" }}>
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ─── Notes modal ──────────────────────────────────────────────────────────────
 
 function NotesModal({ item, notes, onSave, onClose }) {
@@ -319,6 +336,7 @@ function SectionHead({ label, sub, color }) {
 }
 
 function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths = [], orgs = [], orgLinks = [], onSavePath, onSaveOrgLink, onDeleteOrgLink, onRemove }) {
+  const isMobile = useIsMobile();
   const [date, setDate]         = useState(todayStr());
   const [issue, setIssue]       = useState(null);
   const [show, setShow]         = useState(false);
@@ -361,7 +379,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths 
   return (
     <div style={{ position:"relative", height:"100%" }}>
     <div style={{ overflowY:"auto", height:"100%", ...F }}>
-    <div style={{ maxWidth:"980px", margin:"0 auto", padding:"0 32px 80px" }}>
+    <div style={{ maxWidth:"980px", margin:"0 auto", padding: isMobile ? "0 16px 80px" : "0 32px 80px" }}>
       {/* Date header */}
       <div style={{ paddingTop:"32px", paddingBottom:"20px" }}>
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"20px", flexWrap:"wrap" }}>
@@ -404,19 +422,19 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths 
             <div style={{ height:"100%", width:`${allItems.length?(readCount/allItems.length)*100:0}%`, background:"#16A34A", transition:"width 0.5s", borderRadius:"1px" }} />
           </div>
 
-          {/* Two-column layout */}
+          {/* Two-column layout (single column on mobile) */}
           <div style={{ position:"relative" }}>
-            {/* Center rule */}
-            <div style={{ position:"absolute", left:"50%", top:0, bottom:0, width:"1px", background:"linear-gradient(to bottom, transparent 0%, rgba(194,65,12,0.18) 8%, rgba(194,65,12,0.18) 92%, transparent 100%)", pointerEvents:"none" }} />
+            {/* Center rule — desktop only */}
+            {!isMobile && <div style={{ position:"absolute", left:"50%", top:0, bottom:0, width:"1px", background:"linear-gradient(to bottom, transparent 0%, rgba(194,65,12,0.18) 8%, rgba(194,65,12,0.18) 92%, transparent 100%)", pointerEvents:"none" }} />}
 
             {/* Column headers */}
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0 56px", marginBottom:"8px" }}>
+            <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap:"0 56px", marginBottom:"8px" }}>
               <SectionHead label="I — In the Field"   sub="Essays · Reports · Journalism" color="#C2410C" />
-              <SectionHead label="II — The Literature" sub="Papers · Foundational works"   color="#1068D4" />
+              {!isMobile && <SectionHead label="II — The Literature" sub="Papers · Foundational works"   color="#1068D4" />}
             </div>
 
             {/* Items */}
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0 56px" }}>
+            <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap:"0 56px" }}>
               <div style={{ minWidth:0 }}>
                 {issue.nonAcademic.map((item,i) => (
                   <DispatchItem key={item.url} item={item} show={show} idx={i}
@@ -428,6 +446,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths 
                 ))}
               </div>
               <div style={{ minWidth:0 }}>
+                {isMobile && <SectionHead label="II — The Literature" sub="Papers · Foundational works" color="#1068D4" />}
                 {issue.academic.map((item,i) => (
                   <DispatchItem key={item.url} item={item} show={show} idx={i}
                     isLast={i === issue.academic.length - 1}
@@ -682,13 +701,19 @@ function buildLinks(items) {
 }
 
 function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNote, connectedTitles, onNavigate, publicMode, onRemove, paths, onSavePath, orgs, orgLinks, onSaveOrgLink, onDeleteOrgLink }) {
+  const isMobile = useIsMobile();
   if(!node) return null;
   const c = COLOR[node.theme]||"#B45309";
   const isRead = readItems.has(node.url);
   const hasNote = !!(notes[node.url]?.argument||notes[node.url]?.thoughts||notes[node.url]?.quote);
   const noteData = notes[node.url];
   return (
-    <div style={{ ...F, position:"absolute", top:0, right:0, bottom:0, width:"290px", background:"rgba(250,250,248,1.0)", borderLeft:"1px solid rgba(194,65,12,0.42)", zIndex:30, display:"flex", flexDirection:"column" }}>
+    <Fragment>
+      {isMobile && <div onClick={onClose} style={{ position:"absolute", inset:0, background:"rgba(28,20,16,0.18)", zIndex:29 }} />}
+      <div style={isMobile
+        ? { ...F, position:"absolute", bottom:0, left:0, right:0, height:"78%", background:"rgba(250,250,248,1.0)", borderTop:"1px solid rgba(194,65,12,0.42)", borderRadius:"18px 18px 0 0", zIndex:30, display:"flex", flexDirection:"column", boxShadow:"0 -8px 32px rgba(28,20,16,0.12)" }
+        : { ...F, position:"absolute", top:0, right:0, bottom:0, width:"290px", background:"rgba(250,250,248,1.0)", borderLeft:"1px solid rgba(194,65,12,0.42)", zIndex:30, display:"flex", flexDirection:"column" }}>
+        {isMobile && <div style={{ width:"36px", height:"4px", background:"rgba(194,65,12,0.28)", borderRadius:"2px", margin:"10px auto 4px", flexShrink:0 }} />}
       <div style={{ padding:"14px 16px 12px", borderBottom:"1px solid rgba(194,65,12,0.50)", display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:"8px" }}>
         <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
           <Pill color={c}>{node.theme}</Pill>
@@ -798,7 +823,8 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
         </button>}
         {!publicMode && onRemove && <button onClick={() => { onRemove(node); onClose(); }} style={{ flex:1, padding:"7px 4px", background:"transparent", border:"1px solid rgba(194,65,12,0.42)", color:"#C2410C", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>Remove</button>}
       </div>
-    </div>
+      </div>
+    </Fragment>
   );
 }
 
@@ -1001,6 +1027,7 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
 const TRAIL_WAVE = "M0,4 Q15,0 30,4 Q45,8 60,4 Q75,0 90,4 Q105,8 120,4 Q135,0 150,4 Q165,8 180,4 Q195,0 210,4 Q225,8 240,4 Q255,0 270,4 Q285,8 300,4 Q315,0 330,4 Q345,8 360,4 Q375,0 390,4 Q405,8 420,4 Q435,0 450,4 Q465,8 480,4 Q495,0 510,4 Q525,8 540,4 Q555,0 570,4 Q585,8 600,4 Q615,0 630,4 Q645,8 660,4 Q675,0 690,4 Q705,8 720,4 Q735,0 750,4 Q765,8 780,4 Q795,0 810,4 Q825,8 840,4 Q855,0 870,4 Q885,8 900,4";
 
 function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, onOpenNote, onRemove, onSavePath, orgs = [], orgLinks = [], onSaveOrgLink, onDeleteOrgLink, publicMode = false }) {
+  const isMobile = useIsMobile();
   const [selectedId,   setSelectedId]   = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -1021,6 +1048,77 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
     <div style={{ ...F, maxWidth:"680px", margin:"0 auto", padding:"80px 24px", textAlign:"center" }}>
       <div style={{ fontSize:"14.5px", color:"#1C1410", fontStyle:"italic" }}>No trails yet.</div>
       <div style={{ fontSize:"12.5px", color:"#B45309", marginTop:"8px" }}>Open the Grove, click any source, and add it to a new trail from the sidebar.</div>
+    </div>
+  );
+
+  // ── Mobile: trail list ──────────────────────────────────────────────────────
+  if (isMobile && !selectedId) return (
+    <div style={{ overflowY:"auto", height:"100%" }}>
+      {paths.map(p => (
+        <button key={p.id} onClick={() => { setSelectedId(p.id); setSelectedItem(null); }}
+          style={{ display:"flex", alignItems:"center", gap:"14px", width:"100%", background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.1)", padding:"14px 18px", cursor:"pointer", textAlign:"left" }}>
+          <div style={{ width:"3px", height:"38px", borderRadius:"2px", background:p.color, flexShrink:0 }} />
+          <div style={{ flex:1 }}>
+            <div style={{ ...F, fontSize:"13.5px", color:"#1C1410", marginBottom:"3px" }}>{p.name}</div>
+            {p.description && <div style={{ ...F, fontSize:"11px", color:"#78350F", fontStyle:"italic", lineHeight:1.4 }}>{p.description}</div>}
+            <div style={{ fontSize:"9.5px", color:"#B45309", marginTop:"3px", letterSpacing:"0.1em", textTransform:"uppercase" }}>{(p.item_ids||[]).length} pieces</div>
+          </div>
+          <span style={{ fontSize:"18px", color:"rgba(194,65,12,0.35)", flexShrink:0 }}>›</span>
+        </button>
+      ))}
+    </div>
+  );
+
+  // ── Mobile: trail detail ─────────────────────────────────────────────────────
+  if (isMobile && selectedId) return (
+    <div style={{ display:"flex", flexDirection:"column", height:"100%", overflow:"hidden", position:"relative" }}>
+      <div style={{ padding:"10px 16px", borderBottom:"1px solid rgba(194,65,12,0.2)", display:"flex", alignItems:"center", gap:"12px", background:"#FAFAF8", flexShrink:0 }}>
+        <button onClick={() => { setSelectedId(null); setSelectedItem(null); }}
+          style={{ ...F, background:"none", border:"none", color:"#C2410C", cursor:"pointer", fontSize:"14px", padding:0, flexShrink:0 }}>‹ Trails</button>
+        <div style={{ flex:1 }}>
+          <div style={{ ...F, fontSize:"13px", fontWeight:500, color:"#1C1410" }}>{selected?.name}</div>
+          <div style={{ fontSize:"9.5px", color:"#B45309", letterSpacing:"0.1em", textTransform:"uppercase" }}>{(selected?.item_ids||[]).length} pieces</div>
+        </div>
+      </div>
+      <div style={{ flex:1, overflowY:"auto", padding:"0 0 80px" }}>
+        {(selected?.item_ids||[]).map((id, idx) => {
+          const item = itemMap[id];
+          if (!item) return null;
+          const c = COLOR[item.theme] || "#B45309";
+          const isLast = idx === (selected.item_ids||[]).length - 1;
+          const isOpen = selectedItem?.id === item.id;
+          return (
+            <Fragment key={id}>
+              <div onClick={() => setSelectedItem(prev => prev?.id === item.id ? null : item)}
+                style={{ display:"flex", gap:"14px", padding:"14px 18px", cursor:"pointer", alignItems:"flex-start" }}>
+                <div style={{ fontSize:"24px", fontWeight:400, opacity:0.09, lineHeight:1, paddingTop:"3px", color:"#1C1410", flexShrink:0, width:"26px", textAlign:"right" }}>{idx + 1}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center", fontSize:"9.5px", letterSpacing:"0.09em", textTransform:"uppercase", color:"#B45309", marginBottom:"5px" }}>
+                    <span style={{ padding:"1px 5px", borderRadius:"2px", border:"1px solid "+c, color:c }}>{item.theme}</span>
+                    <span>{item.source}</span>
+                  </div>
+                  <div style={{ ...F, fontSize:"13.5px", fontWeight:500, lineHeight:1.4, color: isOpen ? selected.color : "#1C1410", transition:"color 0.15s" }}>{item.title}</div>
+                </div>
+              </div>
+              {!isLast && (
+                <svg width="100%" height="8" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d={TRAIL_WAVE} fill="none" stroke={selected.color} strokeWidth="1" strokeOpacity="0.2"/>
+                </svg>
+              )}
+            </Fragment>
+          );
+        })}
+      </div>
+      {selectedItem && (
+        <GardenSidebar node={selectedItem} onClose={() => setSelectedItem(null)}
+          readItems={readItems} onToggleRead={onToggleRead || (() => {})}
+          notes={notes} onOpenNote={onOpenNote || (() => {})}
+          connectedTitles={connectedTitles} onNavigate={null}
+          publicMode={publicMode} onRemove={onRemove}
+          paths={paths} onSavePath={onSavePath || (() => {})}
+          orgs={orgs} orgLinks={orgLinks}
+          onSaveOrgLink={onSaveOrgLink || (() => {})} onDeleteOrgLink={onDeleteOrgLink || (() => {})} />
+      )}
     </div>
   );
 
@@ -1606,16 +1704,21 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   const orgLinksRef   = useRef(orgLinks);
   const showOrgsRef   = useRef(false);
 
-  const [selected,       setSelected]       = useState(null);
-  const [selectedOrg,    setSelectedOrg]    = useState(null);
-  const [dimTheme,       setDimTheme]       = useState(null);
-  const [ready,          setReady]          = useState(false);
-  const [tooltip,        setTooltip]        = useState(null);
-  const [noteItem,       setNoteItem]       = useState(null);
-  const [pathsPanelOpen,     setPathsPanelOpen]     = useState(false);
-  const [showOrgs,           setShowOrgs]           = useState(false);
-  const [trailsOpen,         setTrailsOpen]         = useState(false);
-  const [highlightedTrailId, setHighlightedTrailId] = useState(null);
+  const isMobile = useIsMobile();
+  const isMobileRef = useRef(false);
+  useEffect(() => { isMobileRef.current = isMobile; }, [isMobile]);
+
+  const [selected,          setSelected]          = useState(null);
+  const [selectedOrg,       setSelectedOrg]       = useState(null);
+  const [dimTheme,          setDimTheme]          = useState(null);
+  const [ready,             setReady]             = useState(false);
+  const [tooltip,           setTooltip]           = useState(null);
+  const [noteItem,          setNoteItem]          = useState(null);
+  const [pathsPanelOpen,    setPathsPanelOpen]    = useState(false);
+  const [showOrgs,          setShowOrgs]          = useState(false);
+  const [trailsOpen,        setTrailsOpen]        = useState(false);
+  const [highlightedTrailId,setHighlightedTrailId]= useState(null);
+  const [mobileThemeSheet,  setMobileThemeSheet]  = useState(null);
   const pathsVisibleRef      = useRef(false);
   const highlightedTrailRef  = useRef(null);
 
@@ -1775,7 +1878,14 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       const bp = bubblePos[t.name], r = bubbleR[t.name];
       const blob = blobPath(bp.cx, bp.cy, r, ti * 31 + 7);
       bg.append("path").attr("d", blob)
-        .attr("fill", "url(#rbg_" + t.name.replace(/\s/g,"_") + ")");
+        .attr("fill", "url(#rbg_" + t.name.replace(/\s/g,"_") + ")")
+        .style("cursor", "pointer")
+        .on("click", (e) => {
+          if (!isMobileRef.current) return;
+          e.stopPropagation();
+          setMobileThemeSheet({ theme: t.name, color: t.color, items: pool.filter(n => n.theme === t.name) });
+          setSelected(null);
+        });
       bg.append("path").attr("d", blob)
         .attr("fill","none").attr("stroke", t.color)
         .attr("stroke-opacity", 0.42).attr("stroke-width", 1.8);
@@ -2324,6 +2434,33 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
       {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} paths={paths} onSavePath={onSavePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={onSaveOrgLink} onDeleteOrgLink={onDeleteOrgLink} />}
       {selectedOrg && <OrgSidebar org={selectedOrg} orgLinks={orgLinks} pool={pool} onClose={() => setSelectedOrg(null)} onNavigate={nodeId => { navigateToNode(nodeId); setSelectedOrg(null); }} />}
+      {isMobile && !mobileThemeSheet && !sideOpen && (
+        <div style={{ position:"absolute", bottom:"14px", left:"50%", transform:"translateX(-50%)", background:"rgba(250,250,248,0.92)", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"16px", padding:"5px 14px", fontSize:"9.5px", color:"#B45309", letterSpacing:"0.08em", pointerEvents:"none", zIndex:10, whiteSpace:"nowrap" }}>
+          Tap a bubble to explore
+        </div>
+      )}
+      {mobileThemeSheet && (
+        <Fragment>
+          <div onClick={() => setMobileThemeSheet(null)} style={{ position:"absolute", inset:0, background:"rgba(28,20,16,0.15)", zIndex:29 }} />
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"72%", background:"#FAFAF8", borderRadius:"18px 18px 0 0", borderTop:"1px solid rgba(194,65,12,0.35)", zIndex:30, display:"flex", flexDirection:"column", boxShadow:"0 -8px 32px rgba(28,20,16,0.12)" }}>
+            <div style={{ width:"36px", height:"4px", background:"rgba(194,65,12,0.28)", borderRadius:"2px", margin:"10px auto 6px", flexShrink:0 }} />
+            <div style={{ padding:"0 16px 10px", borderBottom:"1px solid rgba(194,65,12,0.2)", flexShrink:0 }}>
+              <div style={{ fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:mobileThemeSheet.color, fontWeight:600 }}>{mobileThemeSheet.theme}</div>
+              <div style={{ ...F, fontSize:"11px", color:"#B45309", marginTop:"2px", fontStyle:"italic" }}>{mobileThemeSheet.items.length} pieces</div>
+            </div>
+            <div style={{ flex:1, overflowY:"auto" }}>
+              {mobileThemeSheet.items.map(item => (
+                <button key={item.id}
+                  onClick={() => { setSelected(item); setMobileThemeSheet(null); }}
+                  style={{ display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.1)", padding:"10px 16px", cursor:"pointer" }}>
+                  <div style={{ fontSize:"9px", color:"#B45309", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>{item.source} · {item.type}</div>
+                  <div style={{ ...F, fontSize:"12px", color:"#1C1410", lineHeight:1.4 }}>{item.title}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </Fragment>
+      )}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
       {!ready    && <div style={{ position:"absolute",inset:0,background:"#FFFFFF",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"12.5px",color:"#B45309",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
     </div>
@@ -2496,6 +2633,7 @@ function StatsView({ pool, readItems, notes }) {
 const NAV = { ...F, background:"transparent", border:"1px solid rgba(194,65,12,0.50)", color:"#B45309", width:"28px", height:"28px", borderRadius:"3px", cursor:"pointer", fontSize:"14.5px", display:"inline-flex", alignItems:"center", justifyContent:"center" };
 
 export function PublicGardenPage() {
+  const isMobile = useIsMobile();
   const [pool,        setPool]        = useState(BUILTIN);
   const [notes,       setNotes]       = useState({});
   const [paths,       setPaths]       = useState([]);
@@ -2564,8 +2702,11 @@ export function PublicGardenPage() {
         {TAB_SUBTITLES[tab] && <span style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#B45309", fontStyle:"italic" }}>{TAB_SUBTITLES[tab]}</span>}
       </div>
 
+      {/* Mobile tab strip */}
+      {isMobile && <MobileTabStrip tabs={PUBLIC_TABS} active={tab} onChange={setTab} />}
+
       {/* Content */}
-      <div style={{ flex:1, overflow: tab==="garden"||tab==="field" ? "hidden" : "auto", position:"relative" }}>
+      <div style={{ flex:1, overflow: tab==="garden"||tab==="field"||(tab==="paths"&&isMobile) ? "hidden" : "auto", position:"relative" }}>
         {tab === "garden" && <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} paths={paths} orgs={orgs} orgLinks={orgLinks} />}
         {tab === "paths"  && <PathsView paths={paths} pool={pool} notes={notes} publicMode={true} orgs={orgs} orgLinks={orgLinks} />}
         {tab === "field"  && <FieldView orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={() => {}} onDeleteOrg={() => {}} onSaveOrgLink={() => {}} onDeleteOrgLink={() => {}} publicMode={true} notes={notes} paths={paths} />}
@@ -2905,13 +3046,16 @@ export default function App() {
         </div>
       </div>
 
+      {/* Mobile tab strip (replaces bottom tab bar) */}
+      {isMobile && <MobileTabStrip tabs={TABS} active={tab} onChange={setTab} />}
+
       {/* Subtitle strip */}
       <div style={{ height:"26px", background:"#FAFAF8", borderBottom:"1px solid rgba(194,65,12,0.15)", display:"flex", alignItems:"center", paddingLeft:"18px", flexShrink:0 }}>
         {TAB_SUBTITLES[tab] && <span style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#B45309", fontStyle:"italic" }}>{TAB_SUBTITLES[tab]}</span>}
       </div>
 
       {/* Main content */}
-      <div style={{ flex:1, overflowY: tab==="garden"||tab==="dispatch"||tab==="field"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
+      <div style={{ flex:1, overflowY: tab==="garden"||tab==="dispatch"||tab==="field"||(tab==="paths"&&isMobile)?"hidden":"auto", overflowX:"hidden", position:"relative" }}>
         {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} paths={paths} orgs={orgs} orgLinks={orgLinks} onSavePath={savePath} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} onRemove={removeFromPool} />}
         {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} customThemeColors={customThemeColors} />}
         {tab === "paths"    && <PathsView    paths={paths} pool={pool} notes={notes} readItems={readItems} onToggleRead={toggleRead} onOpenNote={node => { saveNote(node); }} onRemove={removeFromPool} onSavePath={savePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
@@ -2919,8 +3063,6 @@ export default function App() {
         {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} />}
         {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} onSaveThemeColor={saveThemeColor} />}
       </div>
-
-      {isMobile && <BottomTabBar active={tab} onChange={setTab} />}
     </div>
   );
 }
