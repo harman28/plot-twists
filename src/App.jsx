@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo, useSyncExternalStore } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, useSyncExternalStore, Fragment } from "react";
 
 function useIsMobile() {
   const subscribe = useCallback(cb => {
@@ -995,7 +995,7 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
               const isLast = idx === (selected.item_ids||[]).length - 1;
               const isOpen = selectedItem?.id === item.id;
               return (
-                <React.Fragment key={id}>
+                <Fragment key={id}>
                   <div onClick={() => setSelectedItem(prev => prev?.id === item.id ? null : item)}
                     style={{ display:"grid", gridTemplateColumns:"36px 1fr", gap:"0 18px", padding:"20px 0 18px", cursor:"pointer" }}>
                     <div style={{ fontSize:"34px", fontWeight:400, opacity:0.09, textAlign:"right", lineHeight:1, paddingTop:"4px", color:"#1A0A00" }}>
@@ -1017,7 +1017,7 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
                       <path d={TRAIL_WAVE} fill="none" stroke={selected.color} strokeWidth="1" strokeOpacity="0.2"/>
                     </svg>
                   )}
-                </React.Fragment>
+                </Fragment>
               );
             })}
           </div>
