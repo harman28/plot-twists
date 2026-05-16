@@ -921,10 +921,24 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
 
 // ─── Paths view ───────────────────────────────────────────────────────────────
 
-function PathsView({ paths, pool, notes }) {
-  const [selectedId, setSelectedId] = useState(null);
+const TRAIL_WAVE = "M0,4 Q15,0 30,4 Q45,8 60,4 Q75,0 90,4 Q105,8 120,4 Q135,0 150,4 Q165,8 180,4 Q195,0 210,4 Q225,8 240,4 Q255,0 270,4 Q285,8 300,4 Q315,0 330,4 Q345,8 360,4 Q375,0 390,4 Q405,8 420,4 Q435,0 450,4 Q465,8 480,4 Q495,0 510,4 Q525,8 540,4 Q555,0 570,4 Q585,8 600,4 Q615,0 630,4 Q645,8 660,4 Q675,0 690,4 Q705,8 720,4 Q735,0 750,4 Q765,8 780,4 Q795,0 810,4 Q825,8 840,4 Q855,0 870,4 Q885,8 900,4";
+
+function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, onOpenNote, onRemove, onSavePath, orgs = [], orgLinks = [], onSaveOrgLink, onDeleteOrgLink, publicMode = false }) {
+  const [selectedId,   setSelectedId]   = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+
   const itemMap = Object.fromEntries(pool.map(n => [n.id, n]));
   const selected = paths.find(p => p.id === selectedId) || paths[0] || null;
+
+  const connectedTitles = useMemo(() => {
+    if (!selectedItem) return [];
+    const kws = new Set(selectedItem.keywords || []);
+    return pool
+      .filter(n => n.id !== selectedItem.id && (n.keywords || []).some(k => kws.has(k)))
+      .map(n => ({ ...n, keywords: (n.keywords || []).filter(k => kws.has(k)) }))
+      .sort((a, b) => b.keywords.length - a.keywords.length)
+      .slice(0, 12);
+  }, [selectedItem, pool]);
 
   if (paths.length === 0) return (
     <div style={{ ...F, maxWidth:"680px", margin:"0 auto", padding:"80px 24px", textAlign:"center" }}>
@@ -935,89 +949,102 @@ function PathsView({ paths, pool, notes }) {
 
   return (
     <div style={{ display:"flex", height:"calc(100vh - 44px)", overflow:"hidden" }}>
-      {/* Left: path list */}
-      <div style={{ width:"210px", flexShrink:0, borderRight:"1px solid rgba(245,158,11,0.35)", overflowY:"auto", padding:"14px 0" }}>
+
+      {/* ── Bookmark tabs ── */}
+      <div style={{ width:"38px", flexShrink:0, display:"flex", flexDirection:"column", overflowY:"auto", scrollbarWidth:"none" }}>
         {paths.map(p => (
-          <button key={p.id} onClick={() => setSelectedId(p.id)}
-            style={{ ...F, display:"block", width:"100%", textAlign:"left", background: selected?.id===p.id ? "rgba(245,158,11,0.28)" : "transparent", border:"none", borderLeft:"3px solid "+(selected?.id===p.id ? p.color : "transparent"), padding:"10px 14px", cursor:"pointer", transition:"all 0.15s" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:"7px", marginBottom:"3px" }}>
-              <div style={{ width:"7px", height:"7px", borderRadius:"50%", background:p.color, flexShrink:0 }} />
-              <span style={{ fontSize:"12.5px", color:"#1A0A00", fontWeight: selected?.id===p.id ? 600 : 400 }}>{p.name}</span>
-            </div>
-            {p.description && <div style={{ fontSize:"11.5px", color:"#A16207", paddingLeft:"14px", lineHeight:1.4, marginBottom:"2px", fontStyle:"italic" }}>{p.description.length>40 ? p.description.slice(0,40)+"…" : p.description}</div>}
-            <div style={{ fontSize:"11.5px", color:"#A16207", paddingLeft:"14px" }}>{(p.item_ids||[]).length} sources</div>
+          <button key={p.id}
+            onClick={() => { setSelectedId(p.id); setSelectedItem(null); }}
+            style={{ writingMode:"vertical-rl", textOrientation:"mixed", transform:"rotate(180deg)",
+              fontFamily:"'Palatino Linotype',Palatino,serif", fontSize:"9.5px", letterSpacing:"0.16em",
+              textTransform:"uppercase", fontWeight:600, color:"#FFFBEB", background:p.color,
+              border:"none", cursor:"pointer", padding:"18px 10px", whiteSpace:"nowrap",
+              flexShrink:0, textAlign:"left", transition:"opacity 0.15s, filter 0.15s",
+              opacity: selected?.id === p.id ? 1 : 0.45,
+              filter: selected?.id === p.id ? "none" : "saturate(0.5) brightness(0.85)" }}>
+            {p.name}
           </button>
         ))}
       </div>
 
-      {/* Right: curriculum detail */}
-      {selected && (
-        <div style={{ flex:1, overflowY:"auto", padding:"28px 36px 80px" }}>
-          <div style={{ marginBottom:"28px", paddingBottom:"18px", borderBottom:"2px solid "+selected.color+"33" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px" }}>
-              <div style={{ width:"10px", height:"10px", borderRadius:"50%", background:selected.color }} />
-              <h1 style={{ ...F, fontSize:"21.5px", color:"#1A0A00", fontWeight:400, margin:0, letterSpacing:"-0.01em" }}>{selected.name}</h1>
-            </div>
+      {/* ── Main pane ── */}
+      <div style={{ flex:1, background:"#FFFBEB", borderLeft:"1.5px solid rgba(245,158,11,0.22)", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
+        {selected && (<>
+
+          {/* Header */}
+          <div style={{ padding:"28px 44px 22px", flexShrink:0 }}>
+            <div style={{ width:"48px", height:"3px", borderRadius:"2px", background:selected.color, marginBottom:"18px" }} />
+            <h1 style={{ ...F, fontSize:"24px", fontWeight:400, color:"#1A0A00", letterSpacing:"-0.01em", margin:"0 0 7px" }}>{selected.name}</h1>
             {selected.description && (
-              <p style={{ ...F, fontSize:"13.5px", color:"#A16207", fontStyle:"italic", margin:"0 0 0 20px", lineHeight:1.6 }}>{selected.description}</p>
+              <p style={{ ...F, fontSize:"13px", color:"#7C5A1A", fontStyle:"italic", lineHeight:1.6, margin:"0 0 12px" }}>{selected.description}</p>
             )}
+            <div style={{ fontSize:"10px", letterSpacing:"0.12em", textTransform:"uppercase", color:"#A16207" }}>
+              {(selected.item_ids||[]).length} sources · ~{(selected.item_ids||[]).reduce((s, id) => s + (itemMap[id]?.readingMinutes || 0), 0)} min
+            </div>
           </div>
 
-          {(selected.item_ids||[]).length === 0 && (
-            <div style={{ fontSize:"12.5px", color:"#A16207", fontStyle:"italic" }}>No sources in this trail yet.</div>
-          )}
-
-          {(selected.item_ids||[]).map((id, idx) => {
-            const item = itemMap[id];
-            if (!item) return null;
-            const c = COLOR[item.theme] || "#A16207";
-            const note = notes[item.url];
-            return (
-              <div key={id} style={{ display:"flex", gap:"16px", marginBottom:"30px" }}>
-                <div style={{ flexShrink:0, width:"26px", height:"26px", borderRadius:"50%", background:selected.color, display:"flex", alignItems:"center", justifyContent:"center", marginTop:"2px" }}>
-                  <span style={{ fontSize:"11.5px", color:"white", fontWeight:"bold" }}>{idx+1}</span>
-                </div>
-                <div style={{ flex:1, borderLeft:"1px solid rgba(245,158,11,0.28)", paddingLeft:"16px" }}>
-                  <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", alignItems:"center", marginBottom:"7px" }}>
-                    <Pill color={c}>{item.theme}</Pill>
-                    {item.type==="foundational" && <Pill color="#D97706">Foundational</Pill>}
-                    <span style={{ fontSize:"11.5px", color:"#A16207" }}>{item.source} · {item.published}</span>
-                    <span style={{ fontSize:"11.5px", color:"#A16207", marginLeft:"auto" }}>{item.readingMinutes} min</span>
-                  </div>
-                  <a href={item.url} target="_blank" rel="noopener noreferrer"
-                    style={{ ...F, fontSize:"15.5px", color:"#1A0A00", textDecoration:"none", display:"block", lineHeight:"1.4", marginBottom:"12px", fontWeight:500 }}
-                    onMouseEnter={e => e.currentTarget.style.color=c}
-                    onMouseLeave={e => e.currentTarget.style.color="#1A0A00"}>
-                    {item.title} <span style={{ opacity:0.3, fontSize:"12.5px" }}>↗</span>
-                  </a>
-                  {note && (note.quote || note.argument || note.thoughts) && (
-                    <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
-                      {note.quote && (
-                        <div style={{ borderLeft:"2px solid "+selected.color+"55", paddingLeft:"10px" }}>
-                          <div style={{ fontSize:"10.5px", color:selected.color, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Quote</div>
-                          <div style={{ ...F, fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic", lineHeight:1.7 }}>{note.quote}</div>
-                        </div>
-                      )}
-                      {note.argument && (
-                        <div>
-                          <div style={{ fontSize:"10.5px", color:"#D97706", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Argument</div>
-                          <div style={{ ...F, fontSize:"12.5px", color:"#1A0A00", lineHeight:1.6 }}>{note.argument}</div>
-                        </div>
-                      )}
-                      {note.thoughts && (
-                        <div>
-                          <div style={{ fontSize:"10.5px", color:"#7A9B6A", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>My thoughts</div>
-                          <div style={{ ...F, fontSize:"12.5px", color:"#A16207", lineHeight:1.6 }}>{note.thoughts}</div>
-                        </div>
-                      )}
+          {/* Reading list */}
+          <div style={{ flex:1, overflowY:"auto", padding:"12px 44px 80px" }}>
+            {(selected.item_ids||[]).length === 0 && (
+              <div style={{ fontSize:"12.5px", color:"#A16207", fontStyle:"italic" }}>No sources in this trail yet.</div>
+            )}
+            {(selected.item_ids||[]).map((id, idx) => {
+              const item = itemMap[id];
+              if (!item) return null;
+              const c = COLOR[item.theme] || "#A16207";
+              const isLast = idx === (selected.item_ids||[]).length - 1;
+              const isOpen = selectedItem?.id === item.id;
+              return (
+                <React.Fragment key={id}>
+                  <div onClick={() => setSelectedItem(prev => prev?.id === item.id ? null : item)}
+                    style={{ display:"grid", gridTemplateColumns:"36px 1fr", gap:"0 18px", padding:"20px 0 18px", cursor:"pointer" }}>
+                    <div style={{ fontSize:"34px", fontWeight:400, opacity:0.09, textAlign:"right", lineHeight:1, paddingTop:"4px", color:"#1A0A00" }}>
+                      {idx + 1}
                     </div>
+                    <div>
+                      <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", alignItems:"center", fontSize:"10px", letterSpacing:"0.09em", textTransform:"uppercase", color:"#A16207", marginBottom:"6px" }}>
+                        <span style={{ fontSize:"9px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"1px 6px", borderRadius:"2px", border:"1px solid "+c, color:c }}>{item.theme}</span>
+                        <span>{item.source} · {item.published}</span>
+                        <span style={{ marginLeft:"auto" }}>{item.readingMinutes} min</span>
+                      </div>
+                      <div style={{ ...F, fontSize:"15.5px", fontWeight:500, lineHeight:1.4, color: isOpen ? selected.color : "#1A0A00", transition:"color 0.15s" }}>
+                        {item.title} <span style={{ opacity:0.3, fontSize:"12px" }}>↗</span>
+                      </div>
+                    </div>
+                  </div>
+                  {!isLast && (
+                    <svg width="100%" height="8" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d={TRAIL_WAVE} fill="none" stroke={selected.color} strokeWidth="1" strokeOpacity="0.2"/>
+                    </svg>
                   )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+
+          {/* Sidebar */}
+          {selectedItem && (
+            <GardenSidebar
+              node={selectedItem}
+              onClose={() => setSelectedItem(null)}
+              readItems={readItems}
+              onToggleRead={onToggleRead || (() => {})}
+              notes={notes}
+              onOpenNote={onOpenNote || (() => {})}
+              connectedTitles={connectedTitles}
+              onNavigate={null}
+              publicMode={publicMode}
+              onRemove={onRemove}
+              paths={paths}
+              onSavePath={onSavePath || (() => {})}
+              orgs={orgs}
+              orgLinks={orgLinks}
+              onSaveOrgLink={onSaveOrgLink || (() => {})}
+              onDeleteOrgLink={onDeleteOrgLink || (() => {})}
+            />
+          )}
+        </>)}
+      </div>
     </div>
   );
 }
@@ -2417,7 +2444,7 @@ export function PublicGardenPage() {
       {/* Content */}
       <div style={{ flex:1, overflow: tab==="garden" ? "hidden" : "auto", position:"relative" }}>
         {tab === "garden" && <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} paths={paths} orgs={orgs} orgLinks={orgLinks} />}
-        {tab === "paths"  && <PathsView paths={paths} pool={pool} notes={notes} />}
+        {tab === "paths"  && <PathsView paths={paths} pool={pool} notes={notes} publicMode={true} orgs={orgs} orgLinks={orgLinks} />}
         {tab === "field"  && <FieldView orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={() => {}} onDeleteOrg={() => {}} onSaveOrgLink={() => {}} onDeleteOrgLink={() => {}} publicMode={true} />}
       </div>
     </div>
@@ -2760,7 +2787,7 @@ export default function App() {
       <div style={{ flex:1, overflowY: tab==="garden"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
         {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} />}
         {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} customThemeColors={customThemeColors} />}
-        {tab === "paths"    && <PathsView    paths={paths} pool={pool} notes={notes} />}
+        {tab === "paths"    && <PathsView    paths={paths} pool={pool} notes={notes} readItems={readItems} onToggleRead={toggleRead} onOpenNote={node => { saveNote(node); }} onRemove={removeFromPool} onSavePath={savePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
         {tab === "field"    && <FieldView    orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={saveOrg} onDeleteOrg={deleteOrg} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
         {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} />}
         {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} onSaveThemeColor={saveThemeColor} />}
