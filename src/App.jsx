@@ -264,7 +264,6 @@ function DispatchItem({ item, show, idx, readItems, onToggleRead, notes, onOpenN
         {item.type==="foundational" && <Pill color="#D97706">Foundational</Pill>}
         {item.custom && <Pill color="#A78BFA">Custom</Pill>}
         <span style={{ fontSize:"11.5px", color:"#1A0A00" }}>{item.published}</span>
-        <span style={{ fontSize:"11.5px", color:"#1A0A00", marginLeft:"auto" }}>{item.readingMinutes} min</span>
       </div>
       <a href={item.url} target="_blank" rel="noopener noreferrer"
         style={{ fontSize:"15.5px", color:isRead?"#1A0A00":"#1A0A00", textDecoration:isRead?"line-through":"none", textDecorationColor:"#444", display:"block", lineHeight:"1.4", marginBottom:"8px", fontWeight:500, transition:"color 0.15s", ...F }}
@@ -426,7 +425,6 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
     if(!form.url.trim()) e.url = "Required";
     if(!form.source.trim()) e.source = "Required";
     if(!form.published.trim()) e.published = "Required";
-    if(!form.readingMinutes || isNaN(parseInt(form.readingMinutes))) e.readingMinutes = "Must be a number";
     if(form.theme === "__other__" && !form.customTheme.trim()) e.customTheme = "Enter a theme name";
     if(form.keywords.length === 0) e.keywords = "Add at least one keyword";
     return e;
@@ -488,11 +486,6 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
           <label style={labelStyle}>Published *</label>
           <input value={form.published} onChange={e=>set("published",e.target.value)} placeholder="e.g. Mar 2024" style={inputStyle} />
           {errors.published && <div style={errStyle}>{errors.published}</div>}
-        </div>
-        <div>
-          <label style={labelStyle}>Reading time (minutes) *</label>
-          <input value={form.readingMinutes} onChange={e=>set("readingMinutes",e.target.value)} type="number" min="1" placeholder="e.g. 12" style={inputStyle} />
-          {errors.readingMinutes && <div style={errStyle}>{errors.readingMinutes}</div>}
         </div>
         <div>
           <label style={labelStyle}>Theme *</label>
@@ -564,7 +557,7 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
                   <Pill color={COLOR[item.theme]||"#A16207"}>{item.theme}</Pill>
                 </div>
                 <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:"13.5px", color:"#1A0A00", textDecoration:"none", display:"block", marginBottom:"3px" }}>{item.title} ↗</a>
-                <div style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic" }}>{item.source} · {item.published} · {item.readingMinutes} min</div>
+                <div style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic" }}>{item.source} · {item.published}</div>
               </div>
               <button onClick={() => onDelete(item.id)} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.42)", color:"#D97706", padding:"3px 9px", borderRadius:"3px", cursor:"pointer", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", flexShrink:0 }}>Remove</button>
             </div>
@@ -628,7 +621,7 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
       <div style={{ flex:1, overflowY:"auto", padding:"14px 16px" }}>
         <div style={{ fontSize:"15.5px", color:"#1A0A00", lineHeight:"1.4", marginBottom:"8px", fontWeight:500 }}>{node.title}</div>
         <div style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic", marginBottom:"3px" }}>{node.source}</div>
-        <div style={{ fontSize:"11.5px", color:"#1A0A00", marginBottom:"12px" }}>{node.published} · {node.readingMinutes} min</div>
+        <div style={{ fontSize:"11.5px", color:"#1A0A00", marginBottom:"12px" }}>{node.published}</div>
         <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginBottom:"14px" }}>
           {node.keywords.map((kw,i) => <span key={i} style={{ fontSize:"11.5px", color:c, background:c+"14", border:"1px solid "+c+"30", padding:"2px 7px", borderRadius:"2px" }}>#{kw}</span>)}
         </div>
@@ -973,13 +966,12 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
 
           {/* Header */}
           <div style={{ padding:"28px 44px 22px", flexShrink:0 }}>
-            <div style={{ width:"48px", height:"3px", borderRadius:"2px", background:selected.color, marginBottom:"18px" }} />
             <h1 style={{ ...F, fontSize:"24px", fontWeight:400, color:"#1A0A00", letterSpacing:"-0.01em", margin:"0 0 7px" }}>{selected.name}</h1>
             {selected.description && (
               <p style={{ ...F, fontSize:"13px", color:"#7C5A1A", fontStyle:"italic", lineHeight:1.6, margin:"0 0 12px" }}>{selected.description}</p>
             )}
             <div style={{ fontSize:"10px", letterSpacing:"0.12em", textTransform:"uppercase", color:"#A16207" }}>
-              {(selected.item_ids||[]).length} sources · ~{(selected.item_ids||[]).reduce((s, id) => s + (itemMap[id]?.readingMinutes || 0), 0)} min
+              {(selected.item_ids||[]).length} sources
             </div>
           </div>
 
@@ -1005,7 +997,6 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
                       <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", alignItems:"center", fontSize:"10px", letterSpacing:"0.09em", textTransform:"uppercase", color:"#A16207", marginBottom:"6px" }}>
                         <span style={{ fontSize:"9px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"1px 6px", borderRadius:"2px", border:"1px solid "+c, color:c }}>{item.theme}</span>
                         <span>{item.source} · {item.published}</span>
-                        <span style={{ marginLeft:"auto" }}>{item.readingMinutes} min</span>
                       </div>
                       <div style={{ ...F, fontSize:"15.5px", fontWeight:500, lineHeight:1.4, color: isOpen ? selected.color : "#1A0A00", transition:"color 0.15s" }}>
                         {item.title} <span style={{ opacity:0.3, fontSize:"12px" }}>↗</span>
@@ -1240,7 +1231,6 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:"28px", gap:"12px", flexWrap:"wrap" }}>
         <div>
           <h2 style={{ fontSize:"19.5px", color:"#1A0A00", fontWeight:400, margin:"0 0 5px" }}>The Field</h2>
-          <p style={{ ...F, fontSize:"12.5px", color:"#A16207", fontStyle:"italic", margin:0 }}>Organisations, labs, journals, and actors shaping the discourse.</p>
         </div>
         {!publicMode && <button onClick={() => { setEditOrg(null); setShowAdd(true); }}
           style={{ ...F, background:"transparent", border:"1px solid #D97706", color:"#D97706", padding:"7px 16px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", flexShrink:0 }}>
@@ -2266,7 +2256,6 @@ function StatsView({ pool, readItems, notes }) {
           { label:"Total read",    value: totalRead,  sub: `of ${pool.length}`,   color:"#16A34A" },
           { label:"Essays read",   value: readEssays.length, sub:`of ${essays.length}`, color:"#D97706" },
           { label:"Papers read",   value: readPapers.length, sub:`of ${papers.length}`, color:"#7A9B6A" },
-          { label:"Time invested", value: timeStr,    sub:"reading time",          color:"#A78BFA" },
           { label:"Notes written", value: totalNotes, sub:`across ${pool.length} items`, color:"#D97706" },
         ].map(s => (
           <div key={s.label} style={{ background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.50)", borderTop:"2px solid "+s.color, borderRadius:"3px", padding:"14px 14px 12px" }}>
