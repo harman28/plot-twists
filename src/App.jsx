@@ -1821,6 +1821,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         });
         nodeSel.attr("cx",d=>d.x).attr("cy",d=>d.y);
         labelSel.attr("x",d=>d.x).attr("y",d=>d.y);
+        drawPathOverlay();
+        drawOrgOverlay();
       });
 
     simRef.current = sim;
