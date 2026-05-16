@@ -1220,7 +1220,7 @@ function AddOrgModal({ org, onSave, onClose }) {
 
 // ─── Org card ─────────────────────────────────────────────────────────────────
 
-function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onSaveOrgLink, onDeleteOrgLink, publicMode }) {
+function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onSaveOrgLink, onDeleteOrgLink, onOpenSidebar, publicMode }) {
   const [searchQ, setSearchQ]       = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const color = STANCE_COLORS[org.stance] || "#B45309";
@@ -1268,7 +1268,10 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
             <div key={item.id} style={{ display:"flex", alignItems:"baseline", gap:"8px", marginBottom:"6px" }}>
               <span style={{ fontSize:"9px", color:"#B45309", flexShrink:0 }}>◆</span>
               <span style={{ ...F, fontSize:"10.5px", letterSpacing:"0.07em", textTransform:"uppercase", color:COLOR[item.theme]||"#B45309", flexShrink:0 }}>{item.theme}</span>
-              <span style={{ ...F, fontSize:"12.5px", color:"#1C1410", flex:1, lineHeight:1.35 }}>{item.title.length > 60 ? item.title.slice(0, 60)+"…" : item.title}</span>
+              <button onClick={() => onOpenSidebar && onOpenSidebar(item)}
+                style={{ ...F, background:"none", border:"none", padding:0, cursor: onOpenSidebar ? "pointer" : "default", textAlign:"left", fontSize:"12.5px", color:"#1C1410", flex:1, lineHeight:1.35 }}>
+                {item.title.length > 60 ? item.title.slice(0, 60)+"…" : item.title}
+              </button>
               {!publicMode && <button onClick={() => onDeleteOrgLink(org.id, item.id)} style={{ background:"none", border:"none", cursor:"pointer", color:"#C2410C", fontSize:"12px", padding:0, opacity:0.5, flexShrink:0 }}>×</button>}
             </div>
           ))}
@@ -1301,17 +1304,34 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
 
 // ─── Field view ───────────────────────────────────────────────────────────────
 
-function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink, onDeleteOrgLink, publicMode }) {
+function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink, onDeleteOrgLink, publicMode, notes = {}, readItems = new Set(), onToggleRead, paths = [] }) {
   const [showAdd,          setShowAdd]          = useState(false);
   const [editOrg,          setEditOrg]          = useState(null);
   const [expanded,         setExpanded]         = useState(null);
   const [collapsedStances, setCollapsedStances] = useState(new Set());
+  const [sidebarItem,      setSidebarItem]      = useState(null);
+
+  const connectedTitles = useMemo(() => {
+    if (!sidebarItem) return [];
+    const links = buildLinks(pool);
+    return links
+      .filter(l => l.source?.id === sidebarItem.id || l.target?.id === sidebarItem.id)
+      .map(l => {
+        const oid = l.source?.id === sidebarItem.id ? l.target?.id : l.source?.id;
+        const o = pool.find(p => p.id === oid);
+        return o ? { ...o, keywords: l.keywords } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.keywords.length - a.keywords.length);
+  }, [sidebarItem, pool]);
 
   const grouped = Object.fromEntries(ORG_STANCES.map(s => [s, []]));
   orgs.forEach(org => { (grouped[org.stance] || grouped["Industry"]).push(org); });
 
   return (
-    <div style={{ ...F, maxWidth:"800px", margin:"0 auto", padding:"28px 24px 80px" }}>
+    <div style={{ position:"relative", height:"100%" }}>
+    <div style={{ overflowY:"auto", height:"100%", ...F }}>
+    <div style={{ maxWidth:"800px", margin:"0 auto", padding:"28px 24px 80px" }}>
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:"28px", gap:"12px", flexWrap:"wrap" }}>
         <div>
         </div>
@@ -1359,6 +1379,7 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
                     onDelete={() => onDeleteOrg(org.id)}
                     onSaveOrgLink={onSaveOrgLink}
                     onDeleteOrgLink={onDeleteOrgLink}
+                    onOpenSidebar={setSidebarItem}
                     publicMode={publicMode} />
                 ))}
               </div>
@@ -1372,6 +1393,28 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
           onSave={org => { onSaveOrg(org); setShowAdd(false); setEditOrg(null); }}
           onClose={() => { setShowAdd(false); setEditOrg(null); }} />
       )}
+    </div>
+    </div>
+    {sidebarItem && (
+      <GardenSidebar
+        node={sidebarItem}
+        onClose={() => setSidebarItem(null)}
+        readItems={readItems}
+        onToggleRead={onToggleRead}
+        notes={notes}
+        onOpenNote={null}
+        connectedTitles={connectedTitles}
+        onNavigate={null}
+        publicMode={publicMode}
+        onRemove={null}
+        paths={paths}
+        onSavePath={null}
+        orgs={orgs}
+        orgLinks={orgLinks}
+        onSaveOrgLink={onSaveOrgLink}
+        onDeleteOrgLink={onDeleteOrgLink}
+      />
+    )}
     </div>
   );
 }
@@ -2522,10 +2565,10 @@ export function PublicGardenPage() {
       </div>
 
       {/* Content */}
-      <div style={{ flex:1, overflow: tab==="garden" ? "hidden" : "auto", position:"relative" }}>
+      <div style={{ flex:1, overflow: tab==="garden"||tab==="field" ? "hidden" : "auto", position:"relative" }}>
         {tab === "garden" && <GardenView pool={pool} readItems={new Set()} onToggleRead={() => {}} notes={notes} onSaveNote={() => {}} publicMode={true} paths={paths} orgs={orgs} orgLinks={orgLinks} />}
         {tab === "paths"  && <PathsView paths={paths} pool={pool} notes={notes} publicMode={true} orgs={orgs} orgLinks={orgLinks} />}
-        {tab === "field"  && <FieldView orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={() => {}} onDeleteOrg={() => {}} onSaveOrgLink={() => {}} onDeleteOrgLink={() => {}} publicMode={true} />}
+        {tab === "field"  && <FieldView orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={() => {}} onDeleteOrg={() => {}} onSaveOrgLink={() => {}} onDeleteOrgLink={() => {}} publicMode={true} notes={notes} paths={paths} />}
       </div>
     </div>
   );
@@ -2868,11 +2911,11 @@ export default function App() {
       </div>
 
       {/* Main content */}
-      <div style={{ flex:1, overflowY: tab==="garden"||tab==="dispatch"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
+      <div style={{ flex:1, overflowY: tab==="garden"||tab==="dispatch"||tab==="field"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
         {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} paths={paths} orgs={orgs} orgLinks={orgLinks} onSavePath={savePath} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} onRemove={removeFromPool} />}
         {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} customThemeColors={customThemeColors} />}
         {tab === "paths"    && <PathsView    paths={paths} pool={pool} notes={notes} readItems={readItems} onToggleRead={toggleRead} onOpenNote={node => { saveNote(node); }} onRemove={removeFromPool} onSavePath={savePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
-        {tab === "field"    && <FieldView    orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={saveOrg} onDeleteOrg={deleteOrg} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
+        {tab === "field"    && <FieldView    orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={saveOrg} onDeleteOrg={deleteOrg} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} notes={notes} readItems={readItems} onToggleRead={toggleRead} paths={paths} />}
         {tab === "stats"    && <StatsView    pool={pool} readItems={readItems} notes={notes} />}
         {tab === "add"      && <AddSourceView pool={pool} onAdd={addItem} onDelete={deleteItem} hiddenIds={hiddenIds} allBuiltin={BUILTIN} onHide={hideItem} onRestore={restoreItem} onSaveThemeColor={saveThemeColor} />}
       </div>
