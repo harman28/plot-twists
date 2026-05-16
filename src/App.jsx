@@ -177,6 +177,12 @@ const TABS = [
   { id:"add",      label:"Sow",       icon:"＋" },
 ];
 
+const TAB_SUBTITLES = {
+  garden: "Network of knowledge, ideas, and theories",
+  paths:  "Theme specific curriculum for the intellectually curious",
+  field:  "Actors shaping the discourse",
+};
+
 function TabBar({ active, onChange }) {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:0, height:"100%" }}>
@@ -312,7 +318,7 @@ function SectionHead({ label, sub, color }) {
   );
 }
 
-function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
+function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths = [], orgs = [], orgLinks = [], onSavePath, onSaveOrgLink, onDeleteOrgLink, onRemove }) {
   const [date, setDate]         = useState(todayStr());
   const [issue, setIssue]       = useState(null);
   const [show, setShow]         = useState(false);
@@ -455,13 +461,13 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
         connectedTitles={connectedTitles}
         onNavigate={null}
         publicMode={false}
-        onRemove={null}
-        paths={[]}
-        onSavePath={() => {}}
-        orgs={[]}
-        orgLinks={[]}
-        onSaveOrgLink={() => {}}
-        onDeleteOrgLink={() => {}}
+        onRemove={onRemove ? it => { onRemove(it); setSidebarItem(null); } : null}
+        paths={paths}
+        onSavePath={onSavePath || (() => {})}
+        orgs={orgs}
+        orgLinks={orgLinks}
+        onSaveOrgLink={onSaveOrgLink || (() => {})}
+        onDeleteOrgLink={onDeleteOrgLink || (() => {})}
       />
     )}
     </div>
@@ -1019,7 +1025,7 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
   );
 
   return (
-    <div style={{ display:"flex", height:"calc(100vh - 44px)", overflow:"hidden" }}>
+    <div style={{ display:"flex", height:"100%", overflow:"hidden" }}>
 
       {/* ── Bookmark tabs ── */}
       <div style={{ width:"38px", flexShrink:0, display:"flex", flexDirection:"column", overflowY:"auto", scrollbarWidth:"none" }}>
@@ -1044,7 +1050,6 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
 
           {/* Header */}
           <div style={{ padding:"28px 44px 22px", flexShrink:0 }}>
-            <div style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#A16207", fontStyle:"italic", marginBottom:"12px" }}>Theme specific curriculum for the intellectually curious</div>
             <h1 style={{ ...F, fontSize:"24px", fontWeight:400, color:"#1A0A00", letterSpacing:"-0.01em", margin:"0 0 7px" }}>{selected.name}</h1>
             {selected.description && (
               <p style={{ ...F, fontSize:"13px", color:"#7C5A1A", fontStyle:"italic", lineHeight:1.6, margin:"0 0 12px" }}>{selected.description}</p>
@@ -1309,7 +1314,6 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
     <div style={{ ...F, maxWidth:"800px", margin:"0 auto", padding:"28px 24px 80px" }}>
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:"28px", gap:"12px", flexWrap:"wrap" }}>
         <div>
-          <h2 style={{ fontSize:"19.5px", color:"#1A0A00", fontWeight:400, margin:"0 0 5px" }}>Actors shaping the discourse</h2>
         </div>
         {!publicMode && <button onClick={() => { setEditOrg(null); setShowAdd(true); }}
           style={{ ...F, background:"transparent", border:"1px solid #D97706", color:"#D97706", padding:"7px 16px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", flexShrink:0 }}>
@@ -2271,10 +2275,6 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         )}
       </div>
 
-      <div style={{ position:"absolute", bottom:"14px", right: sideOpen||!!selectedOrg ? "304px" : "14px", transition:"right 0.2s", pointerEvents:"none", zIndex:5 }}>
-        <span style={{ ...F, fontSize:"10px", letterSpacing:"0.16em", textTransform:"uppercase", color:"#A16207", opacity:0.45, fontStyle:"italic" }}>Network of knowledge, ideas, and theories</span>
-      </div>
-
       {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} paths={paths} onSavePath={onSavePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={onSaveOrgLink} onDeleteOrgLink={onDeleteOrgLink} />}
       {selectedOrg && <OrgSidebar org={selectedOrg} orgLinks={orgLinks} pool={pool} onClose={() => setSelectedOrg(null)} onNavigate={nodeId => { navigateToNode(nodeId); setSelectedOrg(null); }} />}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
@@ -2853,9 +2853,14 @@ export default function App() {
         </div>
       </div>
 
+      {/* Subtitle strip */}
+      <div style={{ height:"26px", background:"#FEFCE8", borderBottom:"1px solid rgba(245,158,11,0.15)", display:"flex", alignItems:"center", paddingLeft:"18px", flexShrink:0 }}>
+        {TAB_SUBTITLES[tab] && <span style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#A16207", fontStyle:"italic" }}>{TAB_SUBTITLES[tab]}</span>}
+      </div>
+
       {/* Main content */}
       <div style={{ flex:1, overflowY: tab==="garden"||tab==="dispatch"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
-        {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} />}
+        {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} paths={paths} orgs={orgs} orgLinks={orgLinks} onSavePath={savePath} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} onRemove={removeFromPool} />}
         {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} customThemeColors={customThemeColors} />}
         {tab === "paths"    && <PathsView    paths={paths} pool={pool} notes={notes} readItems={readItems} onToggleRead={toggleRead} onOpenNote={node => { saveNote(node); }} onRemove={removeFromPool} onSavePath={savePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
         {tab === "field"    && <FieldView    orgs={orgs} orgLinks={orgLinks} pool={pool} onSaveOrg={saveOrg} onDeleteOrg={deleteOrg} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
