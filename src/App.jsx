@@ -1237,11 +1237,15 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
             <button
               onClick={() => setCollapsedStances(prev => { const s = new Set(prev); s.has(stance) ? s.delete(stance) : s.add(stance); return s; })}
               style={{ width:"100%", display:"flex", alignItems:"center", gap:"14px", marginBottom: isCollapsed ? 0 : "4px", padding:"8px 0", background:"none", border:"none", cursor:"pointer" }}>
-              <div style={{ flex:1, height:"1px", background:color, opacity:0.3 }} />
+              <svg style={{ flex:1 }} height="8" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,4 Q15,0 30,4 Q45,8 60,4 Q75,0 90,4 Q105,8 120,4 Q135,0 150,4 Q165,8 180,4 Q195,0 210,4 Q225,8 240,4 Q255,0 270,4 Q285,8 300,4 Q315,0 330,4 Q345,8 360,4 Q375,0 390,4 Q405,8 420,4 Q435,0 450,4 Q465,8 480,4 Q495,0 510,4 Q525,8 540,4 Q555,0 570,4 Q585,8 600,4" fill="none" stroke={color} strokeWidth="1" strokeOpacity="0.4"/>
+              </svg>
               <span style={{ ...F, fontSize:"10px", letterSpacing:"0.22em", textTransform:"uppercase", fontWeight:600, color, whiteSpace:"nowrap" }}>
                 {stance} {isCollapsed ? "▸" : "▾"}
               </span>
-              <div style={{ flex:1, height:"1px", background:color, opacity:0.3 }} />
+              <svg style={{ flex:1 }} height="8" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,4 Q15,0 30,4 Q45,8 60,4 Q75,0 90,4 Q105,8 120,4 Q135,0 150,4 Q165,8 180,4 Q195,0 210,4 Q225,8 240,4 Q255,0 270,4 Q285,8 300,4 Q315,0 330,4 Q345,8 360,4 Q375,0 390,4 Q405,8 420,4 Q435,0 450,4 Q465,8 480,4 Q495,0 510,4 Q525,8 540,4 Q555,0 570,4 Q585,8 600,4" fill="none" stroke={color} strokeWidth="1" strokeOpacity="0.4"/>
+              </svg>
             </button>
             {!isCollapsed && (
               <div style={{ display:"flex", flexDirection:"column" }}>
