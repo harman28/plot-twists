@@ -302,15 +302,15 @@ function DispatchItem({ item, show, idx, isLast, waveColor, readItems, onToggleR
 
 function SectionHead({ label, sub, color }) {
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:"14px", marginBottom:"22px" }}>
-      <svg style={{ flex:1, minWidth:0 }} height="8" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <div style={{ display:"flex", alignItems:"center", gap:"14px", marginBottom:"22px", minWidth:0 }}>
+      <svg style={{ flex:1, minWidth:0 }} width="0" height="8" viewBox="0 0 540 10" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <path d={DISPATCH_WAVE} fill="none" stroke={color} strokeWidth="1" strokeOpacity="0.4"/>
       </svg>
       <div style={{ textAlign:"center", flexShrink:0 }}>
         <div style={{ ...F, fontSize:"10px", letterSpacing:"0.22em", textTransform:"uppercase", fontWeight:600, color, whiteSpace:"nowrap" }}>{label}</div>
         <div style={{ ...F, fontSize:"10.5px", color:"#A16207", fontStyle:"italic", whiteSpace:"nowrap", marginTop:"2px" }}>{sub}</div>
       </div>
-      <svg style={{ flex:1, minWidth:0 }} height="8" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <svg style={{ flex:1, minWidth:0 }} width="0" height="8" viewBox="0 0 540 10" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <path d={DISPATCH_WAVE} fill="none" stroke={color} strokeWidth="1" strokeOpacity="0.4"/>
       </svg>
     </div>
@@ -402,7 +402,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
 
             {/* Items */}
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0 56px" }}>
-              <div>
+              <div style={{ minWidth:0 }}>
                 {issue.nonAcademic.map((item,i) => (
                   <DispatchItem key={item.url} item={item} show={show} idx={i}
                     isLast={i === issue.nonAcademic.length - 1}
@@ -410,7 +410,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
                     readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />
                 ))}
               </div>
-              <div>
+              <div style={{ minWidth:0 }}>
                 {issue.academic.map((item,i) => (
                   <DispatchItem key={item.url} item={item} show={show} idx={i}
                     isLast={i === issue.academic.length - 1}
