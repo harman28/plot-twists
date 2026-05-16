@@ -1119,7 +1119,7 @@ function AddOrgModal({ org, onSave, onClose }) {
 // ─── Org card ─────────────────────────────────────────────────────────────────
 
 function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onSaveOrgLink, onDeleteOrgLink, publicMode }) {
-  const [searchQ, setSearchQ]     = useState("");
+  const [searchQ, setSearchQ]       = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const color = STANCE_COLORS[org.stance] || "#A16207";
   const itemMap = Object.fromEntries(pool.map(n => [n.id, n]));
@@ -1129,36 +1129,45 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
     const q = searchQ.trim().toLowerCase();
     if (!q) return [];
     const linkedIds = new Set(links.map(l => l.item_id));
-    return pool.filter(i => !linkedIds.has(i.id) && (i.title.toLowerCase().includes(q) || i.source.toLowerCase().includes(q))).slice(0,6);
+    return pool.filter(i => !linkedIds.has(i.id) && (i.title.toLowerCase().includes(q) || i.source.toLowerCase().includes(q))).slice(0, 6);
   }, [searchQ, pool, links]);
 
   return (
-    <div style={{ background:"rgba(254,252,232,0.97)", border:"1px solid rgba(245,158,11,0.28)", borderLeft:"3px solid "+color, borderRadius:"3px", padding:"10px 14px" }}>
-      <div style={{ display:"flex", alignItems:"flex-start", gap:"8px" }}>
+    <div style={{ borderBottom:"1px solid rgba(26,10,0,0.07)", padding:"14px 0" }}>
+      <div style={{ display:"flex", alignItems:"flex-start", gap:"16px" }}>
         <div style={{ flex:1 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"3px" }}>
-            <span style={{ ...F, fontSize:"13.5px", color:"#1A0A00", fontWeight:500 }}>{org.name}</span>
-            {org.website && <a href={org.website} target="_blank" rel="noopener noreferrer" style={{ fontSize:"11.5px", color, textDecoration:"none" }}>↗</a>}
+          <div style={{ display:"flex", alignItems:"baseline", gap:"8px", marginBottom: org.description ? "4px" : 0 }}>
+            {org.website
+              ? <a href={org.website} target="_blank" rel="noopener noreferrer"
+                  style={{ ...F, fontSize:"15px", fontWeight:500, color:"#1A0A00", textDecoration:"none", borderBottom:"1px solid rgba(26,10,0,0.2)", transition:"border-color 0.15s" }}
+                  onMouseEnter={e => e.currentTarget.style.borderBottomColor = color}
+                  onMouseLeave={e => e.currentTarget.style.borderBottomColor = "rgba(26,10,0,0.2)"}>
+                  {org.name}
+                </a>
+              : <span style={{ ...F, fontSize:"15px", fontWeight:500, color:"#1A0A00" }}>{org.name}</span>
+            }
+            {!publicMode && <>
+              <button onClick={onEdit}   style={{ background:"none", border:"none", cursor:"pointer", color:"#A16207", fontSize:"12px",  padding:"0 2px", opacity:0.5 }}>✎</button>
+              <button onClick={onDelete} style={{ background:"none", border:"none", cursor:"pointer", color:"#D97706", fontSize:"13px",  padding:0,       opacity:0.4 }}>×</button>
+            </>}
           </div>
-          {org.description && <div style={{ ...F, fontSize:"12.5px", color:"#A16207", fontStyle:"italic", lineHeight:1.4 }}>{org.description}</div>}
+          {org.description && <div style={{ ...F, fontSize:"12.5px", color:"#7C5A1A", fontStyle:"italic", lineHeight:1.5 }}>{org.description}</div>}
         </div>
-        <div style={{ display:"flex", gap:"4px", alignItems:"center", flexShrink:0 }}>
-          <button onClick={onToggle}
-            style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", fontSize:"10.5px", color:"#A16207", letterSpacing:"0.07em", whiteSpace:"nowrap" }}>
-            {links.length} {links.length===1?"article":"articles"} {isExpanded?"▲":"▼"}
-          </button>
-          {!publicMode && <button onClick={onEdit} style={{ background:"none", border:"none", cursor:"pointer", color:"#A16207", fontSize:"12.5px", padding:"0 2px" }}>✎</button>}
-          {!publicMode && <button onClick={onDelete} style={{ background:"none", border:"none", cursor:"pointer", color:"#D97706", fontSize:"13.5px", padding:0, opacity:0.6 }}>×</button>}
-        </div>
+        <button onClick={onToggle} style={{ background:"none", border:"none", cursor:"pointer", padding:0, flexShrink:0 }}>
+          <span style={{ ...F, fontSize:"11px", color:"#A16207", letterSpacing:"0.06em", whiteSpace:"nowrap" }}>
+            · {links.length} {links.length === 1 ? "piece" : "pieces"} {isExpanded ? "▲" : "▼"}
+          </span>
+        </button>
       </div>
 
       {isExpanded && (
-        <div style={{ marginTop:"10px", paddingTop:"10px", borderTop:"1px solid rgba(245,158,11,0.22)" }}>
+        <div style={{ marginTop:"10px", paddingTop:"10px", borderTop:"1px dashed rgba(26,10,0,0.12)" }}>
           {linkedItems.map(item => (
-            <div key={item.id} style={{ display:"flex", alignItems:"center", gap:"7px", marginBottom:"5px" }}>
-              <Pill color={COLOR[item.theme]||"#A16207"} small>{item.theme}</Pill>
-              <span style={{ ...F, fontSize:"12.5px", color:"#1A0A00", flex:1, lineHeight:1.3 }}>{item.title.length>52 ? item.title.slice(0,52)+"…" : item.title}</span>
-              {!publicMode && <button onClick={() => onDeleteOrgLink(org.id, item.id)} style={{ background:"none", border:"none", cursor:"pointer", color:"#D97706", fontSize:"12.5px", padding:0, opacity:0.6, flexShrink:0 }}>×</button>}
+            <div key={item.id} style={{ display:"flex", alignItems:"baseline", gap:"8px", marginBottom:"6px" }}>
+              <span style={{ fontSize:"9px", color:"#A16207", flexShrink:0 }}>◆</span>
+              <span style={{ ...F, fontSize:"10.5px", letterSpacing:"0.07em", textTransform:"uppercase", color:COLOR[item.theme]||"#A16207", flexShrink:0 }}>{item.theme}</span>
+              <span style={{ ...F, fontSize:"12.5px", color:"#1A0A00", flex:1, lineHeight:1.35 }}>{item.title.length > 60 ? item.title.slice(0, 60)+"…" : item.title}</span>
+              {!publicMode && <button onClick={() => onDeleteOrgLink(org.id, item.id)} style={{ background:"none", border:"none", cursor:"pointer", color:"#D97706", fontSize:"12px", padding:0, opacity:0.5, flexShrink:0 }}>×</button>}
             </div>
           ))}
           {linkedItems.length === 0 && <div style={{ fontSize:"11.5px", color:"#A16207", fontStyle:"italic", marginBottom:"8px" }}>No articles linked yet.</div>}
@@ -1173,9 +1182,9 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
                 {searchResults.map(item => (
                   <button key={item.id} onMouseDown={() => { onSaveOrgLink(org.id, item.id); setSearchQ(""); }}
                     style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(245,158,11,0.28)", padding:"6px 10px", cursor:"pointer" }}
-                    onMouseEnter={e => e.currentTarget.style.background="rgba(254,252,232,0.98)"}
-                    onMouseLeave={e => e.currentTarget.style.background="transparent"}>
-                    <div style={{ fontSize:"11.5px", color:"#1A0A00" }}>{item.title.length>54 ? item.title.slice(0,54)+"…" : item.title}</div>
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(254,252,232,0.98)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                    <div style={{ fontSize:"11.5px", color:"#1A0A00" }}>{item.title.length > 54 ? item.title.slice(0, 54)+"…" : item.title}</div>
                     <div style={{ fontSize:"10.5px", color:"#A16207" }}>{item.source}</div>
                   </button>
                 ))}
@@ -1224,17 +1233,18 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
         const color = STANCE_COLORS[stance];
         const isCollapsed = collapsedStances.has(stance);
         return (
-          <div key={stance} style={{ marginBottom:"32px" }}>
+          <div key={stance} style={{ marginBottom:"36px" }}>
             <button
               onClick={() => setCollapsedStances(prev => { const s = new Set(prev); s.has(stance) ? s.delete(stance) : s.add(stance); return s; })}
-              style={{ ...F, width:"100%", display:"flex", alignItems:"center", gap:"10px", marginBottom: isCollapsed ? 0 : "12px", padding:"0 0 8px 0", borderBottom:"1px solid "+color+"35", background:"none", border:"none", cursor:"pointer", textAlign:"left" }}>
-              <div style={{ width:"8px", height:"8px", borderRadius:"50%", background:color, flexShrink:0 }} />
-              <span style={{ fontSize:"12.5px", color, letterSpacing:"0.12em", textTransform:"uppercase", fontWeight:600 }}>{stance}</span>
-              <span style={{ fontSize:"12.5px", color:"#A16207" }}>{group.length}</span>
-              <span style={{ marginLeft:"auto", fontSize:"12.5px", color:"#A16207", opacity:0.6 }}>{isCollapsed ? "▸" : "▾"}</span>
+              style={{ width:"100%", display:"flex", alignItems:"center", gap:"14px", marginBottom: isCollapsed ? 0 : "4px", padding:"8px 0", background:"none", border:"none", cursor:"pointer" }}>
+              <div style={{ flex:1, height:"1px", background:color, opacity:0.3 }} />
+              <span style={{ ...F, fontSize:"10px", letterSpacing:"0.22em", textTransform:"uppercase", fontWeight:600, color, whiteSpace:"nowrap" }}>
+                {stance} {isCollapsed ? "▸" : "▾"}
+              </span>
+              <div style={{ flex:1, height:"1px", background:color, opacity:0.3 }} />
             </button>
             {!isCollapsed && (
-              <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+              <div style={{ display:"flex", flexDirection:"column" }}>
                 {group.map(org => (
                   <OrgCard key={org.id} org={org}
                     links={orgLinks.filter(l => l.org_id === org.id)}
