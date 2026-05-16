@@ -1551,8 +1551,9 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   const nodeSelRef    = useRef(null);
   const linkSelRef    = useRef(null);
   const readRef       = useRef(readItems);
-  const bubblePosRef  = useRef({});
-  const bubbleRRef    = useRef({});
+  const bubblePosRef   = useRef({});
+  const bubbleRRef     = useRef({});
+  const stickerBoundRef = useRef(0);
   const zoomRef       = useRef(null);
   const nodesRef      = useRef([]);
   const pathGroupRef  = useRef(null);
@@ -1695,6 +1696,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     });
 
     // ── Build SVG ──
+    stickerBoundRef.current = 0;
     d3.select(svgRef.current).selectAll("*").remove();
     const svg = d3.select(svgRef.current).attr("width", W).attr("height", H);
 
@@ -1766,6 +1768,10 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       const by  = ay + lsin * (bh / 2 + 2) - bh / 2;
       sRect.attr("x",bx).attr("y",by).attr("width",bw).attr("height",bh);
       sTxt.attr("x", bx + bw/2).attr("y", by + bh/2 + bb.height * 0.36);
+      // Track the farthest sticker corner from SVG centre so the org donut knows where to sit
+      [[bx,by],[bx+bw,by],[bx,by+bh],[bx+bw,by+bh]].forEach(([cx,cy]) => {
+        stickerBoundRef.current = Math.max(stickerBoundRef.current, Math.hypot(cx - W/2, cy - H/2));
+      });
     });
 
     // Draw ALL cross-bubble links (intra-bubble are too dense visually but all
@@ -1954,15 +1960,11 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const H = svgRef.current?.clientHeight || (window.innerHeight - 88);
     const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
 
-    // Compute outerR from bubble positions (stable from layout, not affected by sim ticks)
-    // so the ring stays clear of sticker labels and doesn't animate inward/outward.
+    // Use the actual measured sticker extents (recorded when stickers were drawn)
+    // so the ring always clears even wide labels like "ETHICS & DIGITAL JUSTICE".
     const bandHalf = 22;
-    const bp = bubblePosRef.current;
-    const br = bubbleRRef.current;
-    const maxBubbleEdge = Object.keys(bp).length
-      ? Math.max(...Object.keys(bp).map(name => Math.hypot(bp[name].cx - W / 2, bp[name].cy - H / 2) + (br[name] || 100)))
-      : Math.min(W, H) * 0.5;
-    const outerR = maxBubbleEdge + 60; // 60px clears the sticker label box
+    const stickerBound = stickerBoundRef.current || Math.min(W, H) * 0.5;
+    const outerR = stickerBound + 48;
 
     const activeStances = ORG_STANCES.filter(s => currentOrgs.some(o => o.stance === s));
     const numSections = activeStances.length || 1;
