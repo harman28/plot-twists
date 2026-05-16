@@ -1950,17 +1950,13 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const H = svgRef.current?.clientHeight || (window.innerHeight - 88);
     const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
 
-    // Compute outerR dynamically so the org ring always clears the article bubbles.
-    // Bubble centres sit at 0.44*min(W,H); bubble radii are sqrt(count)*23 clamped to ≥52.
-    const themeCount = {};
-    nodesRef.current.forEach(n => { themeCount[n.theme] = (themeCount[n.theme] || 0) + 1; });
-    const cs = Math.min(W, H) / 700;
-    const maxBubbleR = Object.values(themeCount).length
-      ? Math.max(...Object.values(themeCount).map(c => Math.max(85 * cs, Math.sqrt(c) * 40 * cs)))
-      : 100 * cs;
-    const contentEdge = Math.min(W, H) * 0.44 + maxBubbleR;
+    // Compute outerR from actual settled node positions so the ring always clears
+    // the theme sticker labels regardless of canvas aspect ratio.
     const bandHalf = 22;
-    const outerR = contentEdge + 48; // 48px clearance beyond the furthest article
+    const maxNodeDist = nodesRef.current.length
+      ? Math.max(...nodesRef.current.map(n => Math.hypot(n.x - W / 2, n.y - H / 2)))
+      : Math.min(W, H) * 0.35;
+    const outerR = maxNodeDist + 80; // 80px clears bubble border + sticker label box
 
     const activeStances = ORG_STANCES.filter(s => currentOrgs.some(o => o.stance === s));
     const numSections = activeStances.length || 1;
