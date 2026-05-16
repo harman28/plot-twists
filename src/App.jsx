@@ -1551,6 +1551,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   const nodeSelRef    = useRef(null);
   const linkSelRef    = useRef(null);
   const readRef       = useRef(readItems);
+  const bubblePosRef  = useRef({});
+  const bubbleRRef    = useRef({});
   const zoomRef       = useRef(null);
   const nodesRef      = useRef([]);
   const pathGroupRef  = useRef(null);
@@ -1681,6 +1683,8 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     allThemes.forEach(t => {
       bubblePos[t.name] = { cx: rawPos[t.name].x, cy: rawPos[t.name].y };
     });
+    bubblePosRef.current = bubblePos;
+    bubbleRRef.current   = bubbleR;
 
     // Node initial positions scattered inside their bubble
     const nodes = items.map(item => {
@@ -1950,13 +1954,15 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     const H = svgRef.current?.clientHeight || (window.innerHeight - 88);
     const nodePos = Object.fromEntries(nodesRef.current.map(n => [n.id, { x: n.x, y: n.y }]));
 
-    // Compute outerR from actual settled node positions so the ring always clears
-    // the theme sticker labels regardless of canvas aspect ratio.
+    // Compute outerR from bubble positions (stable from layout, not affected by sim ticks)
+    // so the ring stays clear of sticker labels and doesn't animate inward/outward.
     const bandHalf = 22;
-    const maxNodeDist = nodesRef.current.length
-      ? Math.max(...nodesRef.current.map(n => Math.hypot(n.x - W / 2, n.y - H / 2)))
-      : Math.min(W, H) * 0.35;
-    const outerR = maxNodeDist + 80; // 80px clears bubble border + sticker label box
+    const bp = bubblePosRef.current;
+    const br = bubbleRRef.current;
+    const maxBubbleEdge = Object.keys(bp).length
+      ? Math.max(...Object.keys(bp).map(name => Math.hypot(bp[name].cx - W / 2, bp[name].cy - H / 2) + (br[name] || 100)))
+      : Math.min(W, H) * 0.5;
+    const outerR = maxBubbleEdge + 60; // 60px clears the sticker label box
 
     const activeStances = ORG_STANCES.filter(s => currentOrgs.some(o => o.stance === s));
     const numSections = activeStances.length || 1;
