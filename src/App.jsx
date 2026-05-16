@@ -187,7 +187,7 @@ function TabBar({ active, onChange }) {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:0, height:"100%" }}>
       {TABS.map(t => (
-        <button key={t.id} onClick={() => onChange(t.id)} style={{ ...F, height:"100%", padding:"0 20px", background:"transparent", border:"none", borderBottom: active===t.id ? "2px solid #D97706":"2px solid transparent", color: active===t.id ? "#1A0A00":"#A16207", fontSize:"12.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", transition:"color 0.15s" }}>
+        <button key={t.id} onClick={() => onChange(t.id)} style={{ ...F, height:"100%", padding:"0 20px", background:"transparent", border:"none", borderBottom: active===t.id ? "2px solid #C2410C":"2px solid transparent", color: active===t.id ? "#1C1410":"#B45309", fontSize:"12.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", transition:"color 0.15s" }}>
           {t.label}
         </button>
       ))}
@@ -197,10 +197,10 @@ function TabBar({ active, onChange }) {
 
 function BottomTabBar({ active, onChange }) {
   return (
-    <div style={{ position:"fixed", bottom:0, left:0, right:0, height:"56px", background:"#FEFCE8", borderTop:"1px solid rgba(245,158,11,0.35)", display:"flex", zIndex:200, backdropFilter:"blur(8px)" }}>
+    <div style={{ position:"fixed", bottom:0, left:0, right:0, height:"56px", background:"#FAFAF8", borderTop:"1px solid rgba(194,65,12,0.35)", display:"flex", zIndex:200, backdropFilter:"blur(8px)" }}>
       {TABS.map(t => (
         <button key={t.id} onClick={() => onChange(t.id)}
-          style={{ flex:1, background:"transparent", border:"none", borderTop: active===t.id ? "2px solid #D97706" : "2px solid transparent", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"2px", cursor:"pointer", color: active===t.id ? "#1A0A00" : "#A16207", transition:"color 0.15s", padding:0 }}>
+          style={{ flex:1, background:"transparent", border:"none", borderTop: active===t.id ? "2px solid #C2410C" : "2px solid transparent", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"2px", cursor:"pointer", color: active===t.id ? "#1C1410" : "#B45309", transition:"color 0.15s", padding:0 }}>
           <span style={{ fontSize:"17.5px", lineHeight:1 }}>{t.icon}</span>
           <span style={{ ...F, fontSize:"10.5px", letterSpacing:"0.08em", textTransform:"uppercase" }}>{t.label}</span>
         </button>
@@ -216,41 +216,41 @@ function NotesModal({ item, notes, onSave, onClose }) {
   const [arg, setArg]     = useState(existing.argument);
   const [tho, setTho]     = useState(existing.thoughts);
   const [quo, setQuo]     = useState(existing.quote || "");
-  const c = COLOR[item.theme] || "#A16207";
+  const c = COLOR[item.theme] || "#B45309";
   const hasContent = arg.trim() || tho.trim() || quo.trim();
 
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(10,30,20,0.65)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ ...F, background:"#FFFBEB", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"6px", width:"100%", maxWidth:"540px", maxHeight:"90vh", display:"flex", flexDirection:"column", overflow:"hidden" }}>
-        <div style={{ padding:"16px 18px 12px", borderBottom:"1px solid rgba(245,158,11,0.50)", display:"flex", alignItems:"flex-start", gap:"10px" }}>
+      <div onClick={e => e.stopPropagation()} style={{ ...F, background:"#FFFFFF", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"6px", width:"100%", maxWidth:"540px", maxHeight:"90vh", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        <div style={{ padding:"16px 18px 12px", borderBottom:"1px solid rgba(194,65,12,0.50)", display:"flex", alignItems:"flex-start", gap:"10px" }}>
           <div style={{ flex:1 }}>
             <Pill color={c}>{item.theme}</Pill>
-            <div style={{ fontSize:"14.5px", color:"#1A0A00", marginTop:"7px", lineHeight:1.4, fontWeight:500 }}>{item.title}</div>
-            <div style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic", marginTop:"3px" }}>{item.source} · {item.published}</div>
+            <div style={{ fontSize:"14.5px", color:"#1C1410", marginTop:"7px", lineHeight:1.4, fontWeight:500 }}>{item.title}</div>
+            <div style={{ fontSize:"12.5px", color:"#1C1410", fontStyle:"italic", marginTop:"3px" }}>{item.source} · {item.published}</div>
           </div>
-          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1A0A00", cursor:"pointer", fontSize:"19.5px", flexShrink:0 }}>×</button>
+          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1C1410", cursor:"pointer", fontSize:"19.5px", flexShrink:0 }}>×</button>
         </div>
         <div style={{ flex:1, overflowY:"auto", padding:"16px 18px", display:"flex", flexDirection:"column", gap:"14px" }}>
           <div>
-            <label style={{ fontSize:"11.5px", color:"#A16207", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>Key quote</label>
+            <label style={{ fontSize:"11.5px", color:"#B45309", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>Key quote</label>
             <textarea value={quo} onChange={e => setQuo(e.target.value)} placeholder="Paste a passage worth keeping…" rows={3}
-              style={{ ...F, width:"100%", background:"rgba(254,252,232,0.97)", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", color:"#1A0A00", fontSize:"13.5px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6, fontStyle:"italic" }} />
+              style={{ ...F, width:"100%", background:"rgba(250,250,248,0.97)", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", color:"#1C1410", fontSize:"13.5px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6, fontStyle:"italic" }} />
           </div>
           <div>
-            <label style={{ fontSize:"11.5px", color:"#A16207", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>What is being argued?</label>
+            <label style={{ fontSize:"11.5px", color:"#B45309", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>What is being argued?</label>
             <textarea value={arg} onChange={e => setArg(e.target.value)} placeholder="Summarise the core argument…" rows={4}
-              style={{ ...F, width:"100%", background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", color:"#1A0A00", fontSize:"13.5px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6 }} />
+              style={{ ...F, width:"100%", background:"rgba(250,250,248,0.98)", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", color:"#1C1410", fontSize:"13.5px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6 }} />
           </div>
           <div>
-            <label style={{ fontSize:"11.5px", color:"#1A0A00", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>My thoughts / response</label>
+            <label style={{ fontSize:"11.5px", color:"#1C1410", letterSpacing:"0.12em", textTransform:"uppercase", display:"block", marginBottom:"6px" }}>My thoughts / response</label>
             <textarea value={tho} onChange={e => setTho(e.target.value)} placeholder="Your reaction, critique, connections to other ideas…" rows={5}
-              style={{ ...F, width:"100%", background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", color:"#1A0A00", fontSize:"13.5px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6 }} />
+              style={{ ...F, width:"100%", background:"rgba(250,250,248,0.98)", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", color:"#1C1410", fontSize:"13.5px", padding:"9px 11px", resize:"vertical", outline:"none", boxSizing:"border-box", lineHeight:1.6 }} />
           </div>
         </div>
         <div style={{ padding:"12px 18px", borderTop:"1px solid rgba(74,96,48,0.14)", display:"flex", gap:"8px", justifyContent:"flex-end" }}>
-          {hasContent && <button onClick={() => { onSave(item.url, null); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.55)", color:"#D97706", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Delete note</button>}
-          <button onClick={onClose} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.50)", color:"#A16207", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
-          <button onClick={() => { onSave(item.url, { argument:arg, thoughts:tho, quote:quo }); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid #D97706", color:"#D97706", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Save note</button>
+          {hasContent && <button onClick={() => { onSave(item.url, null); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid rgba(194,65,12,0.55)", color:"#C2410C", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Delete note</button>}
+          <button onClick={onClose} style={{ ...F, background:"transparent", border:"1px solid rgba(194,65,12,0.50)", color:"#B45309", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
+          <button onClick={() => { onSave(item.url, { argument:arg, thoughts:tho, quote:quo }); onClose(); }} style={{ ...F, background:"transparent", border:"1px solid #C2410C", color:"#C2410C", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Save note</button>
         </div>
       </div>
     </div>
@@ -262,7 +262,7 @@ function NotesModal({ item, notes, onSave, onClose }) {
 const DISPATCH_WAVE = "M0,5 Q45,1 90,5 Q135,9 180,5 Q225,1 270,5 Q315,9 360,5 Q405,1 450,5 Q495,9 540,5";
 
 function DispatchItem({ item, show, idx, isLast, waveColor, isOpen, readItems, onToggleRead, notes, onOpenSidebar }) {
-  const c = COLOR[item.theme] || "#A16207";
+  const c = COLOR[item.theme] || "#B45309";
   const isRead = readItems.has(item.url);
   const hasNote = !!(notes[item.url]?.argument || notes[item.url]?.thoughts || notes[item.url]?.quote);
   return (
@@ -271,20 +271,20 @@ function DispatchItem({ item, show, idx, isLast, waveColor, isOpen, readItems, o
         style={{ opacity:show?(isRead?0.42:1):0, transform:show?"none":"translateY(8px)", transition:`opacity 0.35s ease ${idx*0.06}s, transform 0.35s ease ${idx*0.06}s`, padding:"20px 0 4px", cursor:"pointer" }}>
         <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center", marginBottom:"7px" }}>
           <Pill color={c}>{item.theme}</Pill>
-          {item.type==="foundational" && <Pill color="#D97706">Foundational</Pill>}
+          {item.type==="foundational" && <Pill color="#C2410C">Foundational</Pill>}
           {item.custom && <Pill color="#A78BFA">Custom</Pill>}
-          <span style={{ fontSize:"11.5px", color:"#1A0A00" }}>{item.published}</span>
+          <span style={{ fontSize:"11.5px", color:"#1C1410" }}>{item.published}</span>
         </div>
-        <div style={{ fontSize:"14.5px", color: isOpen ? c : "#1A0A00", textDecoration:isRead?"line-through":"none", textDecorationColor:"#444", lineHeight:"1.45", marginBottom:"10px", fontWeight:500, transition:"color 0.15s", ...F }}>
+        <div style={{ fontSize:"14.5px", color: isOpen ? c : "#1C1410", textDecoration:isRead?"line-through":"none", textDecorationColor:"#444", lineHeight:"1.45", marginBottom:"10px", fontWeight:500, transition:"color 0.15s", ...F }}>
           {item.title} <span style={{ opacity:0.3, fontSize:"12px" }}>↗</span>
         </div>
         <div style={{ display:"flex", gap:"6px", flexWrap:"wrap", alignItems:"center", paddingBottom:"4px" }}>
-          <span style={{ fontSize:"11px", color:"#A16207", fontStyle:"italic" }}>{item.source}</span>
-          {item.keywords.slice(0,2).map((kw,j) => <span key={j} style={{ fontSize:"10px", color:"#D97706", background:"rgba(217,119,6,0.12)", border:"1px solid rgba(217,119,6,0.28)", padding:"1px 5px", borderRadius:"2px" }}>#{kw}</span>)}
+          <span style={{ fontSize:"11px", color:"#B45309", fontStyle:"italic" }}>{item.source}</span>
+          {item.keywords.slice(0,2).map((kw,j) => <span key={j} style={{ fontSize:"10px", color:"#C2410C", background:"rgba(217,119,6,0.12)", border:"1px solid rgba(217,119,6,0.28)", padding:"1px 5px", borderRadius:"2px" }}>#{kw}</span>)}
           <div style={{ marginLeft:"auto", display:"flex", gap:"4px", flexShrink:0 }}>
             {hasNote && <span style={{ fontSize:"9.5px", letterSpacing:"0.07em", textTransform:"uppercase", color:"#DB2777", padding:"2px 7px", background:"rgba(219,39,119,0.10)", border:"1px solid rgba(219,39,119,0.35)", borderRadius:"2px" }}>✎ Note</span>}
             <button onClick={e => { e.stopPropagation(); onToggleRead(item.url); }}
-              style={{ ...F, background: isRead?"rgba(22,163,74,0.10)":"rgba(254,252,232,0.85)", border: isRead?"1px solid rgba(22,163,74,0.40)":"1px solid rgba(245,158,11,0.38)", borderRadius:"2px", padding:"2px 7px", cursor:"pointer", fontSize:"9.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: isRead?"#16A34A":"#A16207" }}>
+              style={{ ...F, background: isRead?"rgba(22,163,74,0.10)":"rgba(250,250,248,0.85)", border: isRead?"1px solid rgba(22,163,74,0.40)":"1px solid rgba(194,65,12,0.38)", borderRadius:"2px", padding:"2px 7px", cursor:"pointer", fontSize:"9.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: isRead?"#16A34A":"#B45309" }}>
               {isRead ? "✓ Read" : "To Read"}
             </button>
           </div>
@@ -309,7 +309,7 @@ function SectionHead({ label, sub, color }) {
       </svg>
       <div style={{ textAlign:"center", flexShrink:0 }}>
         <div style={{ ...F, fontSize:"10px", letterSpacing:"0.22em", textTransform:"uppercase", fontWeight:600, color, whiteSpace:"nowrap" }}>{label}</div>
-        <div style={{ ...F, fontSize:"10.5px", color:"#A16207", fontStyle:"italic", whiteSpace:"nowrap", marginTop:"2px" }}>{sub}</div>
+        <div style={{ ...F, fontSize:"10.5px", color:"#B45309", fontStyle:"italic", whiteSpace:"nowrap", marginTop:"2px" }}>{sub}</div>
       </div>
       <svg style={{ flex:1, minWidth:0 }} width="0" height="8" viewBox="0 0 540 10" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <path d={DISPATCH_WAVE} fill="none" stroke={color} strokeWidth="1" strokeOpacity="0.4"/>
@@ -367,21 +367,21 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths 
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"20px", flexWrap:"wrap" }}>
           <button onClick={() => load(prevDay(date))} style={NAV}>←</button>
           <button onClick={() => { setPickerVal(date); setShowPicker(v=>!v); }} style={{ ...F, background:"transparent", border:"none", cursor:"pointer", padding:"0 2px" }}>
-            <span style={{ fontSize:"14.5px", color: isToday?"#D97706":"#1A0A00", fontStyle:"italic", borderBottom:"1px dashed currentColor", opacity:0.85 }}>{fmtDate(date)}</span>
+            <span style={{ fontSize:"14.5px", color: isToday?"#C2410C":"#1C1410", fontStyle:"italic", borderBottom:"1px dashed currentColor", opacity:0.85 }}>{fmtDate(date)}</span>
           </button>
           <button onClick={() => { if(!isToday) load(nextDay(date)); }} style={{ ...NAV, opacity:isToday?0.2:1, cursor:isToday?"default":"pointer" }}>→</button>
-          {!isToday && <button onClick={() => load(todayStr())} style={{ ...F, fontSize:"10.5px", letterSpacing:"0.12em", textTransform:"uppercase", background:"transparent", border:"1px solid rgba(245,158,11,0.55)", color:"#D97706", padding:"3px 9px", borderRadius:"2px", cursor:"pointer" }}>Today</button>}
-          {issue && <span style={{ fontSize:"12.5px", color:"#1A0A00", marginLeft:"auto", fontStyle:"italic" }}>{readCount}/{allItems.length} read</span>}
+          {!isToday && <button onClick={() => load(todayStr())} style={{ ...F, fontSize:"10.5px", letterSpacing:"0.12em", textTransform:"uppercase", background:"transparent", border:"1px solid rgba(194,65,12,0.55)", color:"#C2410C", padding:"3px 9px", borderRadius:"2px", cursor:"pointer" }}>Today</button>}
+          {issue && <span style={{ fontSize:"12.5px", color:"#1C1410", marginLeft:"auto", fontStyle:"italic" }}>{readCount}/{allItems.length} read</span>}
         </div>
 
         {showPicker && (
-          <div style={{ marginBottom:"16px", background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"4px", padding:"11px 14px", display:"flex", alignItems:"center", gap:"10px", flexWrap:"wrap" }}>
-            <span style={{ fontSize:"11.5px", color:"#1A0A00", textTransform:"uppercase", letterSpacing:"0.1em" }}>Jump to</span>
+          <div style={{ marginBottom:"16px", background:"rgba(250,250,248,0.98)", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"4px", padding:"11px 14px", display:"flex", alignItems:"center", gap:"10px", flexWrap:"wrap" }}>
+            <span style={{ fontSize:"11.5px", color:"#1C1410", textTransform:"uppercase", letterSpacing:"0.1em" }}>Jump to</span>
             <input type="date" value={pickerVal} max={todayStr()} onChange={e=>setPickerVal(e.target.value)}
-              style={{ background:"transparent", border:"1px solid rgba(245,158,11,0.50)", borderRadius:"3px", color:"#1A0A00", padding:"4px 8px", fontSize:"13.5px", ...F }} />
+              style={{ background:"transparent", border:"1px solid rgba(194,65,12,0.50)", borderRadius:"3px", color:"#1C1410", padding:"4px 8px", fontSize:"13.5px", ...F }} />
             <button onClick={() => { if(pickerVal){load(pickerVal);setShowPicker(false);} }}
-              style={{ ...F, background:"transparent", border:"1px solid #D97706", color:"#D97706", padding:"4px 12px", borderRadius:"3px", cursor:"pointer", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase" }}>Go</button>
-            <button onClick={() => setShowPicker(false)} style={{ background:"transparent", border:"none", color:"#1A0A00", cursor:"pointer", fontSize:"17.5px", marginLeft:"auto" }}>×</button>
+              style={{ ...F, background:"transparent", border:"1px solid #C2410C", color:"#C2410C", padding:"4px 12px", borderRadius:"3px", cursor:"pointer", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase" }}>Go</button>
+            <button onClick={() => setShowPicker(false)} style={{ background:"transparent", border:"none", color:"#1C1410", cursor:"pointer", fontSize:"17.5px", marginLeft:"auto" }}>×</button>
           </div>
         )}
 
@@ -391,7 +391,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths 
         </div>
 
         {!issue && (
-          <button onClick={() => load(date)} style={{ ...F, padding:"11px 26px", background:"transparent", border:"1px solid #D97706", color:"#D97706", fontSize:"12.5px", letterSpacing:"0.15em", textTransform:"uppercase", cursor:"pointer", borderRadius:"3px" }}>
+          <button onClick={() => load(date)} style={{ ...F, padding:"11px 26px", background:"transparent", border:"1px solid #C2410C", color:"#C2410C", fontSize:"12.5px", letterSpacing:"0.15em", textTransform:"uppercase", cursor:"pointer", borderRadius:"3px" }}>
             Generate Today's Plot
           </button>
         )}
@@ -400,18 +400,18 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths 
       {issue && (
         <>
           {/* Progress bar */}
-          <div style={{ height:"2px", background:"rgba(245,158,11,0.25)", borderRadius:"1px", marginBottom:"32px", overflow:"hidden", opacity:show?1:0, transition:"opacity 0.4s ease 0.2s" }}>
+          <div style={{ height:"2px", background:"rgba(194,65,12,0.25)", borderRadius:"1px", marginBottom:"32px", overflow:"hidden", opacity:show?1:0, transition:"opacity 0.4s ease 0.2s" }}>
             <div style={{ height:"100%", width:`${allItems.length?(readCount/allItems.length)*100:0}%`, background:"#16A34A", transition:"width 0.5s", borderRadius:"1px" }} />
           </div>
 
           {/* Two-column layout */}
           <div style={{ position:"relative" }}>
             {/* Center rule */}
-            <div style={{ position:"absolute", left:"50%", top:0, bottom:0, width:"1px", background:"linear-gradient(to bottom, transparent 0%, rgba(245,158,11,0.18) 8%, rgba(245,158,11,0.18) 92%, transparent 100%)", pointerEvents:"none" }} />
+            <div style={{ position:"absolute", left:"50%", top:0, bottom:0, width:"1px", background:"linear-gradient(to bottom, transparent 0%, rgba(194,65,12,0.18) 8%, rgba(194,65,12,0.18) 92%, transparent 100%)", pointerEvents:"none" }} />
 
             {/* Column headers */}
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0 56px", marginBottom:"8px" }}>
-              <SectionHead label="I — In the Field"   sub="Essays · Reports · Journalism" color="#D97706" />
+              <SectionHead label="I — In the Field"   sub="Essays · Reports · Journalism" color="#C2410C" />
               <SectionHead label="II — The Literature" sub="Papers · Foundational works"   color="#1068D4" />
             </div>
 
@@ -421,7 +421,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths 
                 {issue.nonAcademic.map((item,i) => (
                   <DispatchItem key={item.url} item={item} show={show} idx={i}
                     isLast={i === issue.nonAcademic.length - 1}
-                    waveColor="#D97706"
+                    waveColor="#C2410C"
                     isOpen={sidebarItem?.id === item.id}
                     readItems={readItems} onToggleRead={onToggleRead} notes={notes}
                     onOpenSidebar={it => setSidebarItem(prev => prev?.id === it.id ? null : it)} />
@@ -440,9 +440,9 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote, paths 
             </div>
           </div>
 
-          <div style={{ marginTop:"44px", paddingTop:"14px", borderTop:"1px solid rgba(245,158,11,0.20)", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"8px", opacity:show?1:0, transition:"opacity 0.4s ease 0.6s" }}>
-            <span style={{ fontSize:"11.5px", color:"#A16207", fontStyle:"italic" }}>{pool.length} items in pool · rotates daily</span>
-            <button onClick={() => load(date)} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.38)", color:"#A16207", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"4px 11px", cursor:"pointer", borderRadius:"2px" }}>Reshuffle</button>
+          <div style={{ marginTop:"44px", paddingTop:"14px", borderTop:"1px solid rgba(194,65,12,0.20)", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"8px", opacity:show?1:0, transition:"opacity 0.4s ease 0.6s" }}>
+            <span style={{ fontSize:"11.5px", color:"#B45309", fontStyle:"italic" }}>{pool.length} items in pool · rotates daily</span>
+            <button onClick={() => load(date)} style={{ ...F, background:"transparent", border:"1px solid rgba(194,65,12,0.38)", color:"#B45309", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"4px 11px", cursor:"pointer", borderRadius:"2px" }}>Reshuffle</button>
           </div>
         </>
       )}
@@ -534,15 +534,15 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
   }
 
   const customItems = pool.filter(p => p.custom);
-  const inputStyle = { ...F, width:"100%", background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", color:"#1A0A00", fontSize:"13.5px", padding:"8px 10px", outline:"none", boxSizing:"border-box" };
-  const labelStyle = { fontSize:"11.5px", color:"#A16207", letterSpacing:"0.1em", textTransform:"uppercase", display:"block", marginBottom:"5px" };
-  const errStyle   = { fontSize:"11.5px", color:"#D97706", marginTop:"3px" };
+  const inputStyle = { ...F, width:"100%", background:"rgba(250,250,248,0.98)", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"3px", color:"#1C1410", fontSize:"13.5px", padding:"8px 10px", outline:"none", boxSizing:"border-box" };
+  const labelStyle = { fontSize:"11.5px", color:"#B45309", letterSpacing:"0.1em", textTransform:"uppercase", display:"block", marginBottom:"5px" };
+  const errStyle   = { fontSize:"11.5px", color:"#C2410C", marginTop:"3px" };
 
   return (
     <div style={{ ...F, maxWidth:"680px", margin:"0 auto", padding:"24px 24px 80px" }}>
       <div style={{ marginBottom:"28px" }}>
-        <h2 style={{ fontSize:"19.5px", color:"#1A0A00", fontWeight:400, margin:"0 0 6px", letterSpacing:"-0.01em" }}>Sow a Source</h2>
-        <p style={{ fontSize:"13.5px", color:"#A16207", fontStyle:"italic", margin:0 }}>New sources enter the pool immediately and will appear in future plots and the grove.</p>
+        <h2 style={{ fontSize:"19.5px", color:"#1C1410", fontWeight:400, margin:"0 0 6px", letterSpacing:"-0.01em" }}>Sow a Source</h2>
+        <p style={{ fontSize:"13.5px", color:"#B45309", fontStyle:"italic", margin:0 }}>New sources enter the pool immediately and will appear in future plots and the grove.</p>
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"14px", marginBottom:"14px" }}>
@@ -577,8 +577,8 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
               placeholder="Name your theme" style={{ ...inputStyle, marginTop:"6px" }} />
             <div style={{ display:"flex", alignItems:"center", gap:"8px", marginTop:"6px" }}>
               <input type="color" value={form.themeColor} onChange={e=>set("themeColor",e.target.value)}
-                style={{ width:"34px", height:"32px", padding:"2px 3px", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", cursor:"pointer", background:"none" }} />
-              <span style={{ ...F, fontSize:"11.5px", color:"#A16207" }}>Colour for this theme in the grove</span>
+                style={{ width:"34px", height:"32px", padding:"2px 3px", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"3px", cursor:"pointer", background:"none" }} />
+              <span style={{ ...F, fontSize:"11.5px", color:"#B45309" }}>Colour for this theme in the grove</span>
             </div>
           </>)}
           {errors.customTheme && <div style={errStyle}>{errors.customTheme}</div>}
@@ -604,9 +604,9 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
         <label style={labelStyle}>Keywords * (3 recommended)</label>
         <div style={{ display:"flex", gap:"6px", flexWrap:"wrap", marginBottom:"8px" }}>
           {form.keywords.map((kw,i) => (
-            <span key={i} style={{ fontSize:"12.5px", color:"#D97706", background:"rgba(245,158,11,0.28)", border:"1px solid rgba(245,158,11,0.55)", padding:"2px 8px", borderRadius:"2px", display:"flex", alignItems:"center", gap:"5px" }}>
+            <span key={i} style={{ fontSize:"12.5px", color:"#C2410C", background:"rgba(194,65,12,0.28)", border:"1px solid rgba(194,65,12,0.55)", padding:"2px 8px", borderRadius:"2px", display:"flex", alignItems:"center", gap:"5px" }}>
               #{kw}
-              <button onClick={() => set("keywords",form.keywords.filter((_,j)=>j!==i))} style={{ background:"none", border:"none", color:"#D97706", cursor:"pointer", fontSize:"12.5px", padding:0, lineHeight:1 }}>×</button>
+              <button onClick={() => set("keywords",form.keywords.filter((_,j)=>j!==i))} style={{ background:"none", border:"none", color:"#C2410C", cursor:"pointer", fontSize:"12.5px", padding:0, lineHeight:1 }}>×</button>
             </span>
           ))}
         </div>
@@ -614,13 +614,13 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
           <input value={kwInput} onChange={e=>setKwInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"||e.key===","){ e.preventDefault(); addKw(kwInput); }}}
             placeholder="Type a keyword and press Enter" style={{ ...inputStyle, flex:1 }} list="kw-suggestions" />
           <datalist id="kw-suggestions">{allKeywords.map(k=><option key={k} value={k}/>)}</datalist>
-          <button onClick={() => addKw(kwInput)} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.50)", color:"#A16207", padding:"0 14px", borderRadius:"3px", cursor:"pointer", fontSize:"12.5px", whiteSpace:"nowrap" }}>Add</button>
+          <button onClick={() => addKw(kwInput)} style={{ ...F, background:"transparent", border:"1px solid rgba(194,65,12,0.50)", color:"#B45309", padding:"0 14px", borderRadius:"3px", cursor:"pointer", fontSize:"12.5px", whiteSpace:"nowrap" }}>Add</button>
         </div>
-        <div style={{ fontSize:"11.5px", color:"#A16207", marginTop:"5px" }}>Pick from existing or type new ones. Shared keywords create edges in the Grove.</div>
+        <div style={{ fontSize:"11.5px", color:"#B45309", marginTop:"5px" }}>Pick from existing or type new ones. Shared keywords create edges in the Grove.</div>
         {errors.keywords && <div style={errStyle}>{errors.keywords}</div>}
       </div>
 
-      <button onClick={submit} style={{ ...F, padding:"10px 28px", background:"transparent", border:"1px solid #D97706", color:"#D97706", fontSize:"12.5px", letterSpacing:"0.15em", textTransform:"uppercase", cursor:"pointer", borderRadius:"3px", marginBottom:"8px" }}>
+      <button onClick={submit} style={{ ...F, padding:"10px 28px", background:"transparent", border:"1px solid #C2410C", color:"#C2410C", fontSize:"12.5px", letterSpacing:"0.15em", textTransform:"uppercase", cursor:"pointer", borderRadius:"3px", marginBottom:"8px" }}>
         Add to Pool
       </button>
       {saved && <span style={{ fontSize:"12.5px", color:"#16A34A", marginLeft:"12px" }}>✓ Added successfully</span>}
@@ -628,17 +628,17 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
       {/* Custom items list */}
       {customItems.length > 0 && (
         <div style={{ marginTop:"36px" }}>
-          <div style={{ fontSize:"11.5px", color:"#A16207", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"14px" }}>Your custom sources ({customItems.length})</div>
+          <div style={{ fontSize:"11.5px", color:"#B45309", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"14px" }}>Your custom sources ({customItems.length})</div>
           {customItems.map(item => (
-            <div key={item.id} style={{ display:"flex", alignItems:"flex-start", gap:"12px", borderBottom:"1px solid rgba(245,158,11,0.42)", paddingBottom:"12px", marginBottom:"12px" }}>
+            <div key={item.id} style={{ display:"flex", alignItems:"flex-start", gap:"12px", borderBottom:"1px solid rgba(194,65,12,0.42)", paddingBottom:"12px", marginBottom:"12px" }}>
               <div style={{ flex:1 }}>
                 <div style={{ display:"flex", gap:"5px", marginBottom:"4px" }}>
-                  <Pill color={COLOR[item.theme]||"#A16207"}>{item.theme}</Pill>
+                  <Pill color={COLOR[item.theme]||"#B45309"}>{item.theme}</Pill>
                 </div>
-                <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:"13.5px", color:"#1A0A00", textDecoration:"none", display:"block", marginBottom:"3px" }}>{item.title} ↗</a>
-                <div style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic" }}>{item.source} · {item.published}</div>
+                <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:"13.5px", color:"#1C1410", textDecoration:"none", display:"block", marginBottom:"3px" }}>{item.title} ↗</a>
+                <div style={{ fontSize:"12.5px", color:"#1C1410", fontStyle:"italic" }}>{item.source} · {item.published}</div>
               </div>
-              <button onClick={() => onDelete(item.id)} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.42)", color:"#D97706", padding:"3px 9px", borderRadius:"3px", cursor:"pointer", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", flexShrink:0 }}>Remove</button>
+              <button onClick={() => onDelete(item.id)} style={{ ...F, background:"transparent", border:"1px solid rgba(194,65,12,0.42)", color:"#C2410C", padding:"3px 9px", borderRadius:"3px", cursor:"pointer", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", flexShrink:0 }}>Remove</button>
             </div>
           ))}
         </div>
@@ -647,15 +647,15 @@ function AddSourceView({ pool, onAdd, onDelete, hiddenIds, allBuiltin, onHide, o
       {/* Hidden built-in sources */}
       {hiddenIds?.size > 0 && (
         <div style={{ marginTop:"36px" }}>
-          <div style={{ fontSize:"11.5px", color:"#A16207", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"14px" }}>Hidden sources ({hiddenIds.size}) — click Restore to bring back</div>
+          <div style={{ fontSize:"11.5px", color:"#B45309", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"14px" }}>Hidden sources ({hiddenIds.size}) — click Restore to bring back</div>
           {(allBuiltin || []).filter(item => hiddenIds.has(item.id)).map(item => (
-            <div key={item.id} style={{ display:"flex", alignItems:"flex-start", gap:"12px", borderBottom:"1px solid rgba(245,158,11,0.42)", paddingBottom:"10px", marginBottom:"10px", opacity:0.6 }}>
+            <div key={item.id} style={{ display:"flex", alignItems:"flex-start", gap:"12px", borderBottom:"1px solid rgba(194,65,12,0.42)", paddingBottom:"10px", marginBottom:"10px", opacity:0.6 }}>
               <div style={{ flex:1 }}>
-                <Pill color={COLOR[item.theme]||"#A16207"}>{item.theme}</Pill>
-                <div style={{ fontSize:"12.5px", color:"#1A0A00", marginTop:"4px" }}>{item.title}</div>
-                <div style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic", marginTop:"2px" }}>{item.source} · {item.published}</div>
+                <Pill color={COLOR[item.theme]||"#B45309"}>{item.theme}</Pill>
+                <div style={{ fontSize:"12.5px", color:"#1C1410", marginTop:"4px" }}>{item.title}</div>
+                <div style={{ fontSize:"12.5px", color:"#1C1410", fontStyle:"italic", marginTop:"2px" }}>{item.source} · {item.published}</div>
               </div>
-              <button onClick={() => onRestore(item.id)} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.50)", color:"#A16207", padding:"3px 9px", borderRadius:"3px", cursor:"pointer", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", flexShrink:0 }}>Restore</button>
+              <button onClick={() => onRestore(item.id)} style={{ ...F, background:"transparent", border:"1px solid rgba(194,65,12,0.50)", color:"#B45309", padding:"3px 9px", borderRadius:"3px", cursor:"pointer", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", flexShrink:0 }}>Restore</button>
             </div>
           ))}
         </div>
@@ -683,49 +683,49 @@ function buildLinks(items) {
 
 function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNote, connectedTitles, onNavigate, publicMode, onRemove, paths, onSavePath, orgs, orgLinks, onSaveOrgLink, onDeleteOrgLink }) {
   if(!node) return null;
-  const c = COLOR[node.theme]||"#A16207";
+  const c = COLOR[node.theme]||"#B45309";
   const isRead = readItems.has(node.url);
   const hasNote = !!(notes[node.url]?.argument||notes[node.url]?.thoughts||notes[node.url]?.quote);
   const noteData = notes[node.url];
   return (
-    <div style={{ ...F, position:"absolute", top:0, right:0, bottom:0, width:"290px", background:"rgba(237,232,218,1.0)", borderLeft:"1px solid rgba(245,158,11,0.42)", zIndex:30, display:"flex", flexDirection:"column" }}>
-      <div style={{ padding:"14px 16px 12px", borderBottom:"1px solid rgba(245,158,11,0.50)", display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:"8px" }}>
+    <div style={{ ...F, position:"absolute", top:0, right:0, bottom:0, width:"290px", background:"rgba(250,250,248,1.0)", borderLeft:"1px solid rgba(194,65,12,0.42)", zIndex:30, display:"flex", flexDirection:"column" }}>
+      <div style={{ padding:"14px 16px 12px", borderBottom:"1px solid rgba(194,65,12,0.50)", display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:"8px" }}>
         <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
           <Pill color={c}>{node.theme}</Pill>
-          {node.type==="foundational" && <Pill color="#D97706">Foundational</Pill>}
+          {node.type==="foundational" && <Pill color="#C2410C">Foundational</Pill>}
           {node.custom && <Pill color="#A78BFA">Custom</Pill>}
         </div>
-        <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1A0A00", cursor:"pointer", fontSize:"19.5px", lineHeight:1, flexShrink:0 }}>×</button>
+        <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1C1410", cursor:"pointer", fontSize:"19.5px", lineHeight:1, flexShrink:0 }}>×</button>
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"14px 16px" }}>
         <a href={node.url} target="_blank" rel="noopener noreferrer"
-          style={{ fontSize:"15.5px", color:"#1A0A00", lineHeight:"1.4", marginBottom:"8px", fontWeight:500, display:"block", textDecoration:"none", transition:"color 0.15s" }}
+          style={{ fontSize:"15.5px", color:"#1C1410", lineHeight:"1.4", marginBottom:"8px", fontWeight:500, display:"block", textDecoration:"none", transition:"color 0.15s" }}
           onMouseEnter={e => e.currentTarget.style.color=c}
-          onMouseLeave={e => e.currentTarget.style.color="#1A0A00"}>
+          onMouseLeave={e => e.currentTarget.style.color="#1C1410"}>
           {node.title} <span style={{ opacity:0.3, fontSize:"12px" }}>↗</span>
         </a>
-        <div style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic", marginBottom:"3px" }}>{node.source}</div>
-        <div style={{ fontSize:"11.5px", color:"#1A0A00", marginBottom:"12px" }}>{node.published}</div>
+        <div style={{ fontSize:"12.5px", color:"#1C1410", fontStyle:"italic", marginBottom:"3px" }}>{node.source}</div>
+        <div style={{ fontSize:"11.5px", color:"#1C1410", marginBottom:"12px" }}>{node.published}</div>
         <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginBottom:"14px" }}>
           {node.keywords.map((kw,i) => <span key={i} style={{ fontSize:"11.5px", color:c, background:c+"14", border:"1px solid "+c+"30", padding:"2px 7px", borderRadius:"2px" }}>#{kw}</span>)}
         </div>
 
         {/* Notes preview */}
         {hasNote && (
-          <div style={{ background:"rgba(245,158,11,0.15)", border:"1px solid rgba(245,158,11,0.40)", borderRadius:"3px", padding:"10px 12px", marginBottom:"12px", display:"flex", flexDirection:"column", gap:"8px" }}>
-            {noteData.quote && <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.6, fontStyle:"italic", borderLeft:"2px solid rgba(219,39,119,0.55)", paddingLeft:"8px" }}><span style={{ fontSize:"10.5px", color:"#D97706", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px", fontStyle:"normal" }}>Quote</span>{publicMode ? noteData.quote : (noteData.quote.slice(0,140)+(noteData.quote.length>140?"…":""))}</div>}
-            {noteData.argument && <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.5 }}><span style={{ fontSize:"10.5px", color:"#D97706", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>Argument</span>{publicMode ? noteData.argument : (noteData.argument.slice(0,120)+(noteData.argument.length>120?"…":""))}</div>}
-            {noteData.thoughts && <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.5 }}><span style={{ fontSize:"10.5px", color:"#D97706", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>My thoughts</span>{publicMode ? noteData.thoughts : (noteData.thoughts.slice(0,120)+(noteData.thoughts.length>120?"…":""))}</div>}
+          <div style={{ background:"rgba(194,65,12,0.15)", border:"1px solid rgba(194,65,12,0.40)", borderRadius:"3px", padding:"10px 12px", marginBottom:"12px", display:"flex", flexDirection:"column", gap:"8px" }}>
+            {noteData.quote && <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.6, fontStyle:"italic", borderLeft:"2px solid rgba(219,39,119,0.55)", paddingLeft:"8px" }}><span style={{ fontSize:"10.5px", color:"#C2410C", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px", fontStyle:"normal" }}>Quote</span>{publicMode ? noteData.quote : (noteData.quote.slice(0,140)+(noteData.quote.length>140?"…":""))}</div>}
+            {noteData.argument && <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.5 }}><span style={{ fontSize:"10.5px", color:"#C2410C", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>Argument</span>{publicMode ? noteData.argument : (noteData.argument.slice(0,120)+(noteData.argument.length>120?"…":""))}</div>}
+            {noteData.thoughts && <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.5 }}><span style={{ fontSize:"10.5px", color:"#C2410C", textTransform:"uppercase", letterSpacing:"0.1em", display:"block", marginBottom:"3px" }}>My thoughts</span>{publicMode ? noteData.thoughts : (noteData.thoughts.slice(0,120)+(noteData.thoughts.length>120?"…":""))}</div>}
           </div>
         )}
 
         {connectedTitles.length > 0 && (
           <div>
-            <div style={{ fontSize:"10.5px", color:"#A16207", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>
+            <div style={{ fontSize:"10.5px", color:"#B45309", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>
               Connected via shared keywords — <span style={{ fontStyle:"italic" }}>click to navigate</span>
             </div>
             {connectedTitles.slice(0,8).map((ct,i) => {
-              const cc = COLOR[ct.theme] || "#A16207";
+              const cc = COLOR[ct.theme] || "#B45309";
               return (
                 <button key={i} onClick={() => onNavigate && onNavigate(ct.id)}
                   style={{ display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderLeft:"2px solid "+cc+"55", padding:"5px 0 5px 9px", marginBottom:"4px", cursor:"pointer", borderRadius:"0 3px 3px 0", transition:"background 0.15s" }}
@@ -735,17 +735,17 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
                   <div style={{ fontSize:"10.5px", color:cc, marginBottom:"2px", letterSpacing:"0.04em" }}>
                     #{ct.keywords.join(" · #")}
                   </div>
-                  <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.4, ...F }}>
+                  <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.4, ...F }}>
                     {ct.title.length>52 ? ct.title.slice(0,52)+"…" : ct.title}
                   </div>
-                  <div style={{ fontSize:"11.5px", color:"#A16207", fontStyle:"italic", marginTop:"1px" }}>
+                  <div style={{ fontSize:"11.5px", color:"#B45309", fontStyle:"italic", marginTop:"1px" }}>
                     {ct.source}
                   </div>
                 </button>
               );
             })}
             {connectedTitles.length>8 && (
-              <div style={{ fontSize:"11.5px", color:"#A16207", paddingLeft:"9px", marginTop:"4px", fontStyle:"italic" }}>
+              <div style={{ fontSize:"11.5px", color:"#B45309", paddingLeft:"9px", marginTop:"4px", fontStyle:"italic" }}>
                 +{connectedTitles.length-8} more connections
               </div>
             )}
@@ -754,12 +754,12 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
 
         {/* Reading paths */}
         {!publicMode && paths && (
-          <div style={{ marginTop:"14px", paddingTop:"12px", borderTop:"1px solid rgba(245,158,11,0.22)" }}>
-            <div style={{ fontSize:"10.5px", color:"#A16207", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>Trails</div>
+          <div style={{ marginTop:"14px", paddingTop:"12px", borderTop:"1px solid rgba(194,65,12,0.22)" }}>
+            <div style={{ fontSize:"10.5px", color:"#B45309", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>Trails</div>
             {paths.filter(p => (p.item_ids||[]).includes(node.id)).map(p => (
               <div key={p.id} style={{ display:"flex", alignItems:"center", gap:"5px", marginBottom:"4px", background:p.color+"12", border:"1px solid "+p.color+"30", borderRadius:"3px", padding:"4px 7px" }}>
                 <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:p.color, flexShrink:0 }} />
-                <span style={{ ...F, fontSize:"11.5px", color:"#1A0A00", flex:1 }}>{p.name}</span>
+                <span style={{ ...F, fontSize:"11.5px", color:"#1C1410", flex:1 }}>{p.name}</span>
                 <span style={{ fontSize:"10.5px", color:p.color }}>#{(p.item_ids||[]).indexOf(node.id)+1}</span>
                 <button onClick={() => onSavePath({...p, item_ids:(p.item_ids||[]).filter(id=>id!==node.id)})}
                   style={{ background:"none", border:"none", cursor:"pointer", color:p.color, fontSize:"13.5px", padding:0, lineHeight:1, opacity:0.7 }}>×</button>
@@ -771,14 +771,14 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
 
         {/* Organisations */}
         {!publicMode && orgs && orgs.length > 0 && (
-          <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:"1px solid rgba(245,158,11,0.22)" }}>
-            <div style={{ fontSize:"10.5px", color:"#A16207", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>Organisations</div>
+          <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:"1px solid rgba(194,65,12,0.22)" }}>
+            <div style={{ fontSize:"10.5px", color:"#B45309", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"7px" }}>Organisations</div>
             {orgs.filter(org => orgLinks.some(l => l.org_id === org.id && l.item_id === node.id)).map(org => {
-              const color = STANCE_COLORS[org.stance] || "#A16207";
+              const color = STANCE_COLORS[org.stance] || "#B45309";
               return (
                 <div key={org.id} style={{ display:"flex", alignItems:"center", gap:"5px", marginBottom:"4px", background:color+"10", border:"1px solid "+color+"25", borderRadius:"3px", padding:"4px 7px" }}>
                   <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:color, flexShrink:0 }} />
-                  <span style={{ ...F, fontSize:"11.5px", color:"#1A0A00", flex:1 }}>{org.name}</span>
+                  <span style={{ ...F, fontSize:"11.5px", color:"#1C1410", flex:1 }}>{org.name}</span>
                   <span style={{ fontSize:"10.5px", color }}>{org.stance.split(" / ")[0]}</span>
                   <button onClick={() => onDeleteOrgLink(org.id, node.id)} style={{ background:"none", border:"none", cursor:"pointer", color, fontSize:"13.5px", padding:0, lineHeight:1, opacity:0.7 }}>×</button>
                 </div>
@@ -788,15 +788,15 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
           </div>
         )}
       </div>
-      <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(245,158,11,0.50)", display:"flex", gap:"5px", flexWrap:"wrap" }}>
+      <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(194,65,12,0.50)", display:"flex", gap:"5px", flexWrap:"wrap" }}>
         <a href={node.url} target="_blank" rel="noopener noreferrer" style={{ flex:1, textAlign:"center", padding:"7px 4px", background:"transparent", border:"1px solid "+c, color:c, borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", textDecoration:"none", ...F }}>Open ↗</a>
-        {!publicMode && <button onClick={() => onOpenNote(node)} style={{ flex:1, padding:"7px 4px", background:hasNote?"rgba(219,39,119,0.18)":"transparent", border:hasNote?"1px solid rgba(219,39,119,0.50)":"1px solid rgba(245,158,11,0.42)", color:hasNote?"#DB2777":"#1A0A00", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
+        {!publicMode && <button onClick={() => onOpenNote(node)} style={{ flex:1, padding:"7px 4px", background:hasNote?"rgba(219,39,119,0.18)":"transparent", border:hasNote?"1px solid rgba(219,39,119,0.50)":"1px solid rgba(194,65,12,0.42)", color:hasNote?"#DB2777":"#1C1410", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
           {hasNote?"✎ Note":"Note"}
         </button>}
-        {!publicMode && <button onClick={() => onToggleRead(node.url)} style={{ flex:1, padding:"7px 4px", background:isRead?"rgba(22,163,74,0.15)":"transparent", border:isRead?"1px solid rgba(22,163,74,0.50)":"1px solid rgba(245,158,11,0.42)", color:isRead?"#16A34A":"#1A0A00", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
+        {!publicMode && <button onClick={() => onToggleRead(node.url)} style={{ flex:1, padding:"7px 4px", background:isRead?"rgba(22,163,74,0.15)":"transparent", border:isRead?"1px solid rgba(22,163,74,0.50)":"1px solid rgba(194,65,12,0.42)", color:isRead?"#16A34A":"#1C1410", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
           {isRead?"✓ Read":"To Read"}
         </button>}
-        {!publicMode && onRemove && <button onClick={() => { onRemove(node); onClose(); }} style={{ flex:1, padding:"7px 4px", background:"transparent", border:"1px solid rgba(245,158,11,0.42)", color:"#D97706", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>Remove</button>}
+        {!publicMode && onRemove && <button onClick={() => { onRemove(node); onClose(); }} style={{ flex:1, padding:"7px 4px", background:"transparent", border:"1px solid rgba(194,65,12,0.42)", color:"#C2410C", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>Remove</button>}
       </div>
     </div>
   );
@@ -826,16 +826,16 @@ function PathSelector({ node, paths, onSavePath }) {
     <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
       <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Path name…" autoFocus
         onKeyDown={e => { if(e.key==="Enter") createAndAdd(); if(e.key==="Escape") setCreating(false); }}
-        style={{ ...F, background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", color:"#1A0A00", fontSize:"12.5px", padding:"5px 8px", outline:"none" }} />
+        style={{ ...F, background:"rgba(250,250,248,0.98)", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"3px", color:"#1C1410", fontSize:"12.5px", padding:"5px 8px", outline:"none" }} />
       <div style={{ display:"flex", gap:"4px", flexWrap:"wrap" }}>
         {PATH_COLORS.map(c => (
           <button key={c} onClick={() => setNewColor(c)}
-            style={{ width:"16px", height:"16px", borderRadius:"50%", background:c, border: newColor===c?"2px solid #1A0A00":"1px solid transparent", cursor:"pointer", padding:0, flexShrink:0 }} />
+            style={{ width:"16px", height:"16px", borderRadius:"50%", background:c, border: newColor===c?"2px solid #1C1410":"1px solid transparent", cursor:"pointer", padding:0, flexShrink:0 }} />
         ))}
       </div>
       <div style={{ display:"flex", gap:"5px" }}>
-        <button onClick={createAndAdd} style={{ ...F, flex:1, background:"transparent", border:"1px solid #D97706", color:"#D97706", padding:"4px", borderRadius:"3px", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Create</button>
-        <button onClick={() => setCreating(false)} style={{ ...F, flex:1, background:"transparent", border:"1px solid rgba(245,158,11,0.42)", color:"#A16207", padding:"4px", borderRadius:"3px", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
+        <button onClick={createAndAdd} style={{ ...F, flex:1, background:"transparent", border:"1px solid #C2410C", color:"#C2410C", padding:"4px", borderRadius:"3px", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Create</button>
+        <button onClick={() => setCreating(false)} style={{ ...F, flex:1, background:"transparent", border:"1px solid rgba(194,65,12,0.42)", color:"#B45309", padding:"4px", borderRadius:"3px", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
       </div>
     </div>
   );
@@ -843,27 +843,27 @@ function PathSelector({ node, paths, onSavePath }) {
   return (
     <div style={{ position:"relative" }}>
       <button onClick={() => setOpen(v => !v)}
-        style={{ ...F, width:"100%", background:"transparent", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", padding:"5px 8px", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", color:"#A16207", cursor:"pointer", textAlign:"left" }}>
+        style={{ ...F, width:"100%", background:"transparent", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"3px", padding:"5px 8px", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", color:"#B45309", cursor:"pointer", textAlign:"left" }}>
         + Add to trail {open ? "▲" : "▼"}
       </button>
       {open && (
-        <div style={{ position:"absolute", bottom:"calc(100% + 4px)", left:0, right:0, background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", boxShadow:"0 -4px 12px rgba(28,43,28,0.1)", overflow:"hidden", zIndex:50 }}>
+        <div style={{ position:"absolute", bottom:"calc(100% + 4px)", left:0, right:0, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", boxShadow:"0 -4px 12px rgba(28,43,28,0.1)", overflow:"hidden", zIndex:50 }}>
           {paths.length > 0 && available.length === 0 && (
-            <div style={{ padding:"7px 10px", fontSize:"11.5px", color:"#A16207", fontStyle:"italic" }}>Already in all paths</div>
+            <div style={{ padding:"7px 10px", fontSize:"11.5px", color:"#B45309", fontStyle:"italic" }}>Already in all paths</div>
           )}
           {available.map(p => (
             <button key={p.id} onClick={() => addToPath(p)}
-              style={{ ...F, display:"flex", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(245,158,11,0.28)", padding:"6px 10px", cursor:"pointer", alignItems:"center", gap:"6px" }}
-              onMouseEnter={e => e.currentTarget.style.background="rgba(254,252,232,0.98)"}
+              style={{ ...F, display:"flex", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.28)", padding:"6px 10px", cursor:"pointer", alignItems:"center", gap:"6px" }}
+              onMouseEnter={e => e.currentTarget.style.background="rgba(250,250,248,0.98)"}
               onMouseLeave={e => e.currentTarget.style.background="transparent"}>
               <div style={{ width:"7px", height:"7px", borderRadius:"50%", background:p.color, flexShrink:0 }} />
-              <span style={{ fontSize:"11.5px", color:"#1A0A00", flex:1 }}>{p.name}</span>
-              <span style={{ fontSize:"10.5px", color:"#A16207" }}>{(p.item_ids||[]).length} items</span>
+              <span style={{ fontSize:"11.5px", color:"#1C1410", flex:1 }}>{p.name}</span>
+              <span style={{ fontSize:"10.5px", color:"#B45309" }}>{(p.item_ids||[]).length} items</span>
             </button>
           ))}
           <button onClick={() => { setOpen(false); setCreating(true); }}
-            style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", padding:"6px 10px", cursor:"pointer", fontSize:"10.5px", color:"#D97706", letterSpacing:"0.08em", textTransform:"uppercase" }}
-            onMouseEnter={e => e.currentTarget.style.background="rgba(254,252,232,0.98)"}
+            style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", padding:"6px 10px", cursor:"pointer", fontSize:"10.5px", color:"#C2410C", letterSpacing:"0.08em", textTransform:"uppercase" }}
+            onMouseEnter={e => e.currentTarget.style.background="rgba(250,250,248,0.98)"}
             onMouseLeave={e => e.currentTarget.style.background="transparent"}>
             + New trail…
           </button>
@@ -914,21 +914,21 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
   }
 
   return (
-    <div style={{ ...F, position:"absolute", bottom:"44px", left:"10px", zIndex:40, background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"4px", padding:"12px", width:"270px", maxHeight:"72vh", overflowY:"auto", boxShadow:"0 4px 16px rgba(43,45,66,0.1)" }}>
+    <div style={{ ...F, position:"absolute", bottom:"44px", left:"10px", zIndex:40, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"4px", padding:"12px", width:"270px", maxHeight:"72vh", overflowY:"auto", boxShadow:"0 4px 16px rgba(43,45,66,0.1)" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px" }}>
-        <span style={{ fontSize:"10.5px", color:"#A16207", letterSpacing:"0.12em", textTransform:"uppercase" }}>Trails</span>
-        <button onClick={flushAndClose} style={{ background:"none", border:"none", cursor:"pointer", color:"#A16207", fontSize:"14.5px", padding:0, lineHeight:1 }}>×</button>
+        <span style={{ fontSize:"10.5px", color:"#B45309", letterSpacing:"0.12em", textTransform:"uppercase" }}>Trails</span>
+        <button onClick={flushAndClose} style={{ background:"none", border:"none", cursor:"pointer", color:"#B45309", fontSize:"14.5px", padding:0, lineHeight:1 }}>×</button>
       </div>
 
       {paths.length === 0 && (
-        <div style={{ fontSize:"12.5px", color:"#A16207", fontStyle:"italic" }}>No trails yet. Open any source in the grove and add it to a new trail.</div>
+        <div style={{ fontSize:"12.5px", color:"#B45309", fontStyle:"italic" }}>No trails yet. Open any source in the grove and add it to a new trail.</div>
       )}
 
       {paths.map(p => {
         const isExpanded = expanded === p.id;
         const isEditing  = editingId === p.id;
         return (
-          <div key={p.id} style={{ marginBottom:"10px", background:"rgba(254,252,232,0.97)", border:"1px solid rgba(245,158,11,0.22)", borderLeft:"3px solid "+p.color, borderRadius:"3px", padding:"8px 10px" }}>
+          <div key={p.id} style={{ marginBottom:"10px", background:"rgba(250,250,248,0.97)", border:"1px solid rgba(194,65,12,0.22)", borderLeft:"3px solid "+p.color, borderRadius:"3px", padding:"8px 10px" }}>
 
             {/* Name row */}
             <div style={{ display:"flex", alignItems:"center", gap:"5px" }}>
@@ -936,17 +936,17 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
                 <input value={editName} onChange={e => setEditNameSynced(e.target.value)}
                   onKeyDown={e => { if(e.key==="Enter") commitEdit(p); if(e.key==="Escape") setEditingId(null); }}
                   onBlur={() => commitEdit(p)} autoFocus={editFocus === "name"}
-                  style={{ ...F, flex:1, background:"transparent", border:"none", borderBottom:"1px solid rgba(245,158,11,0.55)", outline:"none", fontSize:"12.5px", color:"#1A0A00", padding:"1px 0", fontWeight:500 }} />
+                  style={{ ...F, flex:1, background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.55)", outline:"none", fontSize:"12.5px", color:"#1C1410", padding:"1px 0", fontWeight:500 }} />
               ) : (
                 <span onClick={() => { setEditingId(p.id); setEditNameSynced(p.name); setEditDescSynced(p.description||""); setEditFocus("name"); }}
-                  style={{ flex:1, fontSize:"12.5px", color:"#1A0A00", cursor:"text", fontWeight:500, lineHeight:1.3 }} title="Click to rename">{p.name}</span>
+                  style={{ flex:1, fontSize:"12.5px", color:"#1C1410", cursor:"text", fontWeight:500, lineHeight:1.3 }} title="Click to rename">{p.name}</span>
               )}
               <button onClick={() => setExpanded(v => v===p.id ? null : p.id)}
-                style={{ background:"none", border:"none", cursor:"pointer", color:"#A16207", fontSize:"11.5px", padding:"0 2px", lineHeight:1, flexShrink:0 }}>
+                style={{ background:"none", border:"none", cursor:"pointer", color:"#B45309", fontSize:"11.5px", padding:"0 2px", lineHeight:1, flexShrink:0 }}>
                 {(p.item_ids||[]).length} {isExpanded ? "▲" : "▼"}
               </button>
               <button onClick={() => onDeletePath(p.id)}
-                style={{ background:"none", border:"none", cursor:"pointer", color:"#D97706", fontSize:"13.5px", padding:0, lineHeight:1, flexShrink:0, opacity:0.6 }}>×</button>
+                style={{ background:"none", border:"none", cursor:"pointer", color:"#C2410C", fontSize:"13.5px", padding:0, lineHeight:1, flexShrink:0, opacity:0.6 }}>×</button>
             </div>
 
             {/* Description */}
@@ -954,17 +954,17 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
               <textarea value={editDesc} onChange={e => setEditDescSynced(e.target.value)} placeholder="Describe this trail…" rows={2}
                 autoFocus={editFocus === "desc"}
                 onBlur={() => commitEdit(p)}
-                style={{ ...F, width:"100%", marginTop:"6px", background:"rgba(254,252,232,0.97)", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"2px", color:"#1A0A00", fontSize:"11.5px", padding:"4px 6px", resize:"none", outline:"none", boxSizing:"border-box", lineHeight:1.5, fontStyle:"italic" }} />
+                style={{ ...F, width:"100%", marginTop:"6px", background:"rgba(250,250,248,0.97)", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"2px", color:"#1C1410", fontSize:"11.5px", padding:"4px 6px", resize:"none", outline:"none", boxSizing:"border-box", lineHeight:1.5, fontStyle:"italic" }} />
             ) : (
               <div onClick={() => { setEditingId(p.id); setEditNameSynced(p.name); setEditDescSynced(p.description||""); setEditFocus("desc"); }}
-                style={{ fontSize:"11.5px", color: p.description ? "#A16207" : "rgba(122,128,104,0.45)", fontStyle:"italic", marginTop:"4px", lineHeight:1.4, cursor:"text" }}>
+                style={{ fontSize:"11.5px", color: p.description ? "#B45309" : "rgba(122,128,104,0.45)", fontStyle:"italic", marginTop:"4px", lineHeight:1.4, cursor:"text" }}>
                 {p.description ? (p.description.length>80 ? p.description.slice(0,80)+"…" : p.description) : "Add a description…"}
               </div>
             )}
 
             {/* Expanded item list with reorder */}
             {isExpanded && (p.item_ids||[]).length > 0 && (
-              <div style={{ marginTop:"8px", borderTop:"1px solid rgba(245,158,11,0.22)", paddingTop:"6px" }}>
+              <div style={{ marginTop:"8px", borderTop:"1px solid rgba(194,65,12,0.22)", paddingTop:"6px" }}>
                 {(p.item_ids||[]).map((id, idx) => {
                   const item = itemMap[id];
                   if (!item) return null;
@@ -972,22 +972,22 @@ function PathsPanel({ paths, pool, onSavePath, onDeletePath, onClose }) {
                   return (
                     <div key={id} style={{ display:"flex", alignItems:"center", gap:"4px", marginBottom:"4px" }}>
                       <span style={{ fontSize:"10.5px", color:p.color, fontWeight:"bold", width:"14px", flexShrink:0, textAlign:"right" }}>{idx+1}</span>
-                      <span style={{ flex:1, fontSize:"11.5px", color:"#1A0A00", lineHeight:1.3 }}>
+                      <span style={{ flex:1, fontSize:"11.5px", color:"#1C1410", lineHeight:1.3 }}>
                         {item.title.length>34 ? item.title.slice(0,34)+"…" : item.title}
                       </span>
                       <button onClick={() => moveItem(p, idx, idx-1)} disabled={idx===0}
-                        style={{ background:"none", border:"none", cursor:idx===0?"default":"pointer", color:idx===0?"rgba(122,128,104,0.25)":"#A16207", fontSize:"10.5px", padding:0, lineHeight:1, flexShrink:0 }}>▲</button>
+                        style={{ background:"none", border:"none", cursor:idx===0?"default":"pointer", color:idx===0?"rgba(122,128,104,0.25)":"#B45309", fontSize:"10.5px", padding:0, lineHeight:1, flexShrink:0 }}>▲</button>
                       <button onClick={() => moveItem(p, idx, idx+1)} disabled={last}
-                        style={{ background:"none", border:"none", cursor:last?"default":"pointer", color:last?"rgba(122,128,104,0.25)":"#A16207", fontSize:"10.5px", padding:0, lineHeight:1, flexShrink:0 }}>▼</button>
+                        style={{ background:"none", border:"none", cursor:last?"default":"pointer", color:last?"rgba(122,128,104,0.25)":"#B45309", fontSize:"10.5px", padding:0, lineHeight:1, flexShrink:0 }}>▼</button>
                       <button onClick={() => removeItemFromPath(p, id)}
-                        style={{ background:"none", border:"none", cursor:"pointer", color:"#D97706", fontSize:"12.5px", padding:0, lineHeight:1, flexShrink:0, opacity:0.6 }}>×</button>
+                        style={{ background:"none", border:"none", cursor:"pointer", color:"#C2410C", fontSize:"12.5px", padding:0, lineHeight:1, flexShrink:0, opacity:0.6 }}>×</button>
                     </div>
                   );
                 })}
               </div>
             )}
             {isExpanded && (p.item_ids||[]).length === 0 && (
-              <div style={{ marginTop:"6px", fontSize:"11.5px", color:"#A16207", fontStyle:"italic" }}>No items yet.</div>
+              <div style={{ marginTop:"6px", fontSize:"11.5px", color:"#B45309", fontStyle:"italic" }}>No items yet.</div>
             )}
           </div>
         );
@@ -1019,8 +1019,8 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
 
   if (paths.length === 0) return (
     <div style={{ ...F, maxWidth:"680px", margin:"0 auto", padding:"80px 24px", textAlign:"center" }}>
-      <div style={{ fontSize:"14.5px", color:"#1A0A00", fontStyle:"italic" }}>No trails yet.</div>
-      <div style={{ fontSize:"12.5px", color:"#A16207", marginTop:"8px" }}>Open the Grove, click any source, and add it to a new trail from the sidebar.</div>
+      <div style={{ fontSize:"14.5px", color:"#1C1410", fontStyle:"italic" }}>No trails yet.</div>
+      <div style={{ fontSize:"12.5px", color:"#B45309", marginTop:"8px" }}>Open the Grove, click any source, and add it to a new trail from the sidebar.</div>
     </div>
   );
 
@@ -1034,7 +1034,7 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
             onClick={() => { setSelectedId(p.id); setSelectedItem(null); }}
             style={{ writingMode:"vertical-rl", textOrientation:"mixed", transform:"rotate(180deg)",
               fontFamily:"'Palatino Linotype',Palatino,serif", fontSize:"9.5px", letterSpacing:"0.16em",
-              textTransform:"uppercase", fontWeight:600, color:"#FFFBEB", background:p.color,
+              textTransform:"uppercase", fontWeight:600, color:"#FFFFFF", background:p.color,
               border:"none", cursor:"pointer", padding:"18px 10px", whiteSpace:"nowrap",
               flexShrink:0, textAlign:"left", transition:"opacity 0.15s, filter 0.15s",
               opacity: selected?.id === p.id ? 1 : 0.45,
@@ -1045,16 +1045,16 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
       </div>
 
       {/* ── Main pane ── */}
-      <div style={{ flex:1, background:"#FFFBEB", borderLeft:"1.5px solid rgba(245,158,11,0.22)", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
+      <div style={{ flex:1, background:"#FFFFFF", borderLeft:"1.5px solid rgba(194,65,12,0.22)", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
         {selected && (<>
 
           {/* Header */}
           <div style={{ padding:"28px 44px 22px", flexShrink:0 }}>
-            <h1 style={{ ...F, fontSize:"24px", fontWeight:400, color:"#1A0A00", letterSpacing:"-0.01em", margin:"0 0 7px" }}>{selected.name}</h1>
+            <h1 style={{ ...F, fontSize:"24px", fontWeight:400, color:"#1C1410", letterSpacing:"-0.01em", margin:"0 0 7px" }}>{selected.name}</h1>
             {selected.description && (
-              <p style={{ ...F, fontSize:"13px", color:"#7C5A1A", fontStyle:"italic", lineHeight:1.6, margin:"0 0 12px" }}>{selected.description}</p>
+              <p style={{ ...F, fontSize:"13px", color:"#78350F", fontStyle:"italic", lineHeight:1.6, margin:"0 0 12px" }}>{selected.description}</p>
             )}
-            <div style={{ fontSize:"10px", letterSpacing:"0.12em", textTransform:"uppercase", color:"#A16207" }}>
+            <div style={{ fontSize:"10px", letterSpacing:"0.12em", textTransform:"uppercase", color:"#B45309" }}>
               {(selected.item_ids||[]).length} sources
             </div>
           </div>
@@ -1062,27 +1062,27 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
           {/* Reading list */}
           <div style={{ flex:1, overflowY:"auto", padding:"12px 44px 80px" }}>
             {(selected.item_ids||[]).length === 0 && (
-              <div style={{ fontSize:"12.5px", color:"#A16207", fontStyle:"italic" }}>No sources in this trail yet.</div>
+              <div style={{ fontSize:"12.5px", color:"#B45309", fontStyle:"italic" }}>No sources in this trail yet.</div>
             )}
             {(selected.item_ids||[]).map((id, idx) => {
               const item = itemMap[id];
               if (!item) return null;
-              const c = COLOR[item.theme] || "#A16207";
+              const c = COLOR[item.theme] || "#B45309";
               const isLast = idx === (selected.item_ids||[]).length - 1;
               const isOpen = selectedItem?.id === item.id;
               return (
                 <Fragment key={id}>
                   <div onClick={() => setSelectedItem(prev => prev?.id === item.id ? null : item)}
                     style={{ display:"grid", gridTemplateColumns:"36px 1fr", gap:"0 18px", padding:"20px 0 18px", cursor:"pointer" }}>
-                    <div style={{ fontSize:"34px", fontWeight:400, opacity:0.09, textAlign:"right", lineHeight:1, paddingTop:"4px", color:"#1A0A00" }}>
+                    <div style={{ fontSize:"34px", fontWeight:400, opacity:0.09, textAlign:"right", lineHeight:1, paddingTop:"4px", color:"#1C1410" }}>
                       {idx + 1}
                     </div>
                     <div>
-                      <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", alignItems:"center", fontSize:"10px", letterSpacing:"0.09em", textTransform:"uppercase", color:"#A16207", marginBottom:"6px" }}>
+                      <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", alignItems:"center", fontSize:"10px", letterSpacing:"0.09em", textTransform:"uppercase", color:"#B45309", marginBottom:"6px" }}>
                         <span style={{ fontSize:"9px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"1px 6px", borderRadius:"2px", border:"1px solid "+c, color:c }}>{item.theme}</span>
                         <span>{item.source} · {item.published}</span>
                       </div>
-                      <div style={{ ...F, fontSize:"15.5px", fontWeight:500, lineHeight:1.4, color: isOpen ? selected.color : "#1A0A00", transition:"color 0.15s" }}>
+                      <div style={{ ...F, fontSize:"15.5px", fontWeight:500, lineHeight:1.4, color: isOpen ? selected.color : "#1C1410", transition:"color 0.15s" }}>
                         {item.title} <span style={{ opacity:0.3, fontSize:"12px" }}>↗</span>
                       </div>
                     </div>
@@ -1135,26 +1135,26 @@ function OrgLinker({ node, orgs, orgLinks, onSaveOrgLink, onDeleteOrgLink }) {
   return (
     <div style={{ position:"relative" }}>
       <button onClick={() => setOpen(v => !v)}
-        style={{ ...F, width:"100%", background:"transparent", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", padding:"5px 8px", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", color:"#A16207", cursor:"pointer", textAlign:"left" }}>
+        style={{ ...F, width:"100%", background:"transparent", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"3px", padding:"5px 8px", fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", color:"#B45309", cursor:"pointer", textAlign:"left" }}>
         + Link to organisation {open ? "▲" : "▼"}
       </button>
       {open && (
-        <div style={{ position:"absolute", bottom:"calc(100% + 4px)", left:0, right:0, background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", boxShadow:"0 -4px 12px rgba(28,43,28,0.1)", overflow:"hidden", zIndex:50 }}>
-          <div style={{ padding:"5px 8px", borderBottom:"1px solid rgba(245,158,11,0.28)" }}>
+        <div style={{ position:"absolute", bottom:"calc(100% + 4px)", left:0, right:0, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", boxShadow:"0 -4px 12px rgba(28,43,28,0.1)", overflow:"hidden", zIndex:50 }}>
+          <div style={{ padding:"5px 8px", borderBottom:"1px solid rgba(194,65,12,0.28)" }}>
             <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Search organisations…" autoFocus
-              style={{ ...F, width:"100%", background:"transparent", border:"none", outline:"none", fontSize:"11.5px", color:"#1A0A00", boxSizing:"border-box" }} />
+              style={{ ...F, width:"100%", background:"transparent", border:"none", outline:"none", fontSize:"11.5px", color:"#1C1410", boxSizing:"border-box" }} />
           </div>
-          {available.length === 0 && <div style={{ padding:"7px 10px", fontSize:"11.5px", color:"#A16207", fontStyle:"italic" }}>No organisations to link.</div>}
+          {available.length === 0 && <div style={{ padding:"7px 10px", fontSize:"11.5px", color:"#B45309", fontStyle:"italic" }}>No organisations to link.</div>}
           {available.slice(0,6).map(org => {
-            const color = STANCE_COLORS[org.stance] || "#A16207";
+            const color = STANCE_COLORS[org.stance] || "#B45309";
             return (
               <button key={org.id} onClick={() => { onSaveOrgLink(org.id, node.id); setOpen(false); setSearchQ(""); }}
-                style={{ ...F, display:"flex", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(245,158,11,0.28)", padding:"6px 10px", cursor:"pointer", alignItems:"center", gap:"6px" }}
-                onMouseEnter={e => e.currentTarget.style.background="rgba(254,252,232,0.98)"}
+                style={{ ...F, display:"flex", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.28)", padding:"6px 10px", cursor:"pointer", alignItems:"center", gap:"6px" }}
+                onMouseEnter={e => e.currentTarget.style.background="rgba(250,250,248,0.98)"}
                 onMouseLeave={e => e.currentTarget.style.background="transparent"}>
                 <div style={{ width:"7px", height:"7px", borderRadius:"50%", background:color, flexShrink:0 }} />
-                <span style={{ fontSize:"11.5px", color:"#1A0A00", flex:1 }}>{org.name}</span>
-                <span style={{ fontSize:"10.5px", color:"#A16207" }}>{org.stance.split(" / ")[0]}</span>
+                <span style={{ fontSize:"11.5px", color:"#1C1410", flex:1 }}>{org.name}</span>
+                <span style={{ fontSize:"10.5px", color:"#B45309" }}>{org.stance.split(" / ")[0]}</span>
               </button>
             );
           })}
@@ -1167,8 +1167,8 @@ function OrgLinker({ node, orgs, orgLinks, onSaveOrgLink, onDeleteOrgLink }) {
 // ─── Add / edit org modal ─────────────────────────────────────────────────────
 
 function AddOrgModal({ org, onSave, onClose }) {
-  const iStyle = { ...F, width:"100%", background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", color:"#1A0A00", fontSize:"13.5px", padding:"8px 10px", outline:"none", boxSizing:"border-box" };
-  const lStyle = { fontSize:"11.5px", color:"#A16207", letterSpacing:"0.1em", textTransform:"uppercase", display:"block", marginBottom:"5px" };
+  const iStyle = { ...F, width:"100%", background:"rgba(250,250,248,0.98)", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"3px", color:"#1C1410", fontSize:"13.5px", padding:"8px 10px", outline:"none", boxSizing:"border-box" };
+  const lStyle = { fontSize:"11.5px", color:"#B45309", letterSpacing:"0.1em", textTransform:"uppercase", display:"block", marginBottom:"5px" };
   const [form, setForm] = useState({
     id: org?.id || crypto.randomUUID(),
     name: org?.name || "",
@@ -1180,10 +1180,10 @@ function AddOrgModal({ org, onSave, onClose }) {
 
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(10,30,20,0.65)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ ...F, background:"#FFFBEB", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"6px", width:"100%", maxWidth:"460px", overflow:"hidden" }}>
-        <div style={{ padding:"16px 18px 12px", borderBottom:"1px solid rgba(245,158,11,0.50)", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-          <span style={{ fontSize:"13.5px", color:"#1A0A00", fontWeight:500 }}>{org ? "Edit Organisation" : "Add Organisation"}</span>
-          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1A0A00", cursor:"pointer", fontSize:"19.5px" }}>×</button>
+      <div onClick={e => e.stopPropagation()} style={{ ...F, background:"#FFFFFF", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"6px", width:"100%", maxWidth:"460px", overflow:"hidden" }}>
+        <div style={{ padding:"16px 18px 12px", borderBottom:"1px solid rgba(194,65,12,0.50)", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+          <span style={{ fontSize:"13.5px", color:"#1C1410", fontWeight:500 }}>{org ? "Edit Organisation" : "Add Organisation"}</span>
+          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1C1410", cursor:"pointer", fontSize:"19.5px" }}>×</button>
         </div>
         <div style={{ padding:"16px 18px", display:"flex", flexDirection:"column", gap:"12px" }}>
           <div>
@@ -1206,10 +1206,10 @@ function AddOrgModal({ org, onSave, onClose }) {
             <input value={form.website} onChange={e => set("website",e.target.value)} placeholder="https://…" style={iStyle} />
           </div>
         </div>
-        <div style={{ padding:"12px 18px", borderTop:"1px solid rgba(245,158,11,0.28)", display:"flex", gap:"8px", justifyContent:"flex-end" }}>
-          <button onClick={onClose} style={{ ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.50)", color:"#A16207", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
+        <div style={{ padding:"12px 18px", borderTop:"1px solid rgba(194,65,12,0.28)", display:"flex", gap:"8px", justifyContent:"flex-end" }}>
+          <button onClick={onClose} style={{ ...F, background:"transparent", border:"1px solid rgba(194,65,12,0.50)", color:"#B45309", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>Cancel</button>
           <button onClick={() => { if(form.name.trim()) onSave(form); }}
-            style={{ ...F, background:"transparent", border:"1px solid #D97706", color:"#D97706", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>
+            style={{ ...F, background:"transparent", border:"1px solid #C2410C", color:"#C2410C", padding:"6px 14px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer" }}>
             {org ? "Save" : "Add"}
           </button>
         </div>
@@ -1223,7 +1223,7 @@ function AddOrgModal({ org, onSave, onClose }) {
 function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onSaveOrgLink, onDeleteOrgLink, publicMode }) {
   const [searchQ, setSearchQ]       = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const color = STANCE_COLORS[org.stance] || "#A16207";
+  const color = STANCE_COLORS[org.stance] || "#B45309";
   const itemMap = Object.fromEntries(pool.map(n => [n.id, n]));
   const linkedItems = links.map(l => itemMap[l.item_id]).filter(Boolean);
 
@@ -1241,22 +1241,22 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
           <div style={{ display:"flex", alignItems:"baseline", gap:"8px", marginBottom: org.description ? "4px" : 0 }}>
             {org.website
               ? <a href={org.website} target="_blank" rel="noopener noreferrer"
-                  style={{ ...F, fontSize:"15px", fontWeight:500, color:"#1A0A00", textDecoration:"none", borderBottom:"1px solid rgba(26,10,0,0.2)", transition:"border-color 0.15s" }}
+                  style={{ ...F, fontSize:"15px", fontWeight:500, color:"#1C1410", textDecoration:"none", borderBottom:"1px solid rgba(26,10,0,0.2)", transition:"border-color 0.15s" }}
                   onMouseEnter={e => e.currentTarget.style.borderBottomColor = color}
                   onMouseLeave={e => e.currentTarget.style.borderBottomColor = "rgba(26,10,0,0.2)"}>
                   {org.name}
                 </a>
-              : <span style={{ ...F, fontSize:"15px", fontWeight:500, color:"#1A0A00" }}>{org.name}</span>
+              : <span style={{ ...F, fontSize:"15px", fontWeight:500, color:"#1C1410" }}>{org.name}</span>
             }
             {!publicMode && <>
-              <button onClick={onEdit}   style={{ background:"none", border:"none", cursor:"pointer", color:"#A16207", fontSize:"12px",  padding:"0 2px", opacity:0.5 }}>✎</button>
-              <button onClick={onDelete} style={{ background:"none", border:"none", cursor:"pointer", color:"#D97706", fontSize:"13px",  padding:0,       opacity:0.4 }}>×</button>
+              <button onClick={onEdit}   style={{ background:"none", border:"none", cursor:"pointer", color:"#B45309", fontSize:"12px",  padding:"0 2px", opacity:0.5 }}>✎</button>
+              <button onClick={onDelete} style={{ background:"none", border:"none", cursor:"pointer", color:"#C2410C", fontSize:"13px",  padding:0,       opacity:0.4 }}>×</button>
             </>}
           </div>
-          {org.description && <div style={{ ...F, fontSize:"12.5px", color:"#7C5A1A", fontStyle:"italic", lineHeight:1.5 }}>{org.description}</div>}
+          {org.description && <div style={{ ...F, fontSize:"12.5px", color:"#78350F", fontStyle:"italic", lineHeight:1.5 }}>{org.description}</div>}
         </div>
         <button onClick={onToggle} style={{ background:"none", border:"none", cursor:"pointer", padding:0, flexShrink:0 }}>
-          <span style={{ ...F, fontSize:"11px", color:"#A16207", letterSpacing:"0.06em", whiteSpace:"nowrap" }}>
+          <span style={{ ...F, fontSize:"11px", color:"#B45309", letterSpacing:"0.06em", whiteSpace:"nowrap" }}>
             · {links.length} {links.length === 1 ? "piece" : "pieces"} {isExpanded ? "▲" : "▼"}
           </span>
         </button>
@@ -1266,28 +1266,28 @@ function OrgCard({ org, links, pool, isExpanded, onToggle, onEdit, onDelete, onS
         <div style={{ marginTop:"10px", paddingTop:"10px", borderTop:"1px dashed rgba(26,10,0,0.12)" }}>
           {linkedItems.map(item => (
             <div key={item.id} style={{ display:"flex", alignItems:"baseline", gap:"8px", marginBottom:"6px" }}>
-              <span style={{ fontSize:"9px", color:"#A16207", flexShrink:0 }}>◆</span>
-              <span style={{ ...F, fontSize:"10.5px", letterSpacing:"0.07em", textTransform:"uppercase", color:COLOR[item.theme]||"#A16207", flexShrink:0 }}>{item.theme}</span>
-              <span style={{ ...F, fontSize:"12.5px", color:"#1A0A00", flex:1, lineHeight:1.35 }}>{item.title.length > 60 ? item.title.slice(0, 60)+"…" : item.title}</span>
-              {!publicMode && <button onClick={() => onDeleteOrgLink(org.id, item.id)} style={{ background:"none", border:"none", cursor:"pointer", color:"#D97706", fontSize:"12px", padding:0, opacity:0.5, flexShrink:0 }}>×</button>}
+              <span style={{ fontSize:"9px", color:"#B45309", flexShrink:0 }}>◆</span>
+              <span style={{ ...F, fontSize:"10.5px", letterSpacing:"0.07em", textTransform:"uppercase", color:COLOR[item.theme]||"#B45309", flexShrink:0 }}>{item.theme}</span>
+              <span style={{ ...F, fontSize:"12.5px", color:"#1C1410", flex:1, lineHeight:1.35 }}>{item.title.length > 60 ? item.title.slice(0, 60)+"…" : item.title}</span>
+              {!publicMode && <button onClick={() => onDeleteOrgLink(org.id, item.id)} style={{ background:"none", border:"none", cursor:"pointer", color:"#C2410C", fontSize:"12px", padding:0, opacity:0.5, flexShrink:0 }}>×</button>}
             </div>
           ))}
-          {linkedItems.length === 0 && <div style={{ fontSize:"11.5px", color:"#A16207", fontStyle:"italic", marginBottom:"8px" }}>No articles linked yet.</div>}
+          {linkedItems.length === 0 && <div style={{ fontSize:"11.5px", color:"#B45309", fontStyle:"italic", marginBottom:"8px" }}>No articles linked yet.</div>}
 
           {!publicMode && <div style={{ marginTop:"8px", position:"relative" }}>
             <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Search articles to link…"
               onFocus={() => setShowSearch(true)}
               onBlur={() => setTimeout(() => setShowSearch(false), 150)}
-              style={{ ...F, width:"100%", background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", color:"#1A0A00", fontSize:"12.5px", padding:"5px 8px", outline:"none", boxSizing:"border-box" }} />
+              style={{ ...F, width:"100%", background:"rgba(250,250,248,0.98)", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", color:"#1C1410", fontSize:"12.5px", padding:"5px 8px", outline:"none", boxSizing:"border-box" }} />
             {showSearch && searchResults.length > 0 && (
-              <div style={{ position:"absolute", top:"calc(100% + 2px)", left:0, right:0, background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", zIndex:50, overflow:"hidden", boxShadow:"0 4px 12px rgba(28,43,28,0.1)" }}>
+              <div style={{ position:"absolute", top:"calc(100% + 2px)", left:0, right:0, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", zIndex:50, overflow:"hidden", boxShadow:"0 4px 12px rgba(28,43,28,0.1)" }}>
                 {searchResults.map(item => (
                   <button key={item.id} onMouseDown={() => { onSaveOrgLink(org.id, item.id); setSearchQ(""); }}
-                    style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(245,158,11,0.28)", padding:"6px 10px", cursor:"pointer" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(254,252,232,0.98)"}
+                    style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.28)", padding:"6px 10px", cursor:"pointer" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(250,250,248,0.98)"}
                     onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                    <div style={{ fontSize:"11.5px", color:"#1A0A00" }}>{item.title.length > 54 ? item.title.slice(0, 54)+"…" : item.title}</div>
-                    <div style={{ fontSize:"10.5px", color:"#A16207" }}>{item.source}</div>
+                    <div style={{ fontSize:"11.5px", color:"#1C1410" }}>{item.title.length > 54 ? item.title.slice(0, 54)+"…" : item.title}</div>
+                    <div style={{ fontSize:"10.5px", color:"#B45309" }}>{item.source}</div>
                   </button>
                 ))}
               </div>
@@ -1316,13 +1316,13 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
         <div>
         </div>
         {!publicMode && <button onClick={() => { setEditOrg(null); setShowAdd(true); }}
-          style={{ ...F, background:"transparent", border:"1px solid #D97706", color:"#D97706", padding:"7px 16px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", flexShrink:0 }}>
+          style={{ ...F, background:"transparent", border:"1px solid #C2410C", color:"#C2410C", padding:"7px 16px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", flexShrink:0 }}>
           + Add Organisation
         </button>}
       </div>
 
       {orgs.length === 0 && (
-        <div style={{ textAlign:"center", padding:"60px 0", color:"#A16207", fontStyle:"italic", fontSize:"13.5px" }}>
+        <div style={{ textAlign:"center", padding:"60px 0", color:"#B45309", fontStyle:"italic", fontSize:"13.5px" }}>
           No organisations yet. Add the first one to start mapping the field.
         </div>
       )}
@@ -1489,7 +1489,7 @@ function computeBubblePositions(items, links, W, H, bubbleR, themes = THEMES) {
 // ─── Org sidebar ──────────────────────────────────────────────────────────────
 
 function OrgSidebar({ org, orgLinks, pool, onClose, onNavigate }) {
-  const color = STANCE_COLORS[org.stance] || "#A16207";
+  const color = STANCE_COLORS[org.stance] || "#B45309";
   const linkedItems = orgLinks
     .filter(l => l.org_id === org.id)
     .map(l => pool.find(p => p.id === l.item_id))
@@ -1501,27 +1501,27 @@ function OrgSidebar({ org, orgLinks, pool, onClose, onNavigate }) {
   }
 
   return (
-    <div style={{ position:"absolute", top:0, right:0, width:"280px", height:"100%", background:"#FEFCE8", borderLeft:"1px solid rgba(245,158,11,0.35)", display:"flex", flexDirection:"column", zIndex:30, overflow:"hidden" }}>
-      <div style={{ padding:"14px 14px 10px", borderBottom:"1px solid rgba(245,158,11,0.22)", flexShrink:0 }}>
+    <div style={{ position:"absolute", top:0, right:0, width:"280px", height:"100%", background:"#FAFAF8", borderLeft:"1px solid rgba(194,65,12,0.35)", display:"flex", flexDirection:"column", zIndex:30, overflow:"hidden" }}>
+      <div style={{ padding:"14px 14px 10px", borderBottom:"1px solid rgba(194,65,12,0.22)", flexShrink:0 }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"8px" }}>
           <div style={{ display:"flex", alignItems:"center", gap:"7px" }}>
             <div style={{ width:"9px", height:"9px", borderRadius:"50%", background:color, flexShrink:0 }} />
-            <span style={{ fontSize:"14.5px", fontWeight:500, color:"#1A0A00", lineHeight:1.2 }}>{org.name}</span>
+            <span style={{ fontSize:"14.5px", fontWeight:500, color:"#1C1410", lineHeight:1.2 }}>{org.name}</span>
           </div>
-          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1A0A00", cursor:"pointer", fontSize:"19.5px", lineHeight:1, flexShrink:0, paddingLeft:"8px" }}>×</button>
+          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1C1410", cursor:"pointer", fontSize:"19.5px", lineHeight:1, flexShrink:0, paddingLeft:"8px" }}>×</button>
         </div>
         <div style={{ fontSize:"10.5px", color, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom: org.description || org.website ? "8px" : 0 }}>{org.stance}</div>
         {org.website && (
           <a href={org.website} target="_blank" rel="noopener noreferrer"
-            style={{ fontSize:"12.5px", color:"#D97706", textDecoration:"none", display:"inline-flex", alignItems:"center", gap:"3px", marginBottom:"6px" }}>
+            style={{ fontSize:"12.5px", color:"#C2410C", textDecoration:"none", display:"inline-flex", alignItems:"center", gap:"3px", marginBottom:"6px" }}>
             ↗ {websiteDisplay}
           </a>
         )}
-        {org.description && <p style={{ fontSize:"12.5px", color:"#A16207", fontStyle:"italic", lineHeight:1.5, margin:0 }}>{org.description}</p>}
+        {org.description && <p style={{ fontSize:"12.5px", color:"#B45309", fontStyle:"italic", lineHeight:1.5, margin:0 }}>{org.description}</p>}
       </div>
 
       <div style={{ flex:1, overflowY:"auto", padding:"12px 14px" }}>
-        <div style={{ fontSize:"10.5px", color:"#A16207", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px" }}>
+        <div style={{ fontSize:"10.5px", color:"#B45309", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"10px" }}>
           Linked Articles ({linkedItems.length})
         </div>
         {linkedItems.length === 0 && (
@@ -1529,12 +1529,12 @@ function OrgSidebar({ org, orgLinks, pool, onClose, onNavigate }) {
         )}
         {linkedItems.map(item => (
           <button key={item.id} onClick={() => { onNavigate(item.id); onClose(); }}
-            style={{ display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(245,158,11,0.28)", padding:"7px 0", cursor:"pointer" }}>
+            style={{ display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.28)", padding:"7px 0", cursor:"pointer" }}>
             <div style={{ display:"flex", gap:"5px", alignItems:"center", marginBottom:"2px" }}>
-              <span style={{ fontSize:"10.5px", color: COLOR[item.theme]||"#A16207", letterSpacing:"0.07em", textTransform:"uppercase", flexShrink:0 }}>{item.theme}</span>
-              <span style={{ fontSize:"10.5px", color:"#A16207" }}>· {item.source}</span>
+              <span style={{ fontSize:"10.5px", color: COLOR[item.theme]||"#B45309", letterSpacing:"0.07em", textTransform:"uppercase", flexShrink:0 }}>{item.theme}</span>
+              <span style={{ fontSize:"10.5px", color:"#B45309" }}>· {item.source}</span>
             </div>
-            <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.4, fontFamily:"'Palatino Linotype',Palatino,serif" }}>
+            <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.4, fontFamily:"'Palatino Linotype',Palatino,serif" }}>
               {item.title.length > 70 ? item.title.slice(0,70)+"…" : item.title}
             </div>
           </button>
@@ -1612,7 +1612,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         if (!a || !b) continue;
         pg.append("line")
           .attr("x1", a.x).attr("y1", a.y).attr("x2", b.x).attr("y2", b.y)
-          .attr("stroke", p.color || "#D97706").attr("stroke-width", 2.5)
+          .attr("stroke", p.color || "#C2410C").attr("stroke-width", 2.5)
           .attr("stroke-opacity", 0.55).attr("stroke-dasharray", "8 4")
           .attr("pointer-events", "none");
       }
@@ -1620,7 +1620,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         const pos = nodePos[id];
         if (!pos) return;
         pg.append("circle").attr("cx", pos.x).attr("cy", pos.y).attr("r", 9)
-          .attr("fill", p.color || "#D97706").attr("fill-opacity", 0.88)
+          .attr("fill", p.color || "#C2410C").attr("fill-opacity", 0.88)
           .attr("pointer-events", "none");
         pg.append("text").attr("x", pos.x).attr("y", pos.y)
           .attr("text-anchor", "middle").attr("dominant-baseline", "central")
@@ -1747,7 +1747,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       const label = t.name.toUpperCase();
       const FSIZ = 10.5, PX = 9, PY = 5;
       const sg = bg.append("g").attr("filter","url(#sticker-shadow)");
-      const sRect = sg.append("rect").attr("rx",3).attr("fill","#FFFBEB")
+      const sRect = sg.append("rect").attr("rx",3).attr("fill","#FFFFFF")
         .attr("stroke",t.color).attr("stroke-width",1.5).attr("stroke-opacity",0.85);
       // Render text first so getBBox() measures actual rendered width
       const sTxt = sg.append("text")
@@ -1774,7 +1774,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     const linkSel = g.append("g")
       .selectAll("path").data(crossLinks).enter().append("path")
-      .attr("fill","none").attr("stroke","rgba(245,158,11,0.28)").attr("stroke-width",0.8)
+      .attr("fill","none").attr("stroke","rgba(194,65,12,0.28)").attr("stroke-width",0.8)
       .style("pointer-events","none");
     linkSelRef.current = linkSel;
 
@@ -1825,7 +1825,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         );
         nodeSel.attr("fill-opacity", n => n.id===d.id ? 1 : connIds.has(n.id) ? 0.9 : 0.08);
         linkSel
-          .attr("stroke", l => (l.source?.id===d.id||l.target?.id===d.id) ? COLOR[d.theme]+"dd" : "rgba(245,158,11,0.08)")
+          .attr("stroke", l => (l.source?.id===d.id||l.target?.id===d.id) ? COLOR[d.theme]+"dd" : "rgba(194,65,12,0.08)")
           .attr("stroke-width", l => (l.source?.id===d.id||l.target?.id===d.id) ? 2 : 0.3);
       })
       .on("mousemove", function(e) {
@@ -1847,7 +1847,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       .text(d => d.title.split(":")[0].split("—")[0].trim().slice(0, 22))
       .attr("font-size","10px")
       .attr("font-family","'Palatino Linotype',Palatino,serif")
-      .attr("fill","#1A0A00")
+      .attr("fill","#1C1410")
       .attr("text-anchor","middle")
       .attr("dy", d => rScale(d.degree) + 10)
       .attr("opacity", 0.6)
@@ -1858,7 +1858,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
 
     function resetOp() {
       nodeSel.attr("fill-opacity", d => readRef.current.has(d.url) ? 0.2 : 0.82);
-      linkSel.attr("stroke","rgba(245,158,11,0.28)").attr("stroke-width",0.8);
+      linkSel.attr("stroke","rgba(194,65,12,0.28)").attr("stroke-width",0.8);
     }
 
     // Simulation
@@ -2029,7 +2029,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     currentLinks.forEach(link => {
       const op = orgPos[link.org_id], ap = nodePos[link.item_id];
       if (!op || !ap) return;
-      const color = STANCE_COLORS[currentOrgs.find(o => o.id === link.org_id)?.stance] || "#A16207";
+      const color = STANCE_COLORS[currentOrgs.find(o => o.id === link.org_id)?.stance] || "#B45309";
       og.append("line")
         .attr("x1", op.x).attr("y1", op.y).attr("x2", ap.x).attr("y2", ap.y)
         .attr("stroke", color).attr("stroke-width", 1)
@@ -2041,7 +2041,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     currentOrgs.forEach(org => {
       const pos = orgPos[org.id];
       if (!pos) return;
-      const color = STANCE_COLORS[org.stance] || "#A16207";
+      const color = STANCE_COLORS[org.stance] || "#B45309";
       const r = Math.max(14, Math.min(22, 10 + currentLinks.filter(l => l.org_id === org.id).length * 2));
 
       og.append("circle")
@@ -2102,7 +2102,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         });
     } else {
       nodeSelRef.current.attr("fill-opacity", d => readItems.has(d.url) ? 0.2 : 0.82);
-      linkSelRef.current.attr("stroke","rgba(245,158,11,0.28)").attr("stroke-width",0.8);
+      linkSelRef.current.attr("stroke","rgba(194,65,12,0.28)").attr("stroke-width",0.8);
     }
   }, [dimTheme, readItems]);
 
@@ -2149,34 +2149,34 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       <div style={{ position:"absolute", top:"10px", left:"10px", zIndex:10, display:"flex", flexDirection:"column", gap:"3px" }}>
         {allThemes.map(t => (
           <button key={t.name} onClick={() => setDimTheme(d => d===t.name ? null : t.name)}
-            style={{ ...F, display:"flex", alignItems:"center", gap:"6px", background:dimTheme===t.name?t.color+"22":"#FEFCE8", border:"1px solid "+(dimTheme===t.name?t.color:"rgba(245,158,11,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
+            style={{ ...F, display:"flex", alignItems:"center", gap:"6px", background:dimTheme===t.name?t.color+"22":"#FAFAF8", border:"1px solid "+(dimTheme===t.name?t.color:"rgba(194,65,12,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
             <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:t.color, flexShrink:0 }} />
-            <span style={{ fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color:dimTheme===t.name?t.color:"#1A0A00", whiteSpace:"nowrap" }}>{t.name}</span>
+            <span style={{ fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color:dimTheme===t.name?t.color:"#1C1410", whiteSpace:"nowrap" }}>{t.name}</span>
           </button>
         ))}
         {dimTheme && (
-          <button onClick={() => setDimTheme(null)} style={{ ...F, background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", color:"#A16207", fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase" }}>Clear</button>
+          <button onClick={() => setDimTheme(null)} style={{ ...F, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"3px", padding:"3px 8px", cursor:"pointer", color:"#B45309", fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase" }}>Clear</button>
         )}
         {publicMode ? (
           paths.length > 0 && (
             <button onClick={() => setTrailsOpen(v => !v)}
-              style={{ ...F, marginTop:"6px", background: trailsOpen?"rgba(245,158,11,0.32)":"#FEFCE8", border:"1px solid "+(trailsOpen?"rgba(245,158,11,0.50)":"rgba(245,158,11,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
-              <span style={{ fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: trailsOpen?"#D97706":"#1A0A00", whiteSpace:"nowrap" }}>
+              style={{ ...F, marginTop:"6px", background: trailsOpen?"rgba(194,65,12,0.32)":"#FAFAF8", border:"1px solid "+(trailsOpen?"rgba(194,65,12,0.50)":"rgba(194,65,12,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
+              <span style={{ fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: trailsOpen?"#C2410C":"#1C1410", whiteSpace:"nowrap" }}>
                 Trails ({paths.length})
               </span>
             </button>
           )
         ) : (
           <button onClick={() => setPathsPanelOpen(v => !v)}
-            style={{ ...F, marginTop:"6px", background: pathsPanelOpen?"rgba(245,158,11,0.32)":"#FEFCE8", border:"1px solid "+(pathsPanelOpen?"rgba(245,158,11,0.50)":"rgba(245,158,11,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
-            <span style={{ fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: pathsPanelOpen?"#D97706":"#1A0A00", whiteSpace:"nowrap" }}>
+            style={{ ...F, marginTop:"6px", background: pathsPanelOpen?"rgba(194,65,12,0.32)":"#FAFAF8", border:"1px solid "+(pathsPanelOpen?"rgba(194,65,12,0.50)":"rgba(194,65,12,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
+            <span style={{ fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: pathsPanelOpen?"#C2410C":"#1C1410", whiteSpace:"nowrap" }}>
               Trails{paths.length > 0 ? ` (${paths.length})` : ""}
             </span>
           </button>
         )}
         <button onClick={() => setShowOrgs(v => !v)}
-          style={{ ...F, marginTop:"3px", background: showOrgs?"rgba(16,104,212,0.13)":"#FEFCE8", border:"1px solid "+(showOrgs?"rgba(16,104,212,0.5)":"rgba(245,158,11,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
-          <span style={{ fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: showOrgs?"#D97706":"#1A0A00", whiteSpace:"nowrap" }}>
+          style={{ ...F, marginTop:"3px", background: showOrgs?"rgba(16,104,212,0.13)":"#FAFAF8", border:"1px solid "+(showOrgs?"rgba(16,104,212,0.5)":"rgba(194,65,12,0.42)"), borderRadius:"3px", padding:"3px 8px", cursor:"pointer", transition:"all 0.15s" }}>
+          <span style={{ fontSize:"11.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: showOrgs?"#C2410C":"#1C1410", whiteSpace:"nowrap" }}>
             Orgs{orgs.length > 0 ? ` (${orgs.length})` : ""}
           </span>
         </button>
@@ -2187,15 +2187,15 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       )}
 
       {publicMode && trailsOpen && paths.length > 0 && (
-        <div style={{ ...F, position:"absolute", bottom:"12px", left:"10px", zIndex:10, background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"4px", padding:"10px 12px" }}>
-          <div style={{ fontSize:"10.5px", color:"#A16207", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"7px" }}>Trails</div>
+        <div style={{ ...F, position:"absolute", bottom:"12px", left:"10px", zIndex:10, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"4px", padding:"10px 12px" }}>
+          <div style={{ fontSize:"10.5px", color:"#B45309", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"7px" }}>Trails</div>
           {paths.map(p => (
             <div key={p.id} style={{ display:"flex", alignItems:"center", gap:"7px", marginBottom:"4px" }}>
               <svg width="18" height="5" style={{ flexShrink:0 }}>
                 <line x1="0" y1="2.5" x2="18" y2="2.5" stroke={p.color} strokeWidth="2.5" strokeDasharray="5 2" />
               </svg>
-              <span style={{ fontSize:"11.5px", color:"#1A0A00" }}>{p.name}</span>
-              {p.description && <span style={{ fontSize:"10.5px", color:"#A16207", fontStyle:"italic" }}>— {p.description.length>36 ? p.description.slice(0,36)+"…" : p.description}</span>}
+              <span style={{ fontSize:"11.5px", color:"#1C1410" }}>{p.name}</span>
+              {p.description && <span style={{ fontSize:"10.5px", color:"#B45309", fontStyle:"italic" }}>— {p.description.length>36 ? p.description.slice(0,36)+"…" : p.description}</span>}
             </div>
           ))}
         </div>
@@ -2204,39 +2204,39 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
       <svg ref={svgRef} style={{ position:"absolute", inset:0, width:(sideOpen||!!selectedOrg)?"calc(100% - 290px)":"100%", height:"100%", background:"transparent" }} />
 
       {tooltip && (
-        <div style={{ position:"absolute", left:tooltip.x, top:tooltip.y, transform:"translate(-50%,-100%)", background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", padding:"5px 10px", fontSize:"12.5px", color:"#1A0A00", pointerEvents:"none", zIndex:50, maxWidth:"260px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", ...F }}>
+        <div style={{ position:"absolute", left:tooltip.x, top:tooltip.y, transform:"translate(-50%,-100%)", background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", padding:"5px 10px", fontSize:"12.5px", color:"#1C1410", pointerEvents:"none", zIndex:50, maxWidth:"260px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", ...F }}>
           {tooltip.text}
         </div>
       )}
 
       {/* Search box */}
       <div ref={searchRef} style={{ position:"absolute", top:"10px", right: (sideOpen||!!selectedOrg) ? "300px" : "10px", zIndex:20, transition:"right 0.2s" }}>
-        <div style={{ display:"flex", alignItems:"center", background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.42)", borderRadius:"3px", padding:"4px 8px", gap:"6px" }}>
-          <span style={{ fontSize:"12.5px", color:"#A16207", opacity:0.6 }}>⌕</span>
+        <div style={{ display:"flex", alignItems:"center", background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.42)", borderRadius:"3px", padding:"4px 8px", gap:"6px" }}>
+          <span style={{ fontSize:"12.5px", color:"#B45309", opacity:0.6 }}>⌕</span>
           <input
             value={searchQuery}
             onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true); }}
             onFocus={() => setSearchOpen(true)}
             onKeyDown={e => { if (e.key === "Escape") { setSearchOpen(false); setSearchQuery(""); } }}
             placeholder="Search sources, orgs, trails…"
-            style={{ ...F, background:"transparent", border:"none", outline:"none", fontSize:"12.5px", color:"#1A0A00", width:"180px", "::placeholder":{ color:"#A16207" } }}
+            style={{ ...F, background:"transparent", border:"none", outline:"none", fontSize:"12.5px", color:"#1C1410", width:"180px", "::placeholder":{ color:"#B45309" } }}
           />
-          {searchQuery && <button onClick={() => { setSearchQuery(""); setSearchOpen(false); }} style={{ background:"none", border:"none", cursor:"pointer", color:"#A16207", fontSize:"13.5px", padding:0, lineHeight:1 }}>×</button>}
+          {searchQuery && <button onClick={() => { setSearchQuery(""); setSearchOpen(false); }} style={{ background:"none", border:"none", cursor:"pointer", color:"#B45309", fontSize:"13.5px", padding:0, lineHeight:1 }}>×</button>}
         </div>
         {searchOpen && searchResults.length > 0 && (
-          <div style={{ position:"absolute", top:"calc(100% + 4px)", right:0, background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", minWidth:"280px", maxWidth:"360px", boxShadow:"0 4px 16px rgba(43,45,66,0.1)", overflow:"hidden" }}>
+          <div style={{ position:"absolute", top:"calc(100% + 4px)", right:0, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", minWidth:"280px", maxWidth:"360px", boxShadow:"0 4px 16px rgba(43,45,66,0.1)", overflow:"hidden" }}>
             {searchResults.map(r => {
               if (r._type === "org") {
-                const color = STANCE_COLORS[r.stance] || "#A16207";
+                const color = STANCE_COLORS[r.stance] || "#B45309";
                 return (
                   <button key={"org-"+r.id} onClick={() => { setSelectedOrg(r); setSearchOpen(false); setSearchQuery(""); }}
-                    style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(245,158,11,0.28)", padding:"8px 12px", cursor:"pointer", transition:"background 0.1s" }}
-                    onMouseEnter={e => e.currentTarget.style.background="rgba(254,252,232,0.98)"}
+                    style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.28)", padding:"8px 12px", cursor:"pointer", transition:"background 0.1s" }}
+                    onMouseEnter={e => e.currentTarget.style.background="rgba(250,250,248,0.98)"}
                     onMouseLeave={e => e.currentTarget.style.background="transparent"}>
-                    <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.3, marginBottom:"3px" }}>{r.name}</div>
+                    <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.3, marginBottom:"3px" }}>{r.name}</div>
                     <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
                       <span style={{ fontSize:"10.5px", color, letterSpacing:"0.07em", textTransform:"uppercase" }}>Org</span>
-                      <span style={{ fontSize:"10.5px", color:"#A16207" }}>· {r.stance}</span>
+                      <span style={{ fontSize:"10.5px", color:"#B45309" }}>· {r.stance}</span>
                     </div>
                   </button>
                 );
@@ -2244,26 +2244,26 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
               if (r._type === "trail") {
                 return (
                   <button key={"trail-"+r.id} onClick={() => { setHighlightedTrailId(r.id); if (publicMode) { setTrailsOpen(true); pathsVisibleRef.current = true; } else setPathsPanelOpen(true); setSearchOpen(false); setSearchQuery(""); }}
-                    style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(245,158,11,0.28)", padding:"8px 12px", cursor:"pointer", transition:"background 0.1s" }}
-                    onMouseEnter={e => e.currentTarget.style.background="rgba(254,252,232,0.98)"}
+                    style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.28)", padding:"8px 12px", cursor:"pointer", transition:"background 0.1s" }}
+                    onMouseEnter={e => e.currentTarget.style.background="rgba(250,250,248,0.98)"}
                     onMouseLeave={e => e.currentTarget.style.background="transparent"}>
                     <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"2px" }}>
-                      <svg width="16" height="4" style={{ flexShrink:0 }}><line x1="0" y1="2" x2="16" y2="2" stroke={r.color||"#D97706"} strokeWidth="2" strokeDasharray="4 2" /></svg>
-                      <span style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.3 }}>{r.name}</span>
+                      <svg width="16" height="4" style={{ flexShrink:0 }}><line x1="0" y1="2" x2="16" y2="2" stroke={r.color||"#C2410C"} strokeWidth="2" strokeDasharray="4 2" /></svg>
+                      <span style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.3 }}>{r.name}</span>
                     </div>
-                    <span style={{ fontSize:"10.5px", color:"#A16207", letterSpacing:"0.07em", textTransform:"uppercase" }}>Trail · {(r.item_ids||[]).length} stops</span>
+                    <span style={{ fontSize:"10.5px", color:"#B45309", letterSpacing:"0.07em", textTransform:"uppercase" }}>Trail · {(r.item_ids||[]).length} stops</span>
                   </button>
                 );
               }
               return (
                 <button key={r.id} onClick={() => { navigateToNode(r.id); setSearchOpen(false); setSearchQuery(""); }}
-                  style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(245,158,11,0.28)", padding:"8px 12px", cursor:"pointer", transition:"background 0.1s" }}
-                  onMouseEnter={e => e.currentTarget.style.background="rgba(254,252,232,0.98)"}
+                  style={{ ...F, display:"block", width:"100%", textAlign:"left", background:"transparent", border:"none", borderBottom:"1px solid rgba(194,65,12,0.28)", padding:"8px 12px", cursor:"pointer", transition:"background 0.1s" }}
+                  onMouseEnter={e => e.currentTarget.style.background="rgba(250,250,248,0.98)"}
                   onMouseLeave={e => e.currentTarget.style.background="transparent"}>
-                  <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.3, marginBottom:"3px" }}>{r.title}</div>
+                  <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.3, marginBottom:"3px" }}>{r.title}</div>
                   <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
-                    <span style={{ fontSize:"10.5px", color: COLOR[r.theme] || "#A16207", letterSpacing:"0.08em", textTransform:"uppercase" }}>{r.theme}</span>
-                    <span style={{ fontSize:"10.5px", color:"#A16207" }}>· {r.source}</span>
+                    <span style={{ fontSize:"10.5px", color: COLOR[r.theme] || "#B45309", letterSpacing:"0.08em", textTransform:"uppercase" }}>{r.theme}</span>
+                    <span style={{ fontSize:"10.5px", color:"#B45309" }}>· {r.source}</span>
                   </div>
                 </button>
               );
@@ -2271,14 +2271,14 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
           </div>
         )}
         {searchOpen && searchQuery.trim() && searchResults.length === 0 && (
-          <div style={{ position:"absolute", top:"calc(100% + 4px)", right:0, background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"3px", padding:"10px 12px", fontSize:"12.5px", color:"#A16207", fontStyle:"italic" }}>No results</div>
+          <div style={{ position:"absolute", top:"calc(100% + 4px)", right:0, background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"3px", padding:"10px 12px", fontSize:"12.5px", color:"#B45309", fontStyle:"italic" }}>No results</div>
         )}
       </div>
 
       {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} paths={paths} onSavePath={onSavePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={onSaveOrgLink} onDeleteOrgLink={onDeleteOrgLink} />}
       {selectedOrg && <OrgSidebar org={selectedOrg} orgLinks={orgLinks} pool={pool} onClose={() => setSelectedOrg(null)} onNavigate={nodeId => { navigateToNode(nodeId); setSelectedOrg(null); }} />}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
-      {!ready    && <div style={{ position:"absolute",inset:0,background:"#FFFBEB",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"12.5px",color:"#A16207",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
+      {!ready    && <div style={{ position:"absolute",inset:0,background:"#FFFFFF",display:"flex",alignItems:"center",justifyContent:"center",zIndex:99 }}><span style={{ ...F, fontSize:"12.5px",color:"#B45309",letterSpacing:"0.15em",textTransform:"uppercase" }}>Growing the garden…</span></div>}
     </div>
   );
 }
@@ -2290,10 +2290,10 @@ function StatBar({ value, max, color }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
     <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-      <div style={{ flex:1, height:"4px", background:"rgba(245,158,11,0.50)", borderRadius:"2px", overflow:"hidden" }}>
+      <div style={{ flex:1, height:"4px", background:"rgba(194,65,12,0.50)", borderRadius:"2px", overflow:"hidden" }}>
         <div style={{ height:"100%", width: pct+"%", background: color, borderRadius:"2px", transition:"width 0.6s ease" }} />
       </div>
-      <span style={{ fontSize:"11.5px", color:"#1A0A00", width:"36px", textAlign:"right" }}>{value}/{max}</span>
+      <span style={{ fontSize:"11.5px", color:"#1C1410", width:"36px", textAlign:"right" }}>{value}/{max}</span>
     </div>
   );
 }
@@ -2337,30 +2337,30 @@ function StatsView({ pool, readItems, notes }) {
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(130px, 1fr))", gap:"10px", marginBottom:"36px" }}>
         {[
           { label:"Total read",    value: totalRead,  sub: `of ${pool.length}`,   color:"#16A34A" },
-          { label:"Essays read",   value: readEssays.length, sub:`of ${essays.length}`, color:"#D97706" },
+          { label:"Essays read",   value: readEssays.length, sub:`of ${essays.length}`, color:"#C2410C" },
           { label:"Papers read",   value: readPapers.length, sub:`of ${papers.length}`, color:"#7A9B6A" },
-          { label:"Notes written", value: totalNotes, sub:`across ${pool.length} items`, color:"#D97706" },
+          { label:"Notes written", value: totalNotes, sub:`across ${pool.length} items`, color:"#C2410C" },
         ].map(s => (
-          <div key={s.label} style={{ background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.50)", borderTop:"2px solid "+s.color, borderRadius:"3px", padding:"14px 14px 12px" }}>
+          <div key={s.label} style={{ background:"rgba(250,250,248,0.98)", border:"1px solid rgba(194,65,12,0.50)", borderTop:"2px solid "+s.color, borderRadius:"3px", padding:"14px 14px 12px" }}>
             <div style={{ fontSize:"21.5px", color: s.color, fontWeight:400, lineHeight:1, marginBottom:"5px" }}>{s.value}</div>
-            <div style={{ fontSize:"11.5px", color:"#1A0A00", letterSpacing:"0.05em" }}>{s.label}</div>
-            <div style={{ fontSize:"11.5px", color:"#1A0A00", marginTop:"2px" }}>{s.sub}</div>
+            <div style={{ fontSize:"11.5px", color:"#1C1410", letterSpacing:"0.05em" }}>{s.label}</div>
+            <div style={{ fontSize:"11.5px", color:"#1C1410", marginTop:"2px" }}>{s.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Academic breakdown */}
       <div style={{ marginBottom:"36px" }}>
-        <div style={{ fontSize:"11.5px", color:"#A16207", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>Academic breakdown</div>
+        <div style={{ fontSize:"11.5px", color:"#B45309", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>Academic breakdown</div>
         <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
           {[
-            { label:"Foundational papers", read: readFound.length, total: foundational.length, color:"#D97706" },
+            { label:"Foundational papers", read: readFound.length, total: foundational.length, color:"#C2410C" },
             { label:"Recent papers",       read: readRecent.length, total: recent.length,       color:"#7A9B6A" },
           ].map(row => (
             <div key={row.label}>
               <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"5px" }}>
-                <span style={{ fontSize:"12.5px", color:"#1A0A00" }}>{row.label}</span>
-                <span style={{ fontSize:"12.5px", color: row.read===row.total && row.total>0 ? "#16A34A":"#1A0A00" }}>
+                <span style={{ fontSize:"12.5px", color:"#1C1410" }}>{row.label}</span>
+                <span style={{ fontSize:"12.5px", color: row.read===row.total && row.total>0 ? "#16A34A":"#1C1410" }}>
                   {row.read===row.total && row.total>0 ? "✓ Complete" : `${Math.round(row.read/row.total*100)||0}%`}
                 </span>
               </div>
@@ -2372,17 +2372,17 @@ function StatsView({ pool, readItems, notes }) {
 
       {/* Per-theme breakdown */}
       <div style={{ marginBottom:"36px" }}>
-        <div style={{ fontSize:"11.5px", color:"#1A0A00", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>Progress by theme</div>
+        <div style={{ fontSize:"11.5px", color:"#1C1410", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>Progress by theme</div>
         <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
           {themeStats.map(t => (
             <div key={t.name}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:"5px" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:"7px" }}>
                   <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:t.color }} />
-                  <span style={{ fontSize:"12.5px", color:"#1A0A00" }}>{t.name}</span>
-                  {t.noted > 0 && <span style={{ fontSize:"10.5px", color:"#D97706", background:"rgba(245,158,11,0.28)", border:"1px solid rgba(245,158,11,0.35)", borderRadius:"2px", padding:"1px 5px" }}>✎ {t.noted} note{t.noted>1?"s":""}</span>}
+                  <span style={{ fontSize:"12.5px", color:"#1C1410" }}>{t.name}</span>
+                  {t.noted > 0 && <span style={{ fontSize:"10.5px", color:"#C2410C", background:"rgba(194,65,12,0.28)", border:"1px solid rgba(194,65,12,0.35)", borderRadius:"2px", padding:"1px 5px" }}>✎ {t.noted} note{t.noted>1?"s":""}</span>}
                 </div>
-                <span style={{ fontSize:"11.5px", color: t.read===t.total ? "#16A34A":"#A16207" }}>
+                <span style={{ fontSize:"11.5px", color: t.read===t.total ? "#16A34A":"#B45309" }}>
                   {t.read}/{t.total}
                 </span>
               </div>
@@ -2395,36 +2395,36 @@ function StatsView({ pool, readItems, notes }) {
       {/* Notes list */}
       {notedItems.length > 0 && (
         <div>
-          <div style={{ fontSize:"11.5px", color:"#1A0A00", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>
+          <div style={{ fontSize:"11.5px", color:"#1C1410", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:"14px" }}>
             Your notes ({totalNotes})
           </div>
           <div style={{ display:"flex", flexDirection:"column", gap:"2px" }}>
             {notedItems.map(item => {
               const n = notes[item.url];
-              const c = COLOR[item.theme] || "#A16207";
+              const c = COLOR[item.theme] || "#B45309";
               return (
-                <div key={item.url} style={{ background:"rgba(254,252,232,0.98)", border:"1px solid rgba(245,158,11,0.42)", borderLeft:"3px solid "+c, borderRadius:"3px", padding:"12px 14px" }}>
+                <div key={item.url} style={{ background:"rgba(250,250,248,0.98)", border:"1px solid rgba(194,65,12,0.42)", borderLeft:"3px solid "+c, borderRadius:"3px", padding:"12px 14px" }}>
                   <div style={{ display:"flex", gap:"6px", alignItems:"center", marginBottom:"6px", flexWrap:"wrap" }}>
                     <span style={{ fontSize:"10.5px", letterSpacing:"0.1em", textTransform:"uppercase", padding:"1px 6px", borderRadius:"2px", background:c+"22", color:c, fontWeight:600 }}>{item.theme}</span>
-                    <span style={{ fontSize:"11.5px", color:"#1A0A00", fontStyle:"italic" }}>{item.source} · {item.published}</span>
+                    <span style={{ fontSize:"11.5px", color:"#1C1410", fontStyle:"italic" }}>{item.source} · {item.published}</span>
                   </div>
-                  <div style={{ fontSize:"13.5px", color:"#1A0A00", marginBottom:"10px", lineHeight:1.4, fontWeight:500 }}>{item.title}</div>
+                  <div style={{ fontSize:"13.5px", color:"#1C1410", marginBottom:"10px", lineHeight:1.4, fontWeight:500 }}>{item.title}</div>
                   {n.quote && (
-                    <div style={{ marginBottom:"8px", borderLeft:"2px solid rgba(245,158,11,0.55)", paddingLeft:"8px" }}>
-                      <div style={{ fontSize:"10.5px", color:"#D97706", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Quote</div>
-                      <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.6, fontStyle:"italic" }}>{n.quote}</div>
+                    <div style={{ marginBottom:"8px", borderLeft:"2px solid rgba(194,65,12,0.55)", paddingLeft:"8px" }}>
+                      <div style={{ fontSize:"10.5px", color:"#C2410C", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Quote</div>
+                      <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.6, fontStyle:"italic" }}>{n.quote}</div>
                     </div>
                   )}
                   {n.argument && (
                     <div style={{ marginBottom: n.thoughts ? "8px" : 0 }}>
-                      <div style={{ fontSize:"10.5px", color:"#D97706", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Argument</div>
-                      <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.6 }}>{n.argument}</div>
+                      <div style={{ fontSize:"10.5px", color:"#C2410C", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>Argument</div>
+                      <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.6 }}>{n.argument}</div>
                     </div>
                   )}
                   {n.thoughts && (
                     <div>
                       <div style={{ fontSize:"10.5px", color:"#7A9B6A", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:"3px" }}>My thoughts</div>
-                      <div style={{ fontSize:"12.5px", color:"#A16207", lineHeight:1.6 }}>{n.thoughts}</div>
+                      <div style={{ fontSize:"12.5px", color:"#B45309", lineHeight:1.6 }}>{n.thoughts}</div>
                     </div>
                   )}
                 </div>
@@ -2436,8 +2436,8 @@ function StatsView({ pool, readItems, notes }) {
 
       {totalRead === 0 && (
         <div style={{ marginTop:"60px", textAlign:"center" }}>
-          <div style={{ fontSize:"13.5px", color:"#1A0A00", fontStyle:"italic" }}>No items marked as read yet.</div>
-          <div style={{ fontSize:"12.5px", color:"#A16207", marginTop:"6px" }}>Head to The Plot tab and start reading.</div>
+          <div style={{ fontSize:"13.5px", color:"#1C1410", fontStyle:"italic" }}>No items marked as read yet.</div>
+          <div style={{ fontSize:"12.5px", color:"#B45309", marginTop:"6px" }}>Head to The Plot tab and start reading.</div>
         </div>
       )}
     </div>
@@ -2446,7 +2446,7 @@ function StatsView({ pool, readItems, notes }) {
 
 // ─── Root app ─────────────────────────────────────────────────────────────────
 
-const NAV = { ...F, background:"transparent", border:"1px solid rgba(245,158,11,0.50)", color:"#A16207", width:"28px", height:"28px", borderRadius:"3px", cursor:"pointer", fontSize:"14.5px", display:"inline-flex", alignItems:"center", justifyContent:"center" };
+const NAV = { ...F, background:"transparent", border:"1px solid rgba(194,65,12,0.50)", color:"#B45309", width:"28px", height:"28px", borderRadius:"3px", cursor:"pointer", fontSize:"14.5px", display:"inline-flex", alignItems:"center", justifyContent:"center" };
 
 export function PublicGardenPage() {
   const [pool,        setPool]        = useState(BUILTIN);
@@ -2480,7 +2480,7 @@ export function PublicGardenPage() {
     });
   }, []);
 
-  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#FFFBEB", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"12.5px", color:"#A16207", letterSpacing:"0.15em", textTransform:"uppercase" }}>Growing the garden…</span></div>;
+  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#FFFFFF", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"12.5px", color:"#B45309", letterSpacing:"0.15em", textTransform:"uppercase" }}>Growing the garden…</span></div>;
 
   const PUBLIC_TABS = [
     { id:"garden", label:"The Grove", icon:"🌿", desc:"Network of knowledge, actors, and ideas." },
@@ -2489,23 +2489,23 @@ export function PublicGardenPage() {
   ];
 
   return (
-    <div style={{ height:"100vh", background:"#FFFBEB", color:"#1A0A00", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+    <div style={{ height:"100vh", background:"#FFFFFF", color:"#1C1410", display:"flex", flexDirection:"column", overflow:"hidden" }}>
       {/* Header */}
-      <div style={{ background:"#FEFCE8", borderBottom:"1px solid rgba(245,158,11,0.35)", paddingLeft:"18px", paddingRight:"18px", paddingTop:"10px", paddingBottom:"10px", flexShrink:0, backdropFilter:"blur(4px)", zIndex:100 }}>
+      <div style={{ background:"#FAFAF8", borderBottom:"1px solid rgba(194,65,12,0.35)", paddingLeft:"18px", paddingRight:"18px", paddingTop:"10px", paddingBottom:"10px", flexShrink:0, backdropFilter:"blur(4px)", zIndex:100 }}>
         <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px" }}>
           <span style={{ fontSize:"15.5px", lineHeight:1 }}>🪸</span>
-          <span style={{ ...F, fontSize:"12.5px", color:"#1A0A00", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
-          {lastUpdated && <span style={{ ...F, fontSize:"11.5px", color:"#A16207", fontStyle:"italic", marginLeft:"auto" }}>Updated {lastUpdated}</span>}
+          <span style={{ ...F, fontSize:"12.5px", color:"#1C1410", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
+          {lastUpdated && <span style={{ ...F, fontSize:"11.5px", color:"#B45309", fontStyle:"italic", marginLeft:"auto" }}>Updated {lastUpdated}</span>}
         </div>
-        <p style={{ ...F, fontSize:"12.5px", color:"#1A0A00", lineHeight:1.5, margin:"0 0 8px" }}>
+        <p style={{ ...F, fontSize:"12.5px", color:"#1C1410", lineHeight:1.5, margin:"0 0 8px" }}>
           Hi, I'm Prabhnoor, a researcher in critical AI studies. This is my digital garden exploring AI safety, policy, bias, decolonisation, and more.{" "}
-          <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#D97706", textDecoration:"underline" }}>More about me & my work ↗</a>
+          <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#C2410C", textDecoration:"underline" }}>More about me & my work ↗</a>
         </p>
         {/* Tab bar */}
         <div style={{ display:"flex", gap:"4px", marginBottom:"6px" }}>
           {PUBLIC_TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              style={{ ...F, background: tab===t.id ? "rgba(245,158,11,0.22)" : "transparent", border: tab===t.id ? "1px solid rgba(245,158,11,0.42)" : "1px solid transparent", borderRadius:"3px", padding:"4px 12px", fontSize:"11.5px", letterSpacing:"0.09em", textTransform:"uppercase", color: tab===t.id ? "#D97706" : "#A16207", cursor:"pointer", gap:"5px" }}>
+              style={{ ...F, background: tab===t.id ? "rgba(194,65,12,0.22)" : "transparent", border: tab===t.id ? "1px solid rgba(194,65,12,0.42)" : "1px solid transparent", borderRadius:"3px", padding:"4px 12px", fontSize:"11.5px", letterSpacing:"0.09em", textTransform:"uppercase", color: tab===t.id ? "#C2410C" : "#B45309", cursor:"pointer", gap:"5px" }}>
               <span style={{ marginRight:"4px" }}>{t.icon}</span>{t.label}
             </button>
           ))}
@@ -2513,8 +2513,8 @@ export function PublicGardenPage() {
       </div>
 
       {/* Subtitle strip */}
-      <div style={{ height:"26px", background:"#FEFCE8", borderBottom:"1px solid rgba(245,158,11,0.15)", display:"flex", alignItems:"center", paddingLeft:"18px", flexShrink:0 }}>
-        {TAB_SUBTITLES[tab] && <span style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#A16207", fontStyle:"italic" }}>{TAB_SUBTITLES[tab]}</span>}
+      <div style={{ height:"26px", background:"#FAFAF8", borderBottom:"1px solid rgba(194,65,12,0.15)", display:"flex", alignItems:"center", paddingLeft:"18px", flexShrink:0 }}>
+        {TAB_SUBTITLES[tab] && <span style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#B45309", fontStyle:"italic" }}>{TAB_SUBTITLES[tab]}</span>}
       </div>
 
       {/* Content */}
@@ -2547,22 +2547,22 @@ function SetPasswordScreen({ onDone }) {
   }
 
   return (
-    <div style={{ ...F, height:"100vh", background:"#FFFBEB", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
+    <div style={{ ...F, height:"100vh", background:"#FFFFFF", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontSize:"13.5px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#1A0A00" }}>Plot Twists</div>
-        <div style={{ fontSize:"12.5px", color:"#A16207", fontStyle:"italic", marginTop:"6px" }}>Set your password</div>
+        <div style={{ fontSize:"13.5px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#1C1410" }}>Plot Twists</div>
+        <div style={{ fontSize:"12.5px", color:"#B45309", fontStyle:"italic", marginTop:"6px" }}>Set your password</div>
       </div>
       {done ? (
-        <div style={{ fontSize:"12.5px", color:"#1A0A00" }}>Password set. Entering…</div>
+        <div style={{ fontSize:"12.5px", color:"#1C1410" }}>Password set. Entering…</div>
       ) : (
         <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"12px", width:"260px" }}>
           <input type="password" required placeholder="New password" value={password} onChange={e => setPassword(e.target.value)}
-            style={{ ...F, background:"rgba(254,252,232,1.0)", border:"1px solid rgba(245,158,11,0.42)", color:"#1A0A00", fontSize:"12.5px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
+            style={{ ...F, background:"rgba(250,250,248,1.0)", border:"1px solid rgba(194,65,12,0.42)", color:"#1C1410", fontSize:"12.5px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
           <input type="password" required placeholder="Confirm password" value={confirm} onChange={e => setConfirm(e.target.value)}
-            style={{ ...F, background:"rgba(254,252,232,1.0)", border:"1px solid rgba(245,158,11,0.42)", color:"#1A0A00", fontSize:"12.5px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
-          {error && <div style={{ fontSize:"12.5px", color:"#D97706" }}>{error}</div>}
+            style={{ ...F, background:"rgba(250,250,248,1.0)", border:"1px solid rgba(194,65,12,0.42)", color:"#1C1410", fontSize:"12.5px", padding:"9px 12px", borderRadius:"3px", outline:"none" }} />
+          {error && <div style={{ fontSize:"12.5px", color:"#C2410C" }}>{error}</div>}
           <button type="submit" disabled={loading}
-            style={{ ...F, background:"#D97706", color:"#FFFFFF", border:"none", padding:"10px", fontSize:"12.5px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}>
+            style={{ ...F, background:"#C2410C", color:"#FFFFFF", border:"none", padding:"10px", fontSize:"12.5px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}>
             {loading ? "Saving…" : "Set password"}
           </button>
         </form>
@@ -2589,10 +2589,10 @@ function LoginScreen() {
   }
 
   return (
-    <div style={{ ...F, height:"100vh", background:"#FFFBEB", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
+    <div style={{ ...F, height:"100vh", background:"#FFFFFF", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"32px" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontSize:"13.5px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#1A0A00" }}>Plot Twists</div>
-        <div style={{ fontSize:"12.5px", color:"#A16207", fontStyle:"italic", marginTop:"6px" }}>Prabhnoor's Digital Garden</div>
+        <div style={{ fontSize:"13.5px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#1C1410" }}>Plot Twists</div>
+        <div style={{ fontSize:"12.5px", color:"#B45309", fontStyle:"italic", marginTop:"6px" }}>Prabhnoor's Digital Garden</div>
       </div>
       <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"12px", width:"260px" }}>
         <input
@@ -2601,13 +2601,13 @@ function LoginScreen() {
           placeholder="Password"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          style={{ ...F, background:"rgba(254,252,232,1.0)", border:"1px solid rgba(245,158,11,0.42)", color:"#1A0A00", fontSize:"12.5px", padding:"9px 12px", borderRadius:"3px", outline:"none" }}
+          style={{ ...F, background:"rgba(250,250,248,1.0)", border:"1px solid rgba(194,65,12,0.42)", color:"#1C1410", fontSize:"12.5px", padding:"9px 12px", borderRadius:"3px", outline:"none" }}
         />
-        {error && <div style={{ fontSize:"12.5px", color:"#D97706" }}>{error}</div>}
+        {error && <div style={{ fontSize:"12.5px", color:"#C2410C" }}>{error}</div>}
         <button
           type="submit"
           disabled={loading}
-          style={{ ...F, background:"#D97706", color:"#FFFFFF", border:"none", padding:"10px", fontSize:"12.5px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}
+          style={{ ...F, background:"#C2410C", color:"#FFFFFF", border:"none", padding:"10px", fontSize:"12.5px", letterSpacing:"0.12em", textTransform:"uppercase", cursor: loading ? "default" : "pointer", borderRadius:"3px", opacity: loading ? 0.6 : 1 }}
         >
           {loading ? "Entering…" : "Enter"}
         </button>
@@ -2805,50 +2805,50 @@ export default function App() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [topbarPanel]);
 
-  if (!authReady) return <div style={{ ...F, height:"100vh", background:"#FFFBEB", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"12.5px", color:"#A16207", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
+  if (!authReady) return <div style={{ ...F, height:"100vh", background:"#FFFFFF", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"12.5px", color:"#B45309", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
   if (recovering)  return <SetPasswordScreen onDone={() => setRecovering(false)} />;
   if (!user) return <LoginScreen />;
-  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#FFFBEB", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"12.5px", color:"#A16207", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
+  if (!loaded) return <div style={{ ...F, height:"100vh", background:"#FFFFFF", display:"flex", alignItems:"center", justifyContent:"center" }}><span style={{ fontSize:"12.5px", color:"#B45309", letterSpacing:"0.15em", textTransform:"uppercase" }}>Loading…</span></div>;
 
   return (
-    <div style={{ height:"100vh", background:"#FFFBEB", color:"#1A0A00", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+    <div style={{ height:"100vh", background:"#FFFFFF", color:"#1C1410", display:"flex", flexDirection:"column", overflow:"hidden" }}>
       {/* Top bar */}
-      <div style={{ height:"44px", background:"#FEFCE8", borderBottom:"1px solid rgba(245,158,11,0.35)", display:"flex", alignItems:"center", paddingLeft:"18px", paddingRight:"18px", flexShrink:0, gap:"16px", backdropFilter:"blur(4px)", zIndex:100 }}>
+      <div style={{ height:"44px", background:"#FAFAF8", borderBottom:"1px solid rgba(194,65,12,0.35)", display:"flex", alignItems:"center", paddingLeft:"18px", paddingRight:"18px", flexShrink:0, gap:"16px", backdropFilter:"blur(4px)", zIndex:100 }}>
         <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
-          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#D97706" }} />
-          <span style={{ ...F, fontSize:"12.5px", color:"#1A0A00", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
+          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"#C2410C" }} />
+          <span style={{ ...F, fontSize:"12.5px", color:"#1C1410", letterSpacing:"0.12em", textTransform:"uppercase" }}>Plot Twists</span>
         </div>
         {!isMobile && (
           <>
-            <div style={{ height:"100%", borderLeft:"1px solid rgba(245,158,11,0.50)", marginLeft:"4px" }} />
+            <div style={{ height:"100%", borderLeft:"1px solid rgba(194,65,12,0.50)", marginLeft:"4px" }} />
             <TabBar active={tab} onChange={setTab} />
           </>
         )}
         <div ref={topbarPanelRef} style={{ marginLeft:"auto", display:"flex", gap:"14px", alignItems:"center", position:"relative" }}>
-          {!isMobile && totalRead > 0  && <button onClick={() => setTopbarPanel(v => v==="read"  ? null : "read")}  style={{ ...F, background:"none", border:"none", cursor:"pointer", fontSize:"12.5px", color: topbarPanel==="read"  ?"#D97706":"#A16207", textDecoration: topbarPanel==="read"  ?"underline":"none", padding:0 }}>{totalRead} read</button>}
-          {!isMobile && totalNotes > 0 && <button onClick={() => setTopbarPanel(v => v==="notes" ? null : "notes")} style={{ ...F, background:"none", border:"none", cursor:"pointer", fontSize:"12.5px", color: topbarPanel==="notes" ?"#DB2777":"#A16207", textDecoration: topbarPanel==="notes" ?"underline":"none", padding:0 }}>{totalNotes} notes</button>}
+          {!isMobile && totalRead > 0  && <button onClick={() => setTopbarPanel(v => v==="read"  ? null : "read")}  style={{ ...F, background:"none", border:"none", cursor:"pointer", fontSize:"12.5px", color: topbarPanel==="read"  ?"#C2410C":"#B45309", textDecoration: topbarPanel==="read"  ?"underline":"none", padding:0 }}>{totalRead} read</button>}
+          {!isMobile && totalNotes > 0 && <button onClick={() => setTopbarPanel(v => v==="notes" ? null : "notes")} style={{ ...F, background:"none", border:"none", cursor:"pointer", fontSize:"12.5px", color: topbarPanel==="notes" ?"#DB2777":"#B45309", textDecoration: topbarPanel==="notes" ?"underline":"none", padding:0 }}>{totalNotes} notes</button>}
           <button onClick={() => supabase.auth.signOut()} style={{ ...NAV, fontSize:"11.5px", width:"auto", padding:"0 8px", letterSpacing:"0.06em" }}>Sign out</button>
           {topbarPanel && (() => {
             const items = topbarPanel === "read"
               ? pool.filter(i => readItems.has(i.url))
               : pool.filter(i => notes[i.url] && (notes[i.url].argument || notes[i.url].thoughts || notes[i.url].quote));
             return (
-              <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, width:"340px", maxHeight:"420px", overflowY:"auto", background:"#FEFCE8", border:"1px solid rgba(245,158,11,0.50)", borderRadius:"4px", boxShadow:"0 4px 18px rgba(43,45,66,0.08)", zIndex:200 }}>
-                <div style={{ padding:"10px 14px 8px", borderBottom:"1px solid rgba(245,158,11,0.22)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                  <span style={{ fontSize:"10.5px", color:"#A16207", letterSpacing:"0.12em", textTransform:"uppercase" }}>{topbarPanel === "read" ? "Read" : "Notes"} · {items.length} item{items.length!==1?"s":""}</span>
-                  <button onClick={() => setTopbarPanel(null)} style={{ background:"none", border:"none", cursor:"pointer", color:"#A16207", fontSize:"15.5px", lineHeight:1, padding:0 }}>×</button>
+              <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, width:"340px", maxHeight:"420px", overflowY:"auto", background:"#FAFAF8", border:"1px solid rgba(194,65,12,0.50)", borderRadius:"4px", boxShadow:"0 4px 18px rgba(43,45,66,0.08)", zIndex:200 }}>
+                <div style={{ padding:"10px 14px 8px", borderBottom:"1px solid rgba(194,65,12,0.22)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                  <span style={{ fontSize:"10.5px", color:"#B45309", letterSpacing:"0.12em", textTransform:"uppercase" }}>{topbarPanel === "read" ? "Read" : "Notes"} · {items.length} item{items.length!==1?"s":""}</span>
+                  <button onClick={() => setTopbarPanel(null)} style={{ background:"none", border:"none", cursor:"pointer", color:"#B45309", fontSize:"15.5px", lineHeight:1, padding:0 }}>×</button>
                 </div>
-                {items.length === 0 && <div style={{ padding:"18px 14px", fontSize:"12.5px", color:"#A16207", fontStyle:"italic" }}>Nothing here yet.</div>}
+                {items.length === 0 && <div style={{ padding:"18px 14px", fontSize:"12.5px", color:"#B45309", fontStyle:"italic" }}>Nothing here yet.</div>}
                 {items.map(item => {
                   const note = notes[item.url];
                   return (
-                    <div key={item.url} style={{ padding:"9px 14px", borderBottom:"1px solid rgba(245,158,11,0.28)" }}>
-                      <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:"12.5px", color:"#1A0A00", textDecoration:"none", display:"block", lineHeight:1.4, marginBottom:"3px", fontWeight:500 }}>{item.title} ↗</a>
+                    <div key={item.url} style={{ padding:"9px 14px", borderBottom:"1px solid rgba(194,65,12,0.28)" }}>
+                      <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:"12.5px", color:"#1C1410", textDecoration:"none", display:"block", lineHeight:1.4, marginBottom:"3px", fontWeight:500 }}>{item.title} ↗</a>
                       <div style={{ display:"flex", gap:"8px", alignItems:"center", flexWrap:"wrap" }}>
-                        <span style={{ fontSize:"11.5px", color: COLOR[item.theme]||"#A16207", letterSpacing:"0.07em", textTransform:"uppercase" }}>{item.theme}</span>
-                        <span style={{ fontSize:"11.5px", color:"#A16207", fontStyle:"italic" }}>{item.source}</span>
+                        <span style={{ fontSize:"11.5px", color: COLOR[item.theme]||"#B45309", letterSpacing:"0.07em", textTransform:"uppercase" }}>{item.theme}</span>
+                        <span style={{ fontSize:"11.5px", color:"#B45309", fontStyle:"italic" }}>{item.source}</span>
                       </div>
-                      {topbarPanel === "notes" && note?.argument && <div style={{ fontSize:"12.5px", color:"#1A0A00", lineHeight:1.5, marginTop:"5px", borderLeft:"2px solid rgba(245,158,11,0.55)", paddingLeft:"7px" }}>{note.argument.slice(0,120)}{note.argument.length>120?"…":""}</div>}
+                      {topbarPanel === "notes" && note?.argument && <div style={{ fontSize:"12.5px", color:"#1C1410", lineHeight:1.5, marginTop:"5px", borderLeft:"2px solid rgba(194,65,12,0.55)", paddingLeft:"7px" }}>{note.argument.slice(0,120)}{note.argument.length>120?"…":""}</div>}
                     </div>
                   );
                 })}
@@ -2859,8 +2859,8 @@ export default function App() {
       </div>
 
       {/* Subtitle strip */}
-      <div style={{ height:"26px", background:"#FEFCE8", borderBottom:"1px solid rgba(245,158,11,0.15)", display:"flex", alignItems:"center", paddingLeft:"18px", flexShrink:0 }}>
-        {TAB_SUBTITLES[tab] && <span style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#A16207", fontStyle:"italic" }}>{TAB_SUBTITLES[tab]}</span>}
+      <div style={{ height:"26px", background:"#FAFAF8", borderBottom:"1px solid rgba(194,65,12,0.15)", display:"flex", alignItems:"center", paddingLeft:"18px", flexShrink:0 }}>
+        {TAB_SUBTITLES[tab] && <span style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#B45309", fontStyle:"italic" }}>{TAB_SUBTITLES[tab]}</span>}
       </div>
 
       {/* Main content */}
