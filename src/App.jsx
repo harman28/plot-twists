@@ -255,34 +255,29 @@ function NotesModal({ item, notes, onSave, onClose }) {
 
 const DISPATCH_WAVE = "M0,5 Q45,1 90,5 Q135,9 180,5 Q225,1 270,5 Q315,9 360,5 Q405,1 450,5 Q495,9 540,5";
 
-function DispatchItem({ item, show, idx, isLast, waveColor, readItems, onToggleRead, notes, onOpenNote }) {
+function DispatchItem({ item, show, idx, isLast, waveColor, isOpen, readItems, onToggleRead, notes, onOpenSidebar }) {
   const c = COLOR[item.theme] || "#A16207";
   const isRead = readItems.has(item.url);
   const hasNote = !!(notes[item.url]?.argument || notes[item.url]?.thoughts || notes[item.url]?.quote);
   return (
     <Fragment>
-      <div style={{ opacity:show?(isRead?0.42:1):0, transform:show?"none":"translateY(8px)", transition:`opacity 0.35s ease ${idx*0.06}s, transform 0.35s ease ${idx*0.06}s`, padding:"20px 0 4px" }}>
+      <div onClick={() => onOpenSidebar(item)}
+        style={{ opacity:show?(isRead?0.42:1):0, transform:show?"none":"translateY(8px)", transition:`opacity 0.35s ease ${idx*0.06}s, transform 0.35s ease ${idx*0.06}s`, padding:"20px 0 4px", cursor:"pointer" }}>
         <div style={{ display:"flex", gap:"7px", flexWrap:"wrap", alignItems:"center", marginBottom:"7px" }}>
           <Pill color={c}>{item.theme}</Pill>
           {item.type==="foundational" && <Pill color="#D97706">Foundational</Pill>}
           {item.custom && <Pill color="#A78BFA">Custom</Pill>}
           <span style={{ fontSize:"11.5px", color:"#1A0A00" }}>{item.published}</span>
         </div>
-        <a href={item.url} target="_blank" rel="noopener noreferrer"
-          style={{ fontSize:"14.5px", color:"#1A0A00", textDecoration:isRead?"line-through":"none", textDecorationColor:"#444", display:"block", lineHeight:"1.45", marginBottom:"10px", fontWeight:500, transition:"color 0.15s", ...F }}
-          onMouseEnter={e => { if(!isRead) e.currentTarget.style.color=c; }}
-          onMouseLeave={e => { if(!isRead) e.currentTarget.style.color="#1A0A00"; }}>
+        <div style={{ fontSize:"14.5px", color: isOpen ? c : "#1A0A00", textDecoration:isRead?"line-through":"none", textDecorationColor:"#444", lineHeight:"1.45", marginBottom:"10px", fontWeight:500, transition:"color 0.15s", ...F }}>
           {item.title} <span style={{ opacity:0.3, fontSize:"12px" }}>↗</span>
-        </a>
+        </div>
         <div style={{ display:"flex", gap:"6px", flexWrap:"wrap", alignItems:"center", paddingBottom:"4px" }}>
           <span style={{ fontSize:"11px", color:"#A16207", fontStyle:"italic" }}>{item.source}</span>
           {item.keywords.slice(0,2).map((kw,j) => <span key={j} style={{ fontSize:"10px", color:"#D97706", background:"rgba(217,119,6,0.12)", border:"1px solid rgba(217,119,6,0.28)", padding:"1px 5px", borderRadius:"2px" }}>#{kw}</span>)}
           <div style={{ marginLeft:"auto", display:"flex", gap:"4px", flexShrink:0 }}>
-            <button onClick={() => onOpenNote(item)}
-              style={{ ...F, background: hasNote?"rgba(219,39,119,0.12)":"rgba(254,252,232,0.85)", border: hasNote?"1px solid rgba(219,39,119,0.40)":"1px solid rgba(245,158,11,0.38)", borderRadius:"2px", padding:"2px 7px", cursor:"pointer", fontSize:"9.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: hasNote?"#DB2777":"#A16207" }}>
-              {hasNote ? "✎ Note" : "Note"}
-            </button>
-            <button onClick={() => onToggleRead(item.url)}
+            {hasNote && <span style={{ fontSize:"9.5px", letterSpacing:"0.07em", textTransform:"uppercase", color:"#DB2777", padding:"2px 7px", background:"rgba(219,39,119,0.10)", border:"1px solid rgba(219,39,119,0.35)", borderRadius:"2px" }}>✎ Note</span>}
+            <button onClick={e => { e.stopPropagation(); onToggleRead(item.url); }}
               style={{ ...F, background: isRead?"rgba(22,163,74,0.10)":"rgba(254,252,232,0.85)", border: isRead?"1px solid rgba(22,163,74,0.40)":"1px solid rgba(245,158,11,0.38)", borderRadius:"2px", padding:"2px 7px", cursor:"pointer", fontSize:"9.5px", letterSpacing:"0.07em", textTransform:"uppercase", color: isRead?"#16A34A":"#A16207" }}>
               {isRead ? "✓ Read" : "To Read"}
             </button>
@@ -324,6 +319,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
   const [showPicker, setShowPicker] = useState(false);
   const [pickerVal, setPickerVal]   = useState(todayStr());
   const [noteItem, setNoteItem]     = useState(null);
+  const [sidebarItem, setSidebarItem] = useState(null);
 
   useEffect(() => {
     if (!issue) return;
@@ -338,6 +334,7 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
     setShow(false);
     setDate(d);
     setIssue(getDispatch(d, pool));
+    setSidebarItem(null);
     setTimeout(() => setShow(true), 60);
   }
 
@@ -345,8 +342,20 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
   const allItems = issue ? [...issue.nonAcademic, ...issue.academic] : [];
   const readCount = allItems.filter(i => readItems.has(i.url)).length;
 
+  const connectedTitles = useMemo(() => {
+    if (!sidebarItem) return [];
+    const kws = new Set(sidebarItem.keywords || []);
+    return pool
+      .filter(n => n.id !== sidebarItem.id && (n.keywords || []).some(k => kws.has(k)))
+      .map(n => ({ ...n, keywords: (n.keywords || []).filter(k => kws.has(k)) }))
+      .sort((a, b) => b.keywords.length - a.keywords.length)
+      .slice(0, 12);
+  }, [sidebarItem, pool]);
+
   return (
-    <div style={{ ...F, maxWidth:"980px", margin:"0 auto", padding:"0 32px 80px" }}>
+    <div style={{ position:"relative", height:"100%" }}>
+    <div style={{ overflowY:"auto", height:"100%", ...F }}>
+    <div style={{ maxWidth:"980px", margin:"0 auto", padding:"0 32px 80px" }}>
       {/* Date header */}
       <div style={{ paddingTop:"32px", paddingBottom:"20px" }}>
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"20px", flexWrap:"wrap" }}>
@@ -407,7 +416,9 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
                   <DispatchItem key={item.url} item={item} show={show} idx={i}
                     isLast={i === issue.nonAcademic.length - 1}
                     waveColor="#D97706"
-                    readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />
+                    isOpen={sidebarItem?.id === item.id}
+                    readItems={readItems} onToggleRead={onToggleRead} notes={notes}
+                    onOpenSidebar={it => setSidebarItem(prev => prev?.id === it.id ? null : it)} />
                 ))}
               </div>
               <div style={{ minWidth:0 }}>
@@ -415,7 +426,9 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
                   <DispatchItem key={item.url} item={item} show={show} idx={i}
                     isLast={i === issue.academic.length - 1}
                     waveColor="#1068D4"
-                    readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} />
+                    isOpen={sidebarItem?.id === item.id}
+                    readItems={readItems} onToggleRead={onToggleRead} notes={notes}
+                    onOpenSidebar={it => setSidebarItem(prev => prev?.id === it.id ? null : it)} />
                 ))}
               </div>
             </div>
@@ -429,6 +442,28 @@ function DispatchView({ pool, readItems, onToggleRead, notes, onSaveNote }) {
       )}
 
       {noteItem && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
+    </div>
+    </div>
+    {sidebarItem && (
+      <GardenSidebar
+        node={sidebarItem}
+        onClose={() => setSidebarItem(null)}
+        readItems={readItems}
+        onToggleRead={onToggleRead}
+        notes={notes}
+        onOpenNote={it => { setSidebarItem(null); setNoteItem(it); }}
+        connectedTitles={connectedTitles}
+        onNavigate={null}
+        publicMode={false}
+        onRemove={null}
+        paths={[]}
+        onSavePath={() => {}}
+        orgs={[]}
+        orgLinks={[]}
+        onSaveOrgLink={() => {}}
+        onDeleteOrgLink={() => {}}
+      />
+    )}
     </div>
   );
 }
@@ -657,7 +692,12 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
         <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#1A0A00", cursor:"pointer", fontSize:"19.5px", lineHeight:1, flexShrink:0 }}>×</button>
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"14px 16px" }}>
-        <div style={{ fontSize:"15.5px", color:"#1A0A00", lineHeight:"1.4", marginBottom:"8px", fontWeight:500 }}>{node.title}</div>
+        <a href={node.url} target="_blank" rel="noopener noreferrer"
+          style={{ fontSize:"15.5px", color:"#1A0A00", lineHeight:"1.4", marginBottom:"8px", fontWeight:500, display:"block", textDecoration:"none", transition:"color 0.15s" }}
+          onMouseEnter={e => e.currentTarget.style.color=c}
+          onMouseLeave={e => e.currentTarget.style.color="#1A0A00"}>
+          {node.title} <span style={{ opacity:0.3, fontSize:"12px" }}>↗</span>
+        </a>
         <div style={{ fontSize:"12.5px", color:"#1A0A00", fontStyle:"italic", marginBottom:"3px" }}>{node.source}</div>
         <div style={{ fontSize:"11.5px", color:"#1A0A00", marginBottom:"12px" }}>{node.published}</div>
         <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginBottom:"14px" }}>
@@ -743,7 +783,7 @@ function GardenSidebar({ node, onClose, readItems, onToggleRead, notes, onOpenNo
         )}
       </div>
       <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(245,158,11,0.50)", display:"flex", gap:"5px", flexWrap:"wrap" }}>
-        <a href={node.url} target="_blank" rel="noopener noreferrer" style={{ flex:1, textAlign:"center", padding:"7px 4px", background:"transparent", border:"1px solid "+c, color:c, borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", textDecoration:"none", ...F }}>Read ↗</a>
+        <a href={node.url} target="_blank" rel="noopener noreferrer" style={{ flex:1, textAlign:"center", padding:"7px 4px", background:"transparent", border:"1px solid "+c, color:c, borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", textDecoration:"none", ...F }}>Open ↗</a>
         {!publicMode && <button onClick={() => onOpenNote(node)} style={{ flex:1, padding:"7px 4px", background:hasNote?"rgba(219,39,119,0.18)":"transparent", border:hasNote?"1px solid rgba(219,39,119,0.50)":"1px solid rgba(245,158,11,0.42)", color:hasNote?"#DB2777":"#1A0A00", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", ...F }}>
           {hasNote?"✎ Note":"Note"}
         </button>}
@@ -1004,6 +1044,7 @@ function PathsView({ paths, pool, notes, readItems = new Set(), onToggleRead, on
 
           {/* Header */}
           <div style={{ padding:"28px 44px 22px", flexShrink:0 }}>
+            <div style={{ ...F, fontSize:"10px", letterSpacing:"0.18em", textTransform:"uppercase", color:"#A16207", fontStyle:"italic", marginBottom:"12px" }}>Theme specific curriculum for the intellectually curious</div>
             <h1 style={{ ...F, fontSize:"24px", fontWeight:400, color:"#1A0A00", letterSpacing:"-0.01em", margin:"0 0 7px" }}>{selected.name}</h1>
             {selected.description && (
               <p style={{ ...F, fontSize:"13px", color:"#7C5A1A", fontStyle:"italic", lineHeight:1.6, margin:"0 0 12px" }}>{selected.description}</p>
@@ -2230,6 +2271,10 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
         )}
       </div>
 
+      <div style={{ position:"absolute", bottom:"14px", right: sideOpen||!!selectedOrg ? "304px" : "14px", transition:"right 0.2s", pointerEvents:"none", zIndex:5 }}>
+        <span style={{ ...F, fontSize:"10px", letterSpacing:"0.16em", textTransform:"uppercase", color:"#A16207", opacity:0.45, fontStyle:"italic" }}>Network of knowledge, ideas, and theories</span>
+      </div>
+
       {sideOpen && <GardenSidebar node={selected} onClose={() => setSelected(null)} readItems={readItems} onToggleRead={onToggleRead} notes={notes} onOpenNote={setNoteItem} connectedTitles={connectedTitles} onNavigate={navigateToNode} publicMode={publicMode} onRemove={onRemove} paths={paths} onSavePath={onSavePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={onSaveOrgLink} onDeleteOrgLink={onDeleteOrgLink} />}
       {selectedOrg && <OrgSidebar org={selectedOrg} orgLinks={orgLinks} pool={pool} onClose={() => setSelectedOrg(null)} onNavigate={nodeId => { navigateToNode(nodeId); setSelectedOrg(null); }} />}
       {noteItem  && <NotesModal item={noteItem} notes={notes} onSave={onSaveNote} onClose={() => setNoteItem(null)} />}
@@ -2465,10 +2510,6 @@ export function PublicGardenPage() {
             </button>
           ))}
         </div>
-        {/* Tab description */}
-        <p style={{ ...F, fontSize:"11.5px", color:"#A16207", fontStyle:"italic", lineHeight:1.4, margin:0 }}>
-          {PUBLIC_TABS.find(t => t.id === tab)?.desc}
-        </p>
       </div>
 
       {/* Content */}
@@ -2813,7 +2854,7 @@ export default function App() {
       </div>
 
       {/* Main content */}
-      <div style={{ flex:1, overflowY: tab==="garden"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
+      <div style={{ flex:1, overflowY: tab==="garden"||tab==="dispatch"?"hidden":"auto", overflowX:"hidden", position:"relative", paddingBottom: isMobile ? "56px" : 0 }}>
         {tab === "dispatch" && <DispatchView pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} />}
         {tab === "garden"   && <GardenView   pool={pool} readItems={readItems} onToggleRead={toggleRead} notes={notes} onSaveNote={saveNote} onRemove={removeFromPool} paths={paths} onSavePath={savePath} onDeletePath={deletePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} customThemeColors={customThemeColors} />}
         {tab === "paths"    && <PathsView    paths={paths} pool={pool} notes={notes} readItems={readItems} onToggleRead={toggleRead} onOpenNote={node => { saveNote(node); }} onRemove={removeFromPool} onSavePath={savePath} orgs={orgs} orgLinks={orgLinks} onSaveOrgLink={saveOrgLink} onDeleteOrgLink={deleteOrgLink} />}
