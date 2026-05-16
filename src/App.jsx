@@ -1230,7 +1230,7 @@ function FieldView({ orgs, orgLinks, pool, onSaveOrg, onDeleteOrg, onSaveOrgLink
     <div style={{ ...F, maxWidth:"800px", margin:"0 auto", padding:"28px 24px 80px" }}>
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:"28px", gap:"12px", flexWrap:"wrap" }}>
         <div>
-          <h2 style={{ fontSize:"19.5px", color:"#1A0A00", fontWeight:400, margin:"0 0 5px" }}>The Field</h2>
+          <h2 style={{ fontSize:"19.5px", color:"#1A0A00", fontWeight:400, margin:"0 0 5px" }}>Actors shaping the discourse</h2>
         </div>
         {!publicMode && <button onClick={() => { setEditOrg(null); setShowAdd(true); }}
           style={{ ...F, background:"transparent", border:"1px solid #D97706", color:"#D97706", padding:"7px 16px", borderRadius:"3px", fontSize:"11.5px", letterSpacing:"0.1em", textTransform:"uppercase", cursor:"pointer", flexShrink:0 }}>
