@@ -1497,7 +1497,7 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
   const [showOrgs,           setShowOrgs]           = useState(false);
   const [trailsOpen,         setTrailsOpen]         = useState(false);
   const [highlightedTrailId, setHighlightedTrailId] = useState(null);
-  const pathsVisibleRef      = useRef(!publicMode);
+  const pathsVisibleRef      = useRef(false);
   const highlightedTrailRef  = useRef(null);
 
   // Pan + zoom to a node by id, then open its sidebar
@@ -1846,10 +1846,11 @@ function GardenView({ pool, readItems, onToggleRead, notes, onSaveNote, publicMo
     drawPathOverlay();
   }, [paths, drawPathOverlay]);
 
-  // ── In public mode, sync trails visibility with toggle state ──
+  // ── Sync trail overlay visibility with panel/toggle state ──
   useEffect(() => {
-    if (publicMode) { pathsVisibleRef.current = trailsOpen; drawPathOverlay(); }
-  }, [trailsOpen, publicMode, drawPathOverlay]);
+    pathsVisibleRef.current = publicMode ? trailsOpen : pathsPanelOpen;
+    drawPathOverlay();
+  }, [trailsOpen, pathsPanelOpen, publicMode, drawPathOverlay]);
 
   // ── Redraw when highlighted trail changes ──
   useEffect(() => {
