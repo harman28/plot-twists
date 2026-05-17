@@ -8,3 +8,10 @@ dist
 
 # Supabase CLI temp files
 supabase/.temp
+
+# Design prototype previews
+*-preview.html
+*-themes.html
+*-comparison.html
+combo-themes.html
+new-themes.html
