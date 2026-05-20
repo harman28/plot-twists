@@ -2681,7 +2681,7 @@ export function PublicGardenPage() {
         </div>
         <p style={{ ...F, fontSize:"12.5px", color:"#1C1410", lineHeight:1.5, margin:"0 0 8px" }}>
           Hi, I'm Prabhnoor, a researcher in critical AI studies. This is my digital garden: an evolving, perpetually incomplete exploration of AI safety, policy, bias, decolonisation, and more.{" "}
-          <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#C2410C", textDecoration:"underline" }}>my website ↗</a>
+          <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#C2410C", textDecoration:"underline" }}>& here's my website ↗</a>
         </p>
         {/* Tab bar */}
         <div style={{ display:"flex", gap:"4px", marginBottom:"6px" }}>
