@@ -2680,8 +2680,8 @@ export function PublicGardenPage() {
           {lastUpdated && <span style={{ ...F, fontSize:"11.5px", color:"#B45309", fontStyle:"italic", marginLeft:"auto" }}>Updated {lastUpdated}</span>}
         </div>
         <p style={{ ...F, fontSize:"12.5px", color:"#1C1410", lineHeight:1.5, margin:"0 0 8px" }}>
-          Hi, I'm Prabhnoor, a researcher in critical AI studies. This is my digital garden exploring AI safety, policy, bias, decolonisation, and more.{" "}
-          <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#C2410C", textDecoration:"underline" }}>More about me & my work ↗</a>
+          Hi, I'm Prabhnoor, a researcher in critical AI studies. This is my digital garden: an evolving, perpetually incomplete exploration of AI safety, policy, bias, decolonisation, and more.{" "}
+          <a href="https://prabhnoorkohli.fyi" target="_blank" rel="noopener noreferrer" style={{ color:"#C2410C", textDecoration:"underline" }}>my website ↗</a>
         </p>
         {/* Tab bar */}
         <div style={{ display:"flex", gap:"4px", marginBottom:"6px" }}>
